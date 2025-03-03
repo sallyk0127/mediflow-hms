@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import PatientRegistration from "./patient-registration";
 import MedicalInformation from "./medical-information";
@@ -9,6 +9,13 @@ import PatientList from "./patient-list";
 
 export default function EMRPage() {
   const [selectedTab, setSelectedTab] = useState("patient-registration");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null; // Prevents server-client mismatch
 
   return (
     <div className="container mx-auto p-6">
@@ -20,10 +27,12 @@ export default function EMRPage() {
           <TabsTrigger value="medical-info" onClick={() => setSelectedTab("medical-info")}>Medical Information</TabsTrigger>
           <TabsTrigger value="patient-list" onClick={() => setSelectedTab("patient-list")}>Patient List</TabsTrigger>
         </TabsList>
-        {selectedTab === "patient-registration" && <TabsContent value="patient-registration"><PatientRegistration /></TabsContent>}
-        {selectedTab === "administration-info" && <TabsContent value="administration-info"><AdministrationInformation /></TabsContent>}
-        {selectedTab === "medical-info" && <TabsContent value="medical-info"><MedicalInformation /></TabsContent>}
-        {selectedTab === "patient-list" && <TabsContent value="patient-list"><PatientList /></TabsContent>}
+        <div className="p-4">
+          {selectedTab === "patient-registration" && <PatientRegistration />}
+          {selectedTab === "administration-info" && <AdministrationInformation />}
+          {selectedTab === "medical-info" && <MedicalInformation />}
+          {selectedTab === "patient-list" && <PatientList />}
+        </div>
       </Tabs>
     </div>
   );
