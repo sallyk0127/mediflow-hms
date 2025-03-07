@@ -8,7 +8,7 @@ interface TabsProps {
   className?: string;
 }
 
-export function Tabs({ value, onValueChange, children, className }: TabsProps) {
+export function Tabs({ value, children, className }: TabsProps) {
   return (
     <div className={clsx("w-full", className)}>
       {React.Children.map(children, (child) => {
@@ -42,7 +42,7 @@ interface TabsTriggerProps {
   className?: string;
 }
 
-export function TabsTrigger({ value, children, onClick, isActive, className }: TabsTriggerProps) {
+export function TabsTrigger({ children, onClick, isActive, className }: TabsTriggerProps) {
   return (
     <button
       onClick={onClick}
@@ -63,6 +63,6 @@ interface TabsContentProps {
   className?: string;
 }
 
-export function TabsContent({ value, children, className }: TabsContentProps) {
+export function TabsContent({ children, className }: TabsContentProps) {
   return <div className={clsx("p-4", className)}>{children}</div>;
 }

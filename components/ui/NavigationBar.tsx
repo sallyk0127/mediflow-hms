@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { UsersIcon, SettingsIcon, SearchIcon } from '@/components/ui/icons';
+import { UsersIcon, SettingsIcon } from '@/components/ui/icons';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: UsersIcon },
