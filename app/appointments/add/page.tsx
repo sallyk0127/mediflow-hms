@@ -72,8 +72,10 @@ const departments = [
 export default function AddAppointmentPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null); // Used for department selection 
-  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]); // Used for medication selection 
+  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
+  useEffect(() => { if (selectedDepartment) console.log(selectedDepartment); }, [selectedDepartment]); 
+  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
+  useEffect(() => { if (selectedMedication.length > 0) console.log(selectedMedication); }, [selectedMedication]);
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
