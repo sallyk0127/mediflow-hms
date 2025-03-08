@@ -72,8 +72,8 @@ const departments = [
 export default function AddAppointmentPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null); // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]); // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null); // Used for department selection 
+  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]); // Used for medication selection 
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
