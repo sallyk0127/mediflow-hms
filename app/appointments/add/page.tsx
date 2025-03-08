@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -69,21 +70,19 @@ const departments = [
 ];
 
 export default function AddAppointmentPage() {
+  const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
+  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
-  // ✅ Ensure rendering happens only on client
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   return (
-    <div className="container mx-auto py-12 px-12 bg-white shadow-md rounded-lg max-w-5xl">
+    <div className="container mx-auto py-12 px-12 max-w-6xl">
       <h1 className="text-3xl font-bold mb-6">Add New Appointment</h1>
 
       {/* Search Patient */}
@@ -163,7 +162,9 @@ const [selectedMedication, setSelectedMedication] = useState<{ label: string; va
       </div>
 
       {/* Generate Bill Button */}
-      <Button className="bg-green-500 hover:bg-green-600 w-full">Generate Bill</Button>
+      <Button className="bg-green-500 hover:bg-green-600 flex justify-end gap-2 mt-6">Generate Bill</Button>
+      {/* View Scheduled Appointments Button */}
+      <Button className="bg-blue-500 hover:bg-blue-600 flex justify-end gap-2 mt-6" onClick={() => router.push("/appointments")}>View Scheduled Appointments</Button>
     </div>
   );
 }
