@@ -12,23 +12,78 @@ import dynamic from "next/dynamic";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const departments = [
-  "Cardiology", "Neurology", "Psychology", "Radiology", "Gastroenterology",
-  "Orthopaedics", "Urology", "Ophthalmology", "Emergency", "Haematology"
+    "Aged Health, Chronic Care & Rehabilitation",
+    "Allied Health",
+    "Anaesthetics and Pain Management",
+    "Andrology",
+    "Audiology",
+    "Basic Physician Training Network",
+    "Bereavement",
+    "Blood Cancers",
+    "Breast and Endocrine Surgery",
+    "Burns – NSW Statewide Burn Injury Service",
+    "Cardiology",
+    "Centre for STRONG Medicine",
+    "Concord Cancer Centre",
+    "Chaplaincy",
+    "Colorectal",
+    "Dermatology",
+    "Drug and Alcohol",
+    "Emergency",
+    "Endocrinology and Metabolism",
+    "Ear Nose and Throat",
+    "Eye Clinic",
+    "Gastroenterology",
+    "Gynaecology",
+    "Haematology Department",
+    "Hospital in The Home",
+    "Immunology",
+    "Interpreter Services",
+    "Intensive Care Unit",
+    "Mental Health",
+    "Microbiology and Infectious Diseases",
+    "Molecular Imaging",
+    "National Centre for Veterans' Healthcare (NCVH)",
+    "Neurosciences",
+    "Neurosurgery",
+    "Nutrition and Dietetics",
+    "Ophthalmology",
+    "Orthopaedics",
+    "Palliative and Supportive Care",
+    "Pathology Department",
+    "Patient and Family Experience Officer",
+    "Plastic, Reconstructive and Hand Surgery Unit",
+    "Podiatry",
+    "Pre-Admission Clinic",
+    "Psychology",
+    "Radiology",
+    "Renal",
+    "Respiratory and Sleep Medicine",
+    "Rheumatology",
+    "Social Work",
+    "Speech Pathology",
+    "Stomal Therapy",
+    "The Sydney Cancer Survivorship Centre",
+    "Urology",
+    "Vascular Surgery",
 ];
 
 export default function AddAppointmentPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
-  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
+  // ✅ Ensure rendering happens only on client
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   return (
-    <div className="container mx-auto py-8 px-8 max-w-7xl">
+    <div className="container mx-auto py-12 px-12 bg-white shadow-md rounded-lg max-w-5xl">
       <h1 className="text-3xl font-bold mb-6">Add New Appointment</h1>
 
       {/* Search Patient */}
@@ -108,7 +163,7 @@ export default function AddAppointmentPage() {
       </div>
 
       {/* Generate Bill Button */}
-      <Button className="bg-green-500 hover:bg-green-600 flex justify-end gap-2 mt-6">Generate Bill</Button>
+      <Button className="bg-green-500 hover:bg-green-600 w-full">Generate Bill</Button>
     </div>
   );
 }
