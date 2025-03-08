@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectItem } from '@/components/ui/select';
 import { useState } from 'react';
 
-export default function PatientInsuranceAndRoomDetails() {
+export default function AdministrationInformation() {
   const [formData, setFormData] = useState({
     insuranceProvider: '',
     policyNumber: '',
