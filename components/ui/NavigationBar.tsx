@@ -9,7 +9,7 @@ const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: UsersIcon },
   { name: 'Appointments', href: '/appointments', icon: UsersIcon },
   { name: 'EMR', href: '/emr', icon: UsersIcon },
-  { name: 'Staff Roster', href: '/staff-roster', icon: UsersIcon },
+  { name: 'Staff Management', href: '/staff-management', icon: UsersIcon },
   { name: 'Education Content', href: '/education-content', icon: UsersIcon },
   { name: 'Rooms', href: '/rooms', icon: UsersIcon },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: UsersIcon },

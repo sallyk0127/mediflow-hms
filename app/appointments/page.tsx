@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import NewAppointmentsPage from "./new";
 import CompletedAppointmentsPage from "./completed";
+import { useRouter } from "next/navigation";
 
 export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState("new");
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (indicatorRef.current) {
@@ -24,8 +26,8 @@ export default function AppointmentsPage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold mb-4">Appointments</h1>
-        <Button className="bg-blue-500 hover:bg-blue-600">
-          <PlusIcon className="mr-2 h-4 w-4" /> New Appointment
+        <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => router.push("/appointments/add")}>
+          <PlusIcon className="mr-2 h-4 w-4" /> Add Appointment
         </Button>
       </div>
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
