@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Table, TableHead, TableRow, TableCell, TableBody } from "@/components/ui/tabs.tsx"
+import { Table, TableHead, TableRow, TableCell, TableBody } from "@/components/ui/table"
 import { Info, X } from "lucide-react"
 
 const patientsData = [
