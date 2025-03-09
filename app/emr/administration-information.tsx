@@ -1,46 +1,60 @@
 'use client';
 
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectItem } from '@/components/ui/select';
+import { useState } from 'react';
 
-export default function AdministrationInformation() {
+export default function PatientInsuranceAndRoomDetails() {
+  const [formData, setFormData] = useState({
+    insuranceProvider: '',
+    policyNumber: '',
+    coverageType: '',
+    billingAddress: '',
+    paymentMethod: '',
+    roomNumber: '',
+    wardDepartment: '',
+    bedNumber: '',
+    attendingDoctor: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-6">Administration Information</h2>
-      <form className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="insuranceProvider">Insurance Provider</label>
-            <Input id="insuranceProvider" placeholder="Enter insurance provider" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="policyNumber">Policy Number</label>
-            <Input id="policyNumber" placeholder="Enter policy number" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="admissionDate">Admission Date</label>
-            <Input id="admissionDate" type="date" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="dischargeDate">Discharge Date</label>
-            <Input id="dischargeDate" type="date" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="roomNumber">Room Number</label>
-            <Input id="roomNumber" placeholder="Enter room number" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="wardType">Ward Type</label>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="billingNotes">Billing Notes</label>
-        </div>
-        <div className="flex justify-end space-x-4">
-          <Button type="submit">Save Information</Button>
-        </div>
-      </form>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+      <Input name="insuranceProvider" placeholder="Insurance Provider" value={formData.insuranceProvider} onChange={handleChange} />
+      <Input name="policyNumber" placeholder="Policy Number" value={formData.policyNumber} onChange={handleChange} />
+      
+      <Select name="coverageType" value={formData.coverageType} onChange={handleChange}>
+        <SelectItem value="Full">Full</SelectItem>
+        <SelectItem value="Partial">Partial</SelectItem>
+        <SelectItem value="Copay">Copay</SelectItem>
+      </Select>
+      
+      <Input name="billingAddress" placeholder="Billing Address" value={formData.billingAddress} onChange={handleChange} />
+      <Input name="paymentMethod" placeholder="Payment Method" value={formData.paymentMethod} onChange={handleChange} />
+      <Input name="roomNumber" placeholder="Assigned Room Number" value={formData.roomNumber} onChange={handleChange} />
+      
+      <Select name="wardDepartment" value={formData.wardDepartment} onChange={handleChange}>
+        <SelectItem value="ICU">ICU</SelectItem>
+        <SelectItem value="General">General</SelectItem>
+        <SelectItem value="Maternity">Maternity</SelectItem>
+        <SelectItem value="Surgical">Surgical</SelectItem>
+        <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+        <SelectItem value="Psychiatry">Psychiatry</SelectItem>
+      </Select>
+      
+      <Input name="bedNumber" placeholder="Bed Number" value={formData.bedNumber} onChange={handleChange} />
+      <Input name="attendingDoctor" placeholder="Attending Doctor" value={formData.attendingDoctor} onChange={handleChange} />
+      
+      <div className="flex justify-end gap-2 mt-6">
+        <Button className="bg-blue-600 text-white">Save</Button>
+        <Button className="bg-green-600 text-white">Update</Button>
+        <Button className="bg-red-600 text-white">Delete</Button>
+      </div>
     </div>
   );
 }
