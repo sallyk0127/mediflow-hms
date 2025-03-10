@@ -22,8 +22,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}>
+        {/* Fixed Navigation Bar */}
         <NavigationBar />
-        <main className="flex-1">{children}</main>
+
+        {/* Main Content Area, ensuring it does not overlap the navbar */}
+        <main className="flex-1 ml-62 p-4 overflow-auto">
+          {children}
+        </main>
       </body>
     </html>
   );
