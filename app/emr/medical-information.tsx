@@ -215,7 +215,7 @@ export default function MedicalInformation() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2">
       <form className="space-y-4">
         <div>
           <label className="block text-sm font-medium">Medical History</label>

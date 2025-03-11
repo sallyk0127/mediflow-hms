@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NavigationBar />
 
         {/* Main Content Area, ensuring it does not overlap the navbar */}
-        <main className="flex-1 ml-64 p-8 overflow-auto">
+        <main className="flex-1 ml-64 p-8 overflow-auto bg-[#F1F8FF] min-h-screen">
           {children}
         </main>
       </body>

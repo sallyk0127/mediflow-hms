@@ -24,7 +24,7 @@ export default function PatientInsuranceAndRoomDetails() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
       <Input name="insuranceProvider" placeholder="Insurance Provider" value={formData.insuranceProvider} onChange={handleChange} />
       <Input name="policyNumber" placeholder="Policy Number" value={formData.policyNumber} onChange={handleChange} />
       

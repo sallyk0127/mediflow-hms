@@ -30,7 +30,7 @@ export default function PatientRegistration() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
       <Select name="title" value={formData.title} onChange={handleChange}>
         <SelectItem value="Mr">Mr</SelectItem>
         <SelectItem value="Mrs">Mrs</SelectItem>
