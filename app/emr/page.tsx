@@ -23,38 +23,39 @@ export default function EMRPage() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">EMR (Electronic Medical Records)</h1>
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-        <TabsList className="relative flex border-b mb-4">
-          <div
-            ref={indicatorRef}
-            className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300"
-          ></div>
-          {[
-            { value: "patient-registration", label: "Patient Registration" },
-            { value: "administration-information", label: "Administration Information" },
-            { value: "medical-information", label: "Medical Information" },
-            { value: "patient-list", label: "Patient List" },
-          ].map((tab) => (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              onClick={() => setSelectedTab(tab.value)}
-              className={`relative px-4 py-2 transition-all text-center ${
-                selectedTab === tab.value ? "font-bold text-blue-600" : "text-gray-600"
-              }`}
-              
-            >
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <div className="p-4">
-          {selectedTab === "patient-registration" && <PatientRegistration />}
-          {selectedTab === "administration-information" && <AdministrationInformation />}
-          {selectedTab === "medical-information" && <MedicalInformation />}
-          {selectedTab === "patient-list" && <PatientList />}
-        </div>
-      </Tabs>
+      <div className="bg-white rounded-lg shadow p-6">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <TabsList className="relative flex border-b mb-4">
+            <div
+              ref={indicatorRef}
+              className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300"
+            ></div>
+            {[
+              { value: "patient-registration", label: "Patient Registration" },
+              { value: "administration-information", label: "Administration Information" },
+              { value: "medical-information", label: "Medical Information" },
+              { value: "patient-list", label: "Patient List" },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                onClick={() => setSelectedTab(tab.value)}
+                className={`relative px-4 py-2 transition-all text-center ${
+                  selectedTab === tab.value ? "font-bold text-blue-600" : "text-gray-600"
+                }`}
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="p-4">
+            {selectedTab === "patient-registration" && <PatientRegistration />}
+            {selectedTab === "administration-information" && <AdministrationInformation />}
+            {selectedTab === "medical-information" && <MedicalInformation />}
+            {selectedTab === "patient-list" && <PatientList />}
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }

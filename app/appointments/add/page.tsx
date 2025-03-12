@@ -79,13 +79,12 @@ export default function AddAppointmentPage() {
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  useEffect(() => { setIsClient(true); }, []);
 
   return (
-    <div className="container mx-auto py-12 px-12 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-6">Add New Appointment</h1>
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-semibold mb-4">Add New Appointment</h1>
+      <div className="bg-white rounded-lg shadow p-6">
 
       {/* Search Patient */}
       <Input type="search" placeholder="Search patient by name or ID" className="mb-4 w-full" />
@@ -168,5 +167,6 @@ export default function AddAppointmentPage() {
       {/* View Scheduled Appointments Button */}
       <Button className="bg-blue-500 hover:bg-blue-600 flex justify-end gap-2 mt-6" onClick={() => router.push("/appointments")}>View Scheduled Appointments</Button>
     </div>
+  </div>
   );
 }

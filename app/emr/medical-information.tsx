@@ -3,17 +3,48 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Predefined suggestions for allergies and conditions
+const allergySuggestionsList = ["Cold", "Cough", "Dust", "Pollen", "Peanuts", "Shellfish"];
+const conditionSuggestionsList = ["Diabetes", "Hypertension", "Asthma", "Arthritis", "Chronic Pain"];
+
 export default function MedicalInformation() {
   const router = useRouter();
   const [medicalHistory, setMedicalHistory] = useState("");
   const [medications, setMedications] = useState("");
   const [allergies, setAllergies] = useState("");
   const [conditions, setConditions] = useState("");
+  const [allergySuggestions, setAllergySuggestions] = useState<string[]>([]);
+  const [conditionSuggestions, setConditionSuggestions] = useState<string[]>([]);
 
-  const handleNext = () => {
-    router.push("/next-section"); // Change to your actual route
+  // Handle input change for allergies
+  const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAllergies(value);
+    if (value) {
+      const filteredSuggestions = allergySuggestionsList.filter((item) =>
+        item.toLowerCase().startsWith(value.toLowerCase())
+      );
+      setAllergySuggestions(filteredSuggestions);
+    } else {
+      setAllergySuggestions([]);
+    }
   };
 
+  // Handle input change for conditions
+  const handleConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setConditions(value);
+    if (value) {
+      const filteredSuggestions = conditionSuggestionsList.filter((item) =>
+        item.toLowerCase().startsWith(value.toLowerCase())
+      );
+      setConditionSuggestions(filteredSuggestions);
+    } else {
+      setConditionSuggestions([]);
+    }
+  };
+
+  // Handle form submission
   const handleUpdate = async () => {
     const medicalData = {
       history: medicalHistory,
@@ -21,8 +52,6 @@ export default function MedicalInformation() {
       allergies: allergies,
       conditions: conditions,
     };
-
-    console.log("Updating medical information:", medicalData);
 
     try {
       const response = await fetch("/api/update-medical-info", {
@@ -38,22 +67,23 @@ export default function MedicalInformation() {
       }
     } catch (error) {
       console.error("Update failed:", error);
+      alert("An error occurred while updating medical information.");
     }
   };
 
+  // Clear form fields
   const handleDelete = () => {
     setMedicalHistory("");
     setMedications("");
     setAllergies("");
     setConditions("");
-
-    console.log("Medical information deleted");
     alert("Medical information has been cleared!");
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4">
       <form className="space-y-4">
+        {/* Medical History */}
         <div>
           <label className="block text-sm font-medium">Medical History</label>
           <textarea
@@ -65,6 +95,7 @@ export default function MedicalInformation() {
           />
         </div>
 
+        {/* Current Medications */}
         <div>
           <label className="block text-sm font-medium">Current Medications</label>
           <textarea
@@ -76,6 +107,7 @@ export default function MedicalInformation() {
           />
         </div>
 
+        {/* Allergies */}
         <div>
           <label className="block text-sm font-medium">Allergies</label>
           <input
@@ -83,10 +115,27 @@ export default function MedicalInformation() {
             className="w-full border p-2 rounded"
             placeholder="Enter allergies"
             value={allergies}
-            onChange={(e) => setAllergies(e.target.value)}
+            onChange={handleAllergyChange}
           />
+          {allergySuggestions.length > 0 && (
+            <ul className="border border-gray-300 rounded mt-1">
+              {allergySuggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setAllergies(suggestion);
+                    setAllergySuggestions([]);
+                  }}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
+        {/* Chronic Conditions */}
         <div>
           <label className="block text-sm font-medium">Chronic Conditions</label>
           <input
@@ -94,18 +143,47 @@ export default function MedicalInformation() {
             className="w-full border p-2 rounded"
             placeholder="Enter chronic conditions"
             value={conditions}
-            onChange={(e) => setConditions(e.target.value)}
+            onChange={handleConditionChange}
           />
+          {conditionSuggestions.length > 0 && (
+            <ul className="border border-gray-300 rounded mt-1">
+              {conditionSuggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setConditions(suggestion);
+                    setConditionSuggestions([]);
+                  }}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
+        {/* Buttons */}
         <div className="flex justify-end space-x-4">
-          <button type="button" className="px-4 py-2 bg-blue-500 text-white rounded" onClick={handleNext}>
+          <button
+            type="button"
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={() => router.push("/next-section")}
+          >
             Next
           </button>
-          <button type="button" className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleUpdate}>
+          <button
+            type="button"
+            className="px-4 py-2 bg-green-500 text-white rounded"
+            onClick={handleUpdate}
+          >
             Update
           </button>
-          <button type="button" className="px-4 py-2 bg-red-500 text-white rounded" onClick={handleDelete}>
+          <button
+            type="button"
+            className="px-4 py-2 bg-red-500 text-white rounded"
+            onClick={handleDelete}
+          >
             Delete
           </button>
         </div>
@@ -113,5 +191,3 @@ export default function MedicalInformation() {
     </div>
   );
 }
-
-
