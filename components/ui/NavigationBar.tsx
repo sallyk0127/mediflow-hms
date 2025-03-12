@@ -9,7 +9,7 @@ const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: UsersIcon },
   { name: 'Appointments', href: '/appointments', icon: UsersIcon },
   { name: 'EMR', href: '/emr', icon: UsersIcon },
-  { name: 'Staff Roster', href: '/staff-roster', icon: UsersIcon },
+  { name: 'Staff Management', href: '/staff-management', icon: UsersIcon },
   { name: 'Education Content', href: '/education-content', icon: UsersIcon },
   { name: 'Rooms', href: '/rooms', icon: UsersIcon },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: UsersIcon },
@@ -21,7 +21,7 @@ export default function NavigationBar() {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <nav className="h-screen w-64 bg-gray-900 text-white flex flex-col p-4">
+    <nav className="fixed top-0 left-0 h-screen w-64 bg-gray-900 text-white flex flex-col p-4">
       <div className="flex items-center justify-between pb-4 border-b border-gray-700">
         <h1 className="text-xl font-semibold">MediFlow HMS</h1>
         <button onClick={() => setIsExpanded(!isExpanded)} className="text-gray-400 hover:text-white">
