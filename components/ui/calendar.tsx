@@ -7,14 +7,14 @@ import { buttonVariants } from "@/components/ui/button";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps) { // Removed `classNames`
   const [month, setMonth] = React.useState(new Date());
 
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  const years = Array.from({ length: 110 }, (_, i) => new Date().getFullYear() - 110 + i);
+  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 50 + i);
 
   return (
     <DayPicker
@@ -65,7 +65,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           </div>
         ),
       }}
-      {...props}
+      {...props} // Keep other props to ensure flexibility
     />
   );
 }
