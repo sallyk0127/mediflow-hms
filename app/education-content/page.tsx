@@ -21,11 +21,11 @@ export default function EducationContentPage() {
   }, [selectedTab]);
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Education Content</h1>
-      <div className="bg-white rounded-lg shadow p-6">
+    <div className="flex flex-col w-full h-full bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Education Content</h1>
+      <div className="bg-white rounded-lg shadow-md p-6 flex-1">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="relative flex border-b mb-4">
+          <TabsList className="relative flex border-b">
             <div
               ref={indicatorRef}
               className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300"
@@ -40,15 +40,15 @@ export default function EducationContentPage() {
                 key={tab.value}
                 value={tab.value}
                 onClick={() => setSelectedTab(tab.value)}
-                className={`relative px-4 py-2 transition-all text-center ${
-                  selectedTab === tab.value ? "font-bold text-blue-600" : "text-gray-600"
+                className={`relative px-6 py-3 text-lg font-medium transition-all text-center border-b-2 $ {
+                  selectedTab === tab.value ? "border-blue-500 text-blue-600" : "border-transparent text-gray-600"
                 }`}
               >
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="p-4">
+          <div className="p-6">
             {selectedTab === "case-studies" && <CaseStudies />}
             {selectedTab === "training" && <Training />}
             {selectedTab === "wellness" && <Wellness />}
