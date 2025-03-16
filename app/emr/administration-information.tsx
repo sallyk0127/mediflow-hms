@@ -1,12 +1,19 @@
-"use client";
+'use client';
 
+import { useState } from "react";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
-import { useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-export default function PatientInsuranceAndRoomDetails() {
-  const [formData, setFormData] = useState({
+export default function AdministrationInformation() {
+  const [formData, setFormData] = useState<Record<string, string>>({
     insuranceProvider: '',
     policyNumber: '',
     coverageType: '',
@@ -18,45 +25,50 @@ export default function PatientInsuranceAndRoomDetails() {
     attendingDoctor: '',
   });
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (value: string, name: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
-      <Input name="insuranceProvider" placeholder="Insurance Provider" value={formData.insuranceProvider} onChange={(e) => handleChange("insuranceProvider", e.target.value)} />
-      <Input name="policyNumber" placeholder="Policy Number" value={formData.policyNumber} onChange={(e) => handleChange("policyNumber", e.target.value)} />
-      
-      <Select onValueChange={(value) => handleChange("coverageType", value)}>
-        <SelectTrigger>{formData.coverageType || "Select Coverage Type"}</SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Full">Full</SelectItem>
-          <SelectItem value="Partial">Partial</SelectItem>
-          <SelectItem value="Copay">Copay</SelectItem>
-        </SelectContent>
-      </Select>
-      
-      <Input name="billingAddress" placeholder="Billing Address" value={formData.billingAddress} onChange={(e) => handleChange("billingAddress", e.target.value)} />
-      <Input name="paymentMethod" placeholder="Payment Method" value={formData.paymentMethod} onChange={(e) => handleChange("paymentMethod", e.target.value)} />
-      <Input name="roomNumber" placeholder="Assigned Room Number" value={formData.roomNumber} onChange={(e) => handleChange("roomNumber", e.target.value)} />
-      
-      <Select onValueChange={(value) => handleChange("wardDepartment", value)}>
-        <SelectTrigger>{formData.wardDepartment || "Select Ward Department"}</SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ICU">ICU</SelectItem>
-          <SelectItem value="General">General</SelectItem>
-          <SelectItem value="Maternity">Maternity</SelectItem>
-          <SelectItem value="Surgical">Surgical</SelectItem>
-          <SelectItem value="Pediatrics">Pediatrics</SelectItem>
-          <SelectItem value="Psychiatry">Psychiatry</SelectItem>
-        </SelectContent>
-      </Select>
-      
-      <Input name="bedNumber" placeholder="Bed Number" value={formData.bedNumber} onChange={(e) => handleChange("bedNumber", e.target.value)} />
-      <Input name="attendingDoctor" placeholder="Attending Doctor" value={formData.attendingDoctor} onChange={(e) => handleChange("attendingDoctor", e.target.value)} />
-      
-      <div className="flex justify-end gap-2 mt-6">
-        <Button className="bg-blue-600 text-white">Save</Button>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+      <div className="grid grid-cols-2 gap-4 items-center col-span-2">
+        {[
+          ["Insurance Provider", "insuranceProvider"],
+          ["Policy Number", "policyNumber"],
+          ["Coverage Type", "coverageType"],
+          ["Billing Address", "billingAddress"],
+          ["Payment Method", "paymentMethod"],
+          ["Assigned Room Number", "roomNumber"],
+          ["Ward Department", "wardDepartment"],
+          ["Bed Number", "bedNumber"],
+          ["Attending Doctor", "attendingDoctor"],
+        ].map(([label, name]) => (
+          <div key={name} className="flex items-center gap-2">
+            <label className="text-sm font-medium w-40">{label}</label>
+            {name === "coverageType" || name === "wardDepartment" ? (
+              <Select onValueChange={(value) => handleChange(value, name)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={`Select ${label}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {name === "coverageType" && ["Full", "Partial", "Copay"].map((option) => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                    {name === "wardDepartment" && ["ICU", "General", "Maternity", "Surgical", "Pediatrics", "Psychiatry"].map((option) => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input name={name} value={formData[name]} onChange={(e) => handleChange(e.target.value, name)} />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-end gap-2 mt-6 col-span-2">
+        <Button className="bg-blue-600 text-white">Next</Button>
         <Button className="bg-green-600 text-white">Update</Button>
         <Button className="bg-red-600 text-white">Delete</Button>
       </div>
