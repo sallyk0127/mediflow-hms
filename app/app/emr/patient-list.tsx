@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@/components/ui/table"
 import { Info, X, MessageCircle } from "lucide-react"
-import Image from "next/image";
 
 const patientsData = [
   { id: 1, name: "Elizabeth Polson 1", image: "https://static.independent.co.uk/2024/10/04/08/newFile.jpg?width=1200&height=1200&fit=crop", age: 32, gender: "Female", blood: "B+ve", phone: "+91 12345 67890", email: "elsabethpolsan@hotmail.com" },
@@ -67,11 +66,9 @@ export default function PatientList() {
             {selectedPatients.map((patient) => (
               <TableRow key={patient.id} className="hover:bg-gray-100">
                 <TableCell className="border-none flex items-center space-x-3">
-                  <Image
+                  <img
                     src={patient.image}
                     alt={patient.name}
-                    width={40}
-                    height={40}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <span className="font-bold">{patient.name}</span>
@@ -87,6 +84,7 @@ export default function PatientList() {
                     <Button variant="ghost" size="icon" className="bg-green-200 text-green-600 rounded-full p-1">
                       <MessageCircle className="w-4 h-4" />
                     </Button>
+                    
                     {/* Button Info */}
                     <Button variant="ghost" size="icon" className="bg-blue-200 text-blue-600 rounded-full p-1">
                       <Info className="w-4 h-4" />
