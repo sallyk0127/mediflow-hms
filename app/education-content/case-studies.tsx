@@ -39,7 +39,7 @@ const caseStudies = [
     title: "Case Study 3: Pediatric Asthma Exacerbation",
     patient: "8-year-old boy, frequent asthma attacks",
     summary:
-      "An 8-year-old child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. Oxygen therapy, nebulized bronchodilators, and steroids were administered. The child's condition improved after treatment.",
+      "An 8-year-old child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. Oxygen therapy, nebulized bronchodilators, and steroids were administered. The child condition improved after treatment.",
     details: [
       "Asthma exacerbations can be managed with quick interventions, but it is crucial to identify triggers and develop an action plan.",
       "Identifying common asthma triggers such as allergens or respiratory infections.",
@@ -62,14 +62,14 @@ const CaseStudies: React.FC = () => {
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">📚 Medical Case Studies</h2>
       <p className="mb-6 text-gray-700">
-        {"Explore real-world case studies to enhance learning and practical understanding."}
+        Explore real-world case studies to enhance learning and practical understanding.
       </p>
 
       {caseStudies.map(({ id, title, patient, summary, details, borderColor, bgColor }) => (
         <div key={id} className={`mb-6 p-4 border-l-4 ${borderColor} ${bgColor} rounded`}>
           <h3 className="text-xl font-semibold">{title}</h3>
           <p>
-            <strong>{"Patient:"}</strong> {patient}
+            <strong>Patient:</strong> {patient}
           </p>
           <p className="text-gray-600">{summary}</p>
 
