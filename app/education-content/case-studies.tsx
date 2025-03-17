@@ -1,60 +1,6 @@
-import React, { useState } from 'react';
+import React from "react";
 
-const caseStudies = [
-  {
-    id: 1,
-    title: "Case Study 1: Diabetic Ketoacidosis (DKA)",
-    patient: "John D., 45-year-old male",
-    summary:
-      "John, a long-time diabetic, presented to the ER with nausea, vomiting, and deep, rapid breathing. His lab results showed a blood sugar level of 450 mg/dL, high ketones in urine, and metabolic acidosis. John was admitted to the ICU, where he was given IV insulin and fluids, stabilizing over 24 hours.",
-    details: [
-      "Early recognition of Diabetic Ketoacidosis (DKA) is critical. If untreated, it can lead to severe complications, including organ failure or coma.",
-      "Recognizing the early signs of DKA such as nausea, vomiting, and rapid breathing.",
-      "Emergency treatment involves IV fluids and insulin administration.",
-      "Patient education on managing blood sugar levels and recognizing warning signs to prevent future episodes."
-    ],
-    borderColor: "border-blue-500",
-    bgColor: "bg-blue-100"
-  },
-  {
-    id: 2,
-    title: "Case Study 2: Hypertension Management",
-    patient: "Susan M., 60-year-old female",
-    summary:
-      "Susan was diagnosed with hypertension during a routine check-up. Despite having no noticeable symptoms, her blood pressure was recorded at 160/95 mmHg. Lifestyle changes including a balanced diet and exercise were recommended, and a low-dose medication was prescribed.",
-    details: [
-      "Managing hypertension early can help prevent severe complications such as stroke or heart attack. Regular monitoring and lifestyle changes play a crucial role.",
-      "Importance of regular blood pressure monitoring, especially when no symptoms are present.",
-      "Lifestyle modifications such as diet and exercise can help reduce blood pressure.",
-      "Medication may be required when lifestyle changes alone are not sufficient."
-    ],
-    borderColor: "border-green-500",
-    bgColor: "bg-green-100"
-  },
-  {
-    id: 3,
-    title: "Case Study 3: Pediatric Asthma Exacerbation",
-    patient: "8-year-old boy, frequent asthma attacks",
-    summary:
-      "An 8-year-old child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. Oxygen therapy, nebulized bronchodilators, and steroids were administered. The child's condition improved after treatment.",
-    details: [
-      "Asthma exacerbations can be managed with quick interventions, but it is crucial to identify triggers and develop an action plan.",
-      "Identifying common asthma triggers such as allergens or respiratory infections.",
-      "Immediate treatment with bronchodilators and steroids can relieve symptoms during an exacerbation.",
-      "Developing a personalized asthma action plan for managing future attacks and preventing hospital visits."
-    ],
-    borderColor: "border-red-500",
-    bgColor: "bg-red-100"
-  }
-];
-
-const CaseStudies: React.FC = () => {
-  const [expandedCaseStudy, setExpandedCaseStudy] = useState<number | null>(null);
-
-  const toggleExpand = (id: number) => {
-    setExpandedCaseStudy((prev) => (prev === id ? null : id));
-  };
-
+const CaseStudies = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">📚 Medical Case Studies</h2>
@@ -62,32 +8,52 @@ const CaseStudies: React.FC = () => {
         Explore real-world case studies to enhance learning and practical understanding.
       </p>
 
-      {caseStudies.map(({ id, title, patient, summary, details, borderColor, bgColor }) => (
-        <div key={id} className={`mb-6 p-4 border-l-4 ${borderColor} ${bgColor} rounded`}>
-          <h3 className="text-xl font-semibold">{title}</h3>
-          <p><strong>Patient:</strong> {patient}</p>
-          <p className="text-gray-600">{summary}</p>
+      {/* Case Study 1 */}
+      <div className="mb-6 p-4 border-l-4 border-blue-500 bg-blue-100 rounded">
+        <h3 className="text-xl font-semibold">📌 Case Study 1: Diabetic Ketoacidosis (DKA)</h3>
+        <p><strong>Patient:</strong> John D., 45-year-old male</p>
+        <p className="text-gray-600">
+          John, a long-time diabetic, presented to the ER with nausea, vomiting, and deep, rapid breathing. 
+          Lab results showed high blood sugar (450 mg/dL), ketones in urine, and metabolic acidosis. 
+          He was admitted to the ICU, given IV insulin, and stabilized over 24 hours.
+        </p>
+        <ul className="mt-2 list-disc pl-6 text-gray-700">
+          <li>Recognizing early signs of DKA</li>
+          <li>Emergency treatment with fluids and insulin</li>
+          <li>Patient education on managing blood sugar levels</li>
+        </ul>
+      </div>
 
-          {expandedCaseStudy === id && (
-            <>
-              <p className="text-gray-600">{details[0]}</p>
-              <ul className="mt-2 list-disc pl-6 text-gray-700">
-                {details.slice(1).map((point, index) => (
-                  <li key={index}>{point}</li>
-                ))}
-              </ul>
-            </>
-          )}
+      {/* Case Study 2 */}
+      <div className="mb-6 p-4 border-l-4 border-green-500 bg-green-100 rounded">
+        <h3 className="text-xl font-semibold">📌 Case Study 2: Hypertension Management</h3>
+        <p><strong>Patient:</strong> Susan M., 60-year-old female</p>
+        <p className="text-gray-600">
+          Susan was diagnosed with hypertension during a routine check-up. She had no symptoms but a BP of 160/95 mmHg. 
+          Lifestyle changes and a low-dose medication were prescribed. At a follow-up, her BP had improved.
+        </p>
+        <ul className="mt-2 list-disc pl-6 text-gray-700">
+          <li>Importance of regular BP monitoring</li>
+          <li>Lifestyle changes vs. medication in managing hypertension</li>
+          <li>Long-term health risks of uncontrolled BP</li>
+        </ul>
+      </div>
 
-          <button
-            onClick={() => toggleExpand(id)}
-            aria-expanded={expandedCaseStudy === id}
-            className="text-blue-500 mt-2 cursor-pointer"
-          >
-            {expandedCaseStudy === id ? 'Show Less' : 'Read More'}
-          </button>
-        </div>
-      ))}
+      {/* Case Study 3 */}
+      <div className="mb-6 p-4 border-l-4 border-red-500 bg-red-100 rounded">
+        <h3 className="text-xl font-semibold">📌 Case Study 3: Pediatric Asthma Exacerbation</h3>
+        <p><strong>Patient:</strong> 8-year-old boy, frequent asthma attacks</p>
+        <p className="text-gray-600">
+          A child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. 
+          Oxygen therapy, nebulized bronchodilators, and steroids were administered. The child’s condition improved, 
+          and he was discharged with an updated asthma action plan.
+        </p>
+        <ul className="mt-2 list-disc pl-6 text-gray-700">
+          <li>Identifying asthma triggers</li>
+          <li>Emergency response to an asthma attack</li>
+          <li>Long-term management of pediatric asthma</li>
+        </ul>
+      </div>
     </div>
   );
 };
