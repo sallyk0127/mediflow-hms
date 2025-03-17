@@ -37,7 +37,6 @@ const caseStudies = [
     id: 3,
     title: "Case Study 3: Pediatric Asthma Exacerbation",
     patient: "8-year-old boy, frequent asthma attacks",
-    // Completely rewritten to avoid apostrophes
     summary:
       "An 8-year-old child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. Oxygen therapy, nebulized bronchodilators, and steroids were administered. After treatment, the condition of the child improved significantly.",
     details: [
@@ -69,16 +68,16 @@ const CaseStudies = () => {
         <div key={study.id} className={`mb-6 p-4 border-l-4 ${study.borderColor} ${study.bgColor} rounded`}>
           <h3 className="text-xl font-semibold">{study.title}</h3>
           <p>
-            <strong>Patient:</strong> {study.patient}
+            <strong>Patient:</strong> {study.patient.replace(/'/g, "&#39;")}
           </p>
-          <p className="text-gray-600">{study.summary}</p>
+          <p className="text-gray-600">{study.summary.replace(/'/g, "&#39;")}</p>
 
           {expandedCaseStudy === study.id && (
             <>
-              <p className="text-gray-600">{study.details[0]}</p>
+              <p className="text-gray-600">{study.details[0].replace(/'/g, "&#39;")}</p>
               <ul className="mt-2 list-disc pl-6 text-gray-700">
                 {study.details.slice(1).map((point, index) => (
-                  <li key={index}>{point}</li>
+                  <li key={index}>{point.replace(/'/g, "&#39;")}</li>
                 ))}
               </ul>
             </>
@@ -98,4 +97,3 @@ const CaseStudies = () => {
 }
 
 export default CaseStudies
-
