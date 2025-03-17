@@ -1,8 +1,7 @@
 "use client"
-
-import type React from "react"
 import { useState } from "react"
 
+// Completely rewritten case studies data to avoid any special characters
 const caseStudies = [
   {
     id: 1,
@@ -38,8 +37,9 @@ const caseStudies = [
     id: 3,
     title: "Case Study 3: Pediatric Asthma Exacerbation",
     patient: "8-year-old boy, frequent asthma attacks",
+    // Completely rewritten to avoid apostrophes
     summary:
-      "An 8-year-old child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. Oxygen therapy, nebulized bronchodilators, and steroids were administered. The child condition improved after treatment.",
+      "An 8-year-old child with a history of asthma arrived at the clinic with severe wheezing and shortness of breath. Oxygen therapy, nebulized bronchodilators, and steroids were administered. After treatment, the condition of the child improved significantly.",
     details: [
       "Asthma exacerbations can be managed with quick interventions, but it is crucial to identify triggers and develop an action plan.",
       "Identifying common asthma triggers such as allergens or respiratory infections.",
@@ -51,7 +51,7 @@ const caseStudies = [
   },
 ]
 
-const CaseStudies: React.FC = () => {
+const CaseStudies = () => {
   const [expandedCaseStudy, setExpandedCaseStudy] = useState<number | null>(null)
 
   const toggleExpand = (id: number) => {
@@ -65,19 +65,19 @@ const CaseStudies: React.FC = () => {
         Explore real-world case studies to enhance learning and practical understanding.
       </p>
 
-      {caseStudies.map(({ id, title, patient, summary, details, borderColor, bgColor }) => (
-        <div key={id} className={`mb-6 p-4 border-l-4 ${borderColor} ${bgColor} rounded`}>
-          <h3 className="text-xl font-semibold">{title}</h3>
+      {caseStudies.map((study) => (
+        <div key={study.id} className={`mb-6 p-4 border-l-4 ${study.borderColor} ${study.bgColor} rounded`}>
+          <h3 className="text-xl font-semibold">{study.title}</h3>
           <p>
-            <strong>Patient:</strong> {patient}
+            <strong>Patient:</strong> {study.patient}
           </p>
-          <p className="text-gray-600">{summary}</p>
+          <p className="text-gray-600">{study.summary}</p>
 
-          {expandedCaseStudy === id && (
+          {expandedCaseStudy === study.id && (
             <>
-              <p className="text-gray-600">{details[0]}</p>
+              <p className="text-gray-600">{study.details[0]}</p>
               <ul className="mt-2 list-disc pl-6 text-gray-700">
-                {details.slice(1).map((point, index) => (
+                {study.details.slice(1).map((point, index) => (
                   <li key={index}>{point}</li>
                 ))}
               </ul>
@@ -85,11 +85,11 @@ const CaseStudies: React.FC = () => {
           )}
 
           <button
-            onClick={() => toggleExpand(id)}
-            aria-expanded={expandedCaseStudy === id}
+            onClick={() => toggleExpand(study.id)}
+            aria-expanded={expandedCaseStudy === study.id}
             className="text-blue-500 mt-2 cursor-pointer"
           >
-            {expandedCaseStudy === id ? "Show Less" : "Read More"}
+            {expandedCaseStudy === study.id ? "Show Less" : "Read More"}
           </button>
         </div>
       ))}
