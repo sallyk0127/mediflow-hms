@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 const sessions = [
@@ -30,6 +30,13 @@ const sessions = [
 
 const TrainingTab = () => {
   const [selectedSession, setSelectedSession] = useState<{ role: string; title: string; description: string } | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null); // Reference to the content section
+
+  const scrollToContent = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -39,8 +46,13 @@ const TrainingTab = () => {
             key={index}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gray-100 p-4 rounded-xl shadow-md cursor-pointer transition duration-300 hover:bg-gray-200"
-            onClick={() => setSelectedSession(session)}
+            className={`bg-blue-100 p-4 rounded-xl shadow-md cursor-pointer transition duration-300 hover:bg-blue-200 ${
+              index === 3 ? "col-span-1 md:col-span-1 lg:col-span-1 justify-self-center" : ""
+            }`} // Adjusting the 4th session to be centered
+            onClick={() => {
+              setSelectedSession(session);
+              scrollToContent(); // Scroll to content when a session is clicked
+            }}
           >
             <h3 className="text-xl font-semibold text-gray-800">{session.title}</h3>
             <p className="text-gray-600 mt-2">For: {session.role}</p>
@@ -50,6 +62,7 @@ const TrainingTab = () => {
 
       {selectedSession && (
         <motion.div
+          ref={contentRef} // Assign the reference to the content section
           className="mt-6 p-6 bg-white rounded-lg shadow-lg border-l-4 border-gray-600"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
