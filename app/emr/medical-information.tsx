@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 // Predefined suggestions for allergies and conditions
 const allergySuggestionsList = ["Cold", "Cough", "Dust", "Pollen", "Peanuts", "Shellfish"];
@@ -161,8 +161,7 @@ export default function MedicalInformation() {
             </ul>
           )}
         </div>
-
-          <div className="flex justify-end gap-2 mt-6 col-span-2">
+        <div className="flex justify-end gap-2 mt-6 col-span-2">
             <Button className="bg-blue-600 text-white">Next</Button>
             <Button className="bg-green-600 text-white">Update</Button>
         </div>
