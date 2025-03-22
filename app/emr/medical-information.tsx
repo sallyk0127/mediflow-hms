@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 // Predefined suggestions for allergies and conditions
 const allergySuggestionsList = ["Cold", "Cough", "Dust", "Pollen", "Peanuts", "Shellfish"];
 const conditionSuggestionsList = ["Diabetes", "Hypertension", "Asthma", "Arthritis", "Chronic Pain"];
 
 export default function MedicalInformation() {
-  const router = useRouter();
   const [medicalHistory, setMedicalHistory] = useState("");
   const [medications, setMedications] = useState("");
   const [allergies, setAllergies] = useState("");
@@ -164,10 +162,9 @@ export default function MedicalInformation() {
           )}
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-end gap-2 mt-6 col-span-2">
-        <Button className="bg-blue-600 text-white">Next</Button>
-        <Button className="bg-green-600 text-white">Update</Button>
+          <div className="flex justify-end gap-2 mt-6 col-span-2">
+            <Button className="bg-blue-600 text-white">Next</Button>
+            <Button className="bg-green-600 text-white">Update</Button>
         </div>
       </form>
     </div>
