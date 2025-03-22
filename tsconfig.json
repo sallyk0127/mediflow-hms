@@ -24,9 +24,9 @@
       }
     ],
     "paths": {
-      "@/components/*": [
-        "components/*"
-      ],
+      "@/components/*": ["components/*"],        // This points to the root 'components/' folder
+      "@/appComponents/*": ["app/components/*"]   // This points to the 'components/' folder within 'app/'
+    ,
       "@/lib/*": [
         "lib/*"
       ]
