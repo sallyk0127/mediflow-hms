@@ -35,6 +35,10 @@ export default function AddRosterPage() {
   const [selectedRole, setSelectedRole] = useState<{ label: string; value: string } | null>(null);
   const [selectedShift, setSelectedShift] = useState<{ label: string; value: string } | null>(null);
   const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    console.log("Selected Role:", selectedRole);
+    console.log("Selected Shift:", selectedShift);
+  }, [selectedRole, selectedShift]);
 
   useEffect(() => { setIsClient(true); }, []);
 
