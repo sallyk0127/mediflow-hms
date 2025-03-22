@@ -1,162 +1,134 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 
 const Wellness = () => {
-  const [expandedTip, setExpandedTip] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [selectedWellness, setSelectedWellness] = useState<{
+    id: string;
+    title: string;
+    fullContent: string;
+  } | null>(null);
 
-  const wellnessTips = [
+  const wellnessItems = [
     {
-      id: "nutrition",
-      title: "📌 Nutrition & Healthy Eating",
-      summary: "A balanced diet plays a crucial role in preventing chronic diseases and maintaining overall health.",
+      id: "importance-of-mental-health",
+      title: "🧠 The Importance of Mental Health",
+      summary: "Mental health is just as important as physical health. Learn how to maintain a healthy mind.",
       points: [
-        "Best foods for heart health",
-        "Importance of hydration",
-        "Meal planning for busy professionals",
+        "Why mental health matters",
+        "Tips for improving mental health",
+        "Resources for mental health support",
       ],
       fullContent: `
-        Nutrition & Healthy Eating
+        The Importance of Mental Health
 
-        A balanced diet plays a crucial role in preventing chronic diseases and maintaining overall health. Here are some key tips:
+        Mental health is just as important as physical health. A healthy mind contributes to overall well-being and quality of life.
 
-        - Best foods for heart health: Include foods rich in omega-3 fatty acids, fiber, and antioxidants.
-        - Importance of hydration: Drink at least 8 glasses of water daily to stay hydrated.
-        - Meal planning for busy professionals: Prepare meals in advance to save time and ensure a balanced diet.
+        Key Details:
+        - Why mental health matters: Mental health affects how we think, feel, and act.
+        - Tips for improving mental health: Practice mindfulness, exercise regularly, and seek professional help when needed.
+        - Resources for mental health support: Many organizations offer free or low-cost mental health resources.
       `,
     },
     {
-      id: "stress-management",
-      title: "📌 Managing Stress & Mental Well-being",
-      summary: "Learn stress management techniques to improve focus, productivity, and emotional resilience.",
+      id: "benefits-of-yoga",
+      title: "🧘 Benefits of Yoga",
+      summary: "Yoga is a powerful practice for improving physical and mental health. Discover its benefits.",
       points: [
-        "Mindfulness meditation exercises",
-        "How to balance work and personal life",
-        "Recognizing and coping with burnout",
+        "Physical benefits of yoga",
+        "Mental benefits of yoga",
+        "How to get started with yoga",
       ],
       fullContent: `
-        Managing Stress & Mental Well-being
+        Benefits of Yoga
 
-        Stress management is crucial for maintaining mental health. Here are some techniques:
+        Yoga is a powerful practice for improving physical and mental health. It combines physical postures, breathing exercises, and meditation.
 
-        - Mindfulness meditation exercises: Practice mindfulness for 10 minutes daily to reduce stress.
-        - How to balance work and personal life: Set boundaries and prioritize self-care.
-        - Recognizing and coping with burnout: Take regular breaks and seek support when needed.
-      `,
-    },
-    {
-      id: "sleep",
-      title: "📌 Importance of Sleep & Recovery",
-      summary: "Quality sleep is essential for brain function, immunity, and overall health. Learn how to improve your sleep.",
-      points: [
-        "How screen time affects sleep",
-        "Creating a sleep-friendly environment",
-        "Benefits of power naps",
-      ],
-      fullContent: `
-        Importance of Sleep & Recovery
-
-        Quality sleep is essential for overall health. Here are some tips:
-
-        - How screen time affects sleep: Avoid screens at least 1 hour before bedtime.
-        - Creating a sleep-friendly environment: Keep your bedroom dark, quiet, and cool.
-        - Benefits of power naps: Take a 20-minute nap to boost productivity and mood.
+        Key Details:
+        - Physical benefits of yoga: Improves flexibility, strength, and balance.
+        - Mental benefits of yoga: Reduces stress, anxiety, and depression.
+        - How to get started with yoga: Join a local class or follow online tutorials.
       `,
     },
   ];
 
-  const handleShare = (tip: { title: string; summary: string }) => {
-    const shareText = `${tip.title}\n\n${tip.summary}\n\nRead more: [Link to full article]`;
+  const handleShare = (wellness: { title: string; summary: string }) => {
+    const shareText = `${wellness.title}\n\n${wellness.summary}\n\nRead more: [Link to full article]`;
     const shareUrl = encodeURIComponent(window.location.href);
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-    const emailUrl = `mailto:?subject=${encodeURIComponent(tip.title)}&body=${encodeURIComponent(shareText)}`;
 
+    // Open share options
     if (navigator.share) {
       navigator.share({
-        title: tip.title,
+        title: wellness.title,
         text: shareText,
         url: shareUrl,
       });
     } else {
+      // Fallback for devices that don't support navigator.share
       window.open(whatsappUrl, "_blank");
     }
   };
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate subscription logic
-    setSubscribed(true);
-    setEmail("");
-    setTimeout(() => setSubscribed(false), 3000); // Reset after 3 seconds
-  };
-
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">💖 Health & Wellness</h2>
+      <h2 className="text-2xl font-bold mb-4">Wellness Tips</h2>
       <p className="mb-6 text-gray-700">
-        Tips and guides for maintaining a healthy lifestyle, reducing stress, and improving overall well-being.
+        Explore tips and resources for maintaining physical and mental well-being.
       </p>
 
-      {wellnessTips.map((tip) => (
-        <div
-          key={tip.id}
-          className="mb-6 p-6 border-l-4 border-blue-500 bg-blue-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
-        >
-          <h3 className="text-xl font-semibold mb-2">{tip.title}</h3>
-          <p className="text-gray-600 mb-4">{tip.summary}</p>
+      {wellnessItems.map((wellness) => (
+        <div key={wellness.id} className="mb-6 p-6 border-l-4 border-green-500 bg-green-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+          <h3 className="text-xl font-semibold mb-2">{wellness.title}</h3>
+          <p className="text-gray-600 mb-4">{wellness.summary}</p>
           <ul className="mb-4 list-disc pl-6 text-gray-700">
-            {tip.points.map((point, index) => (
+            {wellness.points.map((point, index) => (
               <li key={index}>{point}</li>
             ))}
           </ul>
           <div className="flex gap-4">
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
-              onClick={() => setExpandedTip(tip.id === expandedTip ? null : tip.id)}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+              onClick={() => setSelectedWellness(wellness)}
             >
-              {tip.id === expandedTip ? "Show Less" : "Read More"}
+              Read More
             </button>
             <button
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
-              onClick={() => handleShare(tip)}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+              onClick={() => handleShare(wellness)}
             >
               Share
             </button>
           </div>
-          {tip.id === expandedTip && (
-            <div className="mt-4 text-gray-700 whitespace-pre-line">
-              {tip.fullContent}
-            </div>
-          )}
         </div>
       ))}
 
-      {/* Subscribe to Wellness Tips */}
-      <div className="mt-8 p-6 border-l-4 border-purple-500 bg-purple-50 rounded-lg">
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">📩 Subscribe to Wellness Tips</h3>
-        <p className="text-gray-600 mb-4">
-          Get the latest wellness tips delivered straight to your inbox.
-        </p>
-        <form onSubmit={handleSubscribe} className="flex gap-4">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <button
-            type="submit"
-            className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition duration-300"
+      {/* Pop-up for Read More */}
+      {selectedWellness && (
+        <motion.div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSelectedWellness(null)}
+        >
+          <motion.div
+            className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
           >
-            Subscribe
-          </button>
-        </form>
-        {subscribed && (
-          <p className="mt-4 text-green-600">Thank you for subscribing! 🎉</p>
-        )}
-      </div>
+            <h3 className="text-2xl font-bold mb-4">{selectedWellness.title}</h3>
+            <p className="text-gray-700 whitespace-pre-line">{selectedWellness.fullContent}</p>
+            <button
+              className="mt-6 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
+              onClick={() => setSelectedWellness(null)}
+            >
+              Close
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };
