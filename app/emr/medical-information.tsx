@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 
 // Predefined suggestions for allergies and conditions
 const allergySuggestionsList = ["Cold", "Cough", "Dust", "Pollen", "Peanuts", "Shellfish"];
 const conditionSuggestionsList = ["Diabetes", "Hypertension", "Asthma", "Arthritis", "Chronic Pain"];
 
 export default function MedicalInformation() {
-  const router = useRouter();
   const [medicalHistory, setMedicalHistory] = useState("");
   const [medications, setMedications] = useState("");
   const [allergies, setAllergies] = useState("");
