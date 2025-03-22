@@ -75,7 +75,6 @@ const News = () => {
     const shareText = `${news.title}\n\n${news.summary}\n\nRead more: [Link to full article]`;
     const shareUrl = encodeURIComponent(window.location.href);
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-    const emailUrl = `mailto:?subject=${encodeURIComponent(news.title)}&body=${encodeURIComponent(shareText)}`;
 
     // Open share options
     if (navigator.share) {
