@@ -168,9 +168,9 @@ export default function MedicalInformation() {
           <button
             type="button"
             className="px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => router.push("/next-section")}
+            onClick={handleUpdate}
           >
-            Next
+            Save
           </button>
           <button
             type="button"
