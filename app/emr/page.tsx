@@ -49,7 +49,7 @@ export default function EMRPage() {
             ))}
           </TabsList>
           <div className="p-4">
-            {selectedTab === "patient-registration" && <PatientRegistration />}
+            {selectedTab === "patient-registration" && <PatientRegistration setSelectedTab={setSelectedTab} />}
             {selectedTab === "administration-information" && <AdministrationInformation />}
             {selectedTab === "medical-information" && <MedicalInformation />}
             {selectedTab === "patient-list" && <PatientList />}

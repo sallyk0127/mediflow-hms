@@ -70,7 +70,6 @@ export default function AdministrationInformation() {
       <div className="flex justify-end gap-2 mt-6 col-span-2">
         <Button className="bg-blue-600 text-white">Next</Button>
         <Button className="bg-green-600 text-white">Update</Button>
-        <Button className="bg-red-600 text-white">Delete</Button>
       </div>
     </div>
   );
