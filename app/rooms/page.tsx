@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-// Data for Chart and Table
+// Data untuk Chart dan Table
 type RoomDetail = {
   id: string;
   bedNumber: string;
@@ -24,7 +22,7 @@ type RoomData = {
   details: RoomDetail[];
 };
 
-// Updated data with additional divisions
+// Data dengan divisi tambahan
 const dataByDate: Record<string, RoomData[]> = {
   Today: [
     {
@@ -105,7 +103,7 @@ export default function RoomAvailabilityChart() {
   const [selectedDivision, setSelectedDivision] = useState<string>("All");
   const [viewMode, setViewMode] = useState<"summary" | "details">("summary");
 
-  // Filter room data based on selected division and status
+  // Filter room data berdasarkan divisi dan status yang dipilih
   const filteredRoomData = dataByDate[selectedDate].filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDivision = selectedDivision === "All" || room.name === selectedDivision;
@@ -116,12 +114,12 @@ export default function RoomAvailabilityChart() {
     return matchesSearch && matchesDivision && matchesStatus;
   });
 
-  // Get all room details flattened for the detail view
+  // Mendapatkan semua detail kamar untuk tampilan detail
   const allRoomDetails = dataByDate[selectedDate]
     .filter(room => selectedDivision === "All" || room.name === selectedDivision)
     .flatMap(room => room.details);
 
-  // Filter bed details based on search query and status filter
+  // Filter detail tempat tidur berdasarkan query pencarian dan filter status
   const filteredBedDetails = allRoomDetails.filter(bed => {
     const matchesSearch = 
       bed.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -148,22 +146,20 @@ export default function RoomAvailabilityChart() {
             </option>
           ))}
         </select>
-        <TabsList className="flex space-x-4">
-          <TabsTrigger 
-            value="chart" 
+        <div className="flex space-x-4">
+          <button
             onClick={() => setActiveTab("chart")}
-            className={activeTab === "chart" ? "text-blue-600 font-bold" : ""}
+            className={`px-4 py-2 ${activeTab === "chart" ? "text-blue-600 font-bold" : ""}`}
           >
             Chart
-          </TabsTrigger>
-          <TabsTrigger 
-            value="table" 
+          </button>
+          <button
             onClick={() => setActiveTab("table")}
-            className={activeTab === "table" ? "text-blue-600 font-bold" : ""}
+            className={`px-4 py-2 ${activeTab === "table" ? "text-blue-600 font-bold" : ""}`}
           >
             Table
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -271,30 +267,30 @@ export default function RoomAvailabilityChart() {
         {activeTab === "table" && viewMode === "summary" && (
           <div>
             <h2 className="text-lg font-semibold">Division Summary</h2>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Division</TableCell>
-                    <TableCell>Total Beds</TableCell>
-                    <TableCell>Occupied</TableCell>
-                    <TableCell>Available</TableCell>
-                    <TableCell>Occupancy Rate</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Division</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Beds</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Occupied</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Occupancy Rate</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
                   {filteredRoomData.map((room) => (
-                    <TableRow key={room.id}>
-                      <TableCell>{room.name}</TableCell>
-                      <TableCell>{room.totalBeds}</TableCell>
-                      <TableCell>{room.occupiedBeds}</TableCell>
-                      <TableCell>{room.availableBeds}</TableCell>
-                      <TableCell>{Math.round((room.occupiedBeds / room.totalBeds) * 100)}%</TableCell>
-                    </TableRow>
+                    <tr key={room.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.totalBeds}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.occupiedBeds}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.availableBeds}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{Math.round((room.occupiedBeds / room.totalBeds) * 100)}%</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -303,24 +299,24 @@ export default function RoomAvailabilityChart() {
             <h2 className="text-lg font-semibold">
               {selectedDivision === "All" ? "All Beds" : `${selectedDivision} Beds`}
             </h2>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Bed Number</TableCell>
-                    <TableCell>Location</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Used Until</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bed Number</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used Until</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
                   {filteredBedDetails.map((bed) => (
-                    <TableRow key={bed.id}>
-                      <TableCell>{bed.id}</TableCell>
-                      <TableCell>{bed.bedNumber}</TableCell>
-                      <TableCell>{bed.location}</TableCell>
-                      <TableCell>
+                    <tr key={bed.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">{bed.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{bed.bedNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{bed.location}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span 
                           className={`px-2 py-1 rounded ${
                             bed.status === "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
@@ -328,13 +324,13 @@ export default function RoomAvailabilityChart() {
                         >
                           {bed.status}
                         </span>
-                      </TableCell>
-                      <TableCell>{bed.usedUntil || "-"}</TableCell>
-                    </TableRow>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{bed.usedUntil || "-"}</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
