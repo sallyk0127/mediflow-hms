@@ -1,8 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Patient } from '@prisma/client';
+
+type PatientData = Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
 const prisma = new PrismaClient();
 
-export const createPatient = async (data: any) => {
+export const createPatient = async (data: PatientData) => {
   try {
     const patient = await prisma.patient.create({
       data,
@@ -26,7 +28,7 @@ export const getPatientById = async (id: number) => {
   }
 };
 
-export const updatePatient = async (id: number, data: any) => {
+export const updatePatient = async (id: number, data: PatientData) => {
   try {
     const patient = await prisma.patient.update({
       where: { id },
