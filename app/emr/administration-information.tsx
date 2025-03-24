@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export default function AdministrationInformation() {
+export default function AdministrationInformation({ setSelectedTab }: { setSelectedTab: (value: string) => void }) {
   const [formData, setFormData] = useState<Record<string, string>>({
     medicareNumber: '',
     insuranceProvider: '',
@@ -28,6 +28,11 @@ export default function AdministrationInformation() {
 
   const handleChange = (value: string, name: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNext = () => {
+    console.log("Saved Form Data:", formData); 
+    setSelectedTab("medical-information");
   };
 
   return (
@@ -70,8 +75,7 @@ export default function AdministrationInformation() {
         ))}
       </div>
       <div className="flex justify-end gap-2 mt-6 col-span-2">
-        <Button className="bg-blue-600 text-white">Next</Button>
-        <Button className="bg-green-600 text-white">Update</Button>
+        <Button className="bg-blue-600 text-white" onClick={handleNext}>Next</Button>
       </div>
     </div>
   );
