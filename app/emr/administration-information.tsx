@@ -14,6 +14,7 @@ import {
 
 export default function AdministrationInformation() {
   const [formData, setFormData] = useState<Record<string, string>>({
+    medicareNumber: '',
     insuranceProvider: '',
     policyNumber: '',
     coverageType: '',
@@ -33,6 +34,7 @@ export default function AdministrationInformation() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div className="grid grid-cols-2 gap-4 items-center col-span-2">
         {[
+          ["Medicare Number", "medicareNumber"],
           ["Insurance Provider", "insuranceProvider"],
           ["Policy Number", "policyNumber"],
           ["Coverage Type", "coverageType"],
