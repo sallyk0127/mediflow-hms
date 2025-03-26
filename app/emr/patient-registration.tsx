@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { useToast } from '@/components/hooks/use-toast' 
+import { useToast } from '@/components/hooks/use-toast';
+import { createPatient } from '../actions/actions-patients';
+import { patientSchema } from '../actions/schemas-patients';
+import { z } from 'zod';
 
 export default function PatientRegistration({ setSelectedTab }: { setSelectedTab: (value: string) => void }) {
   const [formData, setFormData] = useState<Record<string, string>>({
@@ -62,6 +65,67 @@ export default function PatientRegistration({ setSelectedTab }: { setSelectedTab
     console.log("Saved Form Data:", formData); 
     setSelectedTab("administration-information");
   };
+
+  const handleSubmit = async () => {
+    if (!formData.firstName || !formData.lastName || !date) {  
+      toast({
+        title: 'Error',
+        description: 'First Name, Last Name, and Date of Birth are required.',
+        variant: 'destructive',
+      }); 
+      return;
+    }
+  
+    try {
+      // Validate data using Zod schema
+      const validatedData = patientSchema.parse({
+        ...formData,
+        dob: date.toISOString(),
+      });
+  
+      console.log('Sending Data to API:', validatedData); // Debugging log
+  
+      const response = await fetch('/api/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validatedData)
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text(); // Get the raw response text
+        console.error('Server Error Response:', errorText);
+        toast({
+          title: 'Error',
+          description: 'Failed to send data to the server. Check server logs.',
+          variant: 'destructive',
+        });
+        return;
+      }
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        toast({ title: 'Patient Registered Successfully!' });
+        setSelectedTab('administration-information');
+      } else {
+        toast({
+          title: 'Error',
+          description: result.error,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: 'Validation Error',
+          description: error.errors.map((err) => err.message).join(', '),
+          variant: 'destructive',
+        });
+      } else {
+        console.error('Error registering patient:', error);
+      }
+    }
+  };  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
@@ -175,6 +239,7 @@ export default function PatientRegistration({ setSelectedTab }: { setSelectedTab
 
       <div className="flex justify-end gap-2 mt-6 col-span-2">
         <Button className="bg-blue-600 text-white" onClick={handleNext}>Next</Button>
+        <Button className="bg-blue-600 text-white" onClick={handleSubmit}>Submit</Button>
       </div>
     </div>
   );

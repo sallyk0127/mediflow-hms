@@ -31,11 +31,15 @@ export default function MedicalInformation() {
 
   const { toast } = useToast();
 
+
+  
   const handleSubmit = () => {  
       toast({
         title: 'Submitted',
         description: 'Patient Registered Successfully',
       });
+
+  
   };
 
   return (
