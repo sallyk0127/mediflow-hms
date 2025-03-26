@@ -15,7 +15,6 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { useToast } from '@/components/hooks/use-toast';
-import { createPatient } from '../actions/actions-patients';
 import { patientSchema } from '../actions/schemas-patients';
 import { z } from 'zod';
 
