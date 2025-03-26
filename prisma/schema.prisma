@@ -26,15 +26,15 @@ model Patient {
   previousNames          String?
 
   // Administration Information
-  medicareNumber         String?
+  medicareNumber         String? 
   insuranceProvider      String?
   policyNumber           String?
   coverageType           String?
   billingAddress         String?
   paymentMethod          String?
-  roomNumber             String?
+  roomNumber             Int?
   wardDepartment         String?
-  bedNumber              String?
+  bedNumber              Int?
   attendingDoctor        String?
 
   // Medical Information

@@ -43,10 +43,10 @@ export default function PatientRegistration({ setSelectedTab }: { setSelectedTab
   };
 
   const handleNext = () => {
-    if (!formData.firstName || !formData.lastName || !date) {  
+    if (!formData.firstName || !formData.lastName || !date || !formData.gender) {  
       toast({
         title: 'Error',
-        description: 'First Name, Last Name, and Date of Birth are required.',
+        description: 'First Name, Last Name, Gender and Date of Birth are required.',
         variant: 'destructive', // This is optional but useful to show an error toast
       }); 
       return;
@@ -92,7 +92,7 @@ export default function PatientRegistration({ setSelectedTab }: { setSelectedTab
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium w-40">Gender</label>
+          <label className="text-sm font-medium w-40 text-red-500">Gender</label>
           <Select onValueChange={(value) => handleChange(value, 'gender')}>
             <SelectTrigger className="w-full"><SelectValue placeholder="Select Gender" /></SelectTrigger>
             <SelectContent><SelectGroup>
