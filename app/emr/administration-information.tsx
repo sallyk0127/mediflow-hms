@@ -13,26 +13,21 @@ import {
 } from '@/components/ui/select';
 
 export default function AdministrationInformation({ setSelectedTab }: { setSelectedTab: (value: string) => void }) {
-  const [formData, setFormData] = useState<Record<string, any>>({
+  const [formData, setFormData] = useState<Record<string, string>>({
     medicareNumber: '',
     insuranceProvider: '',
     policyNumber: '',
     coverageType: '',
     billingAddress: '',
     paymentMethod: '',
-    roomNumber: null,
+    roomNumber: '',
     wardDepartment: '',
-    bedNumber: null,
+    bedNumber: '',
     attendingDoctor: '',
   });
 
   const handleChange = (value: string, name: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleNumericChange = (value: string, name: string) => {
-    const numericValue = value ? parseInt(value, 10) : null; // Convert to number or null
-    setFormData((prev) => ({ ...prev, [name]: numericValue }));
   };
 
   const handleNext = () => {
@@ -73,19 +68,8 @@ export default function AdministrationInformation({ setSelectedTab }: { setSelec
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            ) : name === "roomNumber" || name === "bedNumber" ? (
-              <Input 
-                name={name} 
-                type="number" 
-                value={formData[name] || ''} 
-                onChange={(e) => handleNumericChange(e.target.value, name)} 
-              />
             ) : (
-              <Input 
-                name={name} 
-                value={formData[name]} 
-                onChange={(e) => handleChange(e.target.value, name)} 
-              />
+              <Input name={name} value={formData[name]} onChange={(e) => handleChange(e.target.value, name)} />
             )}
           </div>
         ))}

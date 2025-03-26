@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Patient" ALTER COLUMN "roomNumber" SET DATA TYPE TEXT,
+ALTER COLUMN "bedNumber" SET DATA TYPE TEXT;
