@@ -41,6 +41,14 @@ export default function PatientRegistration({ setSelectedTab }: { setSelectedTab
   const handleChange = (value: string, name: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  
+  const handleDateChange = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    if (selectedDate) {
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      setFormData((prev) => ({ ...prev, dob: formattedDate }));  // Save formatted date to formData
+    }
+  };  
 
   const handleNext = () => {
     if (!formData.firstName || !formData.lastName || !date || !formData.gender) {  
@@ -107,10 +115,12 @@ export default function PatientRegistration({ setSelectedTab }: { setSelectedTab
           <label className="text-sm font-medium w-40 text-red-500">Date of Birth</label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full text-gray-500">{date ? format(date, "dd/MM/yyyy") : "Select Date"}</Button>
+              <Button variant="outline" className="w-full text-gray-500">
+                {date ? format(date, "dd/MM/yyyy") : "Select Date"}
+              </Button>
             </PopoverTrigger>
             <PopoverContent>
-              <Calendar mode="single" selected={date} onSelect={setDate} />
+              <Calendar mode="single" selected={date} onSelect={handleDateChange} />  {/* Notice the use of handleDateChange */}
             </PopoverContent>
           </Popover>
         </div>
