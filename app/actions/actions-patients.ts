@@ -8,9 +8,18 @@ export const createPatient = async (data: PatientData) => {
   try {
     const validatedData = patientSchema.parse(data);
 
+    // Convert roomNumber and bedNumber to strings if they exist
+    if (validatedData.roomNumber !== undefined && validatedData.roomNumber !== null) {
+      validatedData.roomNumber = validatedData.roomNumber.toString();
+    }
+    if (validatedData.bedNumber !== undefined && validatedData.bedNumber !== null) {
+      validatedData.bedNumber = validatedData.bedNumber.toString();
+    }
+
     const patient = await prisma.patient.create({
       data: validatedData,
     });
+
     return { success: true, patient };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -26,10 +35,19 @@ export const updatePatient = async (id: number, data: Partial<PatientData>) => {
   try {
     const validatedData = patientSchema.partial().parse(data);
 
+    // Convert roomNumber and bedNumber to strings if they exist
+    if (validatedData.roomNumber !== undefined && validatedData.roomNumber !== null) {
+      validatedData.roomNumber = validatedData.roomNumber.toString();
+    }
+    if (validatedData.bedNumber !== undefined && validatedData.bedNumber !== null) {
+      validatedData.bedNumber = validatedData.bedNumber.toString();
+    }
+
     const patient = await prisma.patient.update({
       where: { id },
       data: validatedData,
     });
+
     return { success: true, patient };
   } catch (error) {
     if (error instanceof z.ZodError) {
