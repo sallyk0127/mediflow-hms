@@ -8,14 +8,6 @@ export const createPatient = async (data: PatientData) => {
   try {
     const validatedData = patientSchema.parse(data);
 
-    // Convert roomNumber and bedNumber to strings if they exist
-    if (validatedData.roomNumber) {
-      validatedData.roomNumber = String(validatedData.roomNumber);
-    }
-    if (validatedData.bedNumber) {
-      validatedData.bedNumber = String(validatedData.bedNumber);
-    }
-
     const patient = await prisma.patient.create({
       data: validatedData,
     });
@@ -34,14 +26,6 @@ export const createPatient = async (data: PatientData) => {
 export const updatePatient = async (id: number, data: Partial<PatientData>) => {
   try {
     const validatedData = patientSchema.partial().parse(data);
-
-    // Convert roomNumber and bedNumber to strings if they exist
-    if (validatedData.roomNumber) {
-      validatedData.roomNumber = String(validatedData.roomNumber);
-    }
-    if (validatedData.bedNumber) {
-      validatedData.bedNumber = String(validatedData.bedNumber);
-    }
 
     const patient = await prisma.patient.update({
       where: { id },
