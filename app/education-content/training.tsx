@@ -35,9 +35,9 @@ const sessions = [
   },
   {
     role: "Nurses, Doctors, and Staff",
-    title: "Mental Health Support",
+    title: "Self Wellbeing",
     description: `
-      Mental Health Support Training
+      Self Wellbeing Training
 
       1. Recognizing Signs of Stress  
       Be aware of the signs of stress in yourself and your colleagues. This could include changes in mood, irritability, fatigue, or withdrawal from social interactions. Recognizing these signs early can help address issues before they escalate.
