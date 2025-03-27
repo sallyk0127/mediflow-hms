@@ -1,13 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { cn } from "@/components/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Roster {
   time: string;
@@ -24,33 +31,66 @@ interface Roster {
 
 const rosters: Roster[] = [
   {
-    time: "9:30 AM",
-    date: "15/02/2025",
-    role: "Manager",
+    time: "08:00 AM",
+    date: "28/03/2025",
+    role: "Registered Nurse",
     staff: {
-      name: "John Doe",
+      name: "Emily Clark",
       avatar: "/placeholder.svg",
-      initials: "JD",
+      initials: "EC",
     },
-    staffId: "8271827",
+    staffId: "RN00123",
     shift: "Morning",
   },
   {
-    time: "10:30 AM",
-    date: "15/02/2025",
-    role: "Assistant",
+    time: "02:00 PM",
+    date: "28/03/2025",
+    role: "Dietitian",
     staff: {
-      name: "Jane Smith",
+      name: "Michael Brown",
       avatar: "/placeholder.svg",
-      initials: "JS",
+      initials: "MB",
     },
-    staffId: "8982314",
-    shift: "Evening",
+    staffId: "DT00456",
+    shift: "Afternoon",
+  },
+  {
+    time: "09:00 PM",
+    date: "28/03/2025",
+    role: "Resident",
+    staff: {
+      name: "Sophia Martinez",
+      avatar: "/placeholder.svg",
+      initials: "SM",
+    },
+    staffId: "RS00789",
+    shift: "Night",
   },
 ];
 
 export default function NewRosterPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [selectedStaff, setSelectedStaff] = useState<Roster["staff"] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false); // ✅ Fix for SSR warning
+
+  const handleStaffClick = (staff: Roster["staff"]) => {
+    setSelectedStaff(staff);
+    setIsModalOpen(true);
+  };
+
+  useEffect(() => {
+    setIsHydrated(true); 
+  }, []);
+
+  const today = new Date();
+
+  const filteredRosters = rosters.filter((roster) => {
+    const rosterDate = parse(roster.date, "dd/MM/yyyy", new Date());
+    const isFutureOrToday = rosterDate >= new Date(today.setHours(0, 0, 0, 0));
+    const isMatchingDate = date ? rosterDate.toDateString() === date.toDateString() : true;
+    return isFutureOrToday && isMatchingDate;
+  });
 
   return (
     <div className="container mx-auto">
@@ -78,61 +118,68 @@ export default function NewRosterPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b bg-gray-50">
-              <th className="p-4 text-left text-sm font-medium text-gray-500">Time</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Date</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Role</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Staff Name</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Staff ID</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Shift</th>
+              <th className="p-4 text-left text-sm font-medium text-gray-500">Time</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">User Action</th>
             </tr>
           </thead>
           <tbody>
-            {rosters.map((roster, index) => (
-              <tr key={index} className="border-b">
-                <td className="p-4">{roster.time}</td>
-                <td className="p-4">{roster.date}</td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded-md text-white text-sm bg-blue-500`}>
-                    {roster.role}
-                  </span>
+            {filteredRosters.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="p-4 text-center text-gray-500">
+                  No upcoming rosters found.
                 </td>
-                <td className="p-4 flex items-center">
-                  <Avatar className="h-8 w-8 mr-2">
-                    <AvatarImage src={roster.staff.avatar} />
-                    <AvatarFallback>{roster.staff.initials}</AvatarFallback>
-                  </Avatar>
-                  {roster.staff.name}
-                </td>
-                <td className="p-4">{roster.staffId}</td>
-                <td className="p-4">{roster.shift}</td>
-                <td className="p-4 text-blue-500 cursor-pointer">Edit</td>
               </tr>
-            ))}
+            ) : (
+              filteredRosters.map((roster, index) => (
+                <tr key={index} className="border-b">
+                  <td className="p-4">{roster.date}</td>
+                  <td className="p-4">
+                    <span className="px-2 py-1 rounded-md text-white text-sm bg-blue-500">
+                      {roster.role}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div
+                      className="flex items-center cursor-pointer text-blue-600 hover:underline"
+                      onClick={() => handleStaffClick(roster.staff)}
+                    >
+                      <Avatar className="h-8 w-8 mr-2">
+                        <AvatarImage src={roster.staff.avatar} />
+                        <AvatarFallback>{roster.staff.initials}</AvatarFallback>
+                      </Avatar>
+                      {roster.staff.name}
+                    </div>
+                  </td>
+                  <td className="p-4">{roster.staffId}</td>
+                  <td className="p-4">{roster.shift}</td>
+                  <td className="p-4">{roster.time}</td>
+                  <td className="p-4 text-blue-500 cursor-pointer">Edit</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="flex items-center justify-center space-x-2 py-6">
-        <Button variant="outline" size="sm" disabled>
-            Previous
-        </Button>
-        <Button variant="outline" size="sm" className="bg-blue-500 text-white">
-            1
-        </Button>
-        <Button variant="outline" size="sm">
-            2
-        </Button>
-        <Button variant="outline" size="sm">
-            3
-        </Button>
-        <Button variant="outline" size="sm">
-            4
-        </Button>
-        <Button variant="outline" size="sm">
-            Next
-        </Button>
-      </div>
+      {isHydrated && (
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedStaff?.name}</DialogTitle>
+              <DialogDescription>
+                <span className="mt-2 text-sm text-gray-600 block">
+                  Test.
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
