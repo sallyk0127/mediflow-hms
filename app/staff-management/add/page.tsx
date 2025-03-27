@@ -99,7 +99,9 @@ export default function AddRosterPage() {
             <Select
               options={roles.map((role) => ({ label: role, value: role }))}
               value={selectedRole}
-              onChange={(selected) => setSelectedRole(selected)}
+              onChange={(selected) =>
+                setSelectedRole(selected as { label: string; value: string } | null)
+              }
               placeholder="Search & select role"
             />
           )}
@@ -112,9 +114,12 @@ export default function AddRosterPage() {
             <Select
               options={shifts.map((shift) => ({ label: shift, value: shift }))}
               value={selectedShift}
-              onChange={(selected) => setSelectedShift(selected)}
+              onChange={(selected) =>
+                setSelectedShift(selected as { label: string; value: string } | null)
+              }
               placeholder="Search & select shift"
             />
+          
           )}
         </div>
 
