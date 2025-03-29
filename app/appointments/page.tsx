@@ -22,24 +22,6 @@ export default function AppointmentsPage() {
     }
   }, [selectedTab]);
 
-  const [patientFormData, setPatientFormData] = useState({
-    title: '',
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    gender: '',
-    preferredName: '',
-    dob: '',
-    maritalStatus: '',
-    email: '',
-    phoneNumber: '',
-    address: '',
-    emergencyContactName: '',
-    emergencyContactNumber: '',
-    billingNote: '',
-    previousNames: '',
-  });  
-
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-4">
