@@ -24,8 +24,8 @@ export const patientSchema = z.object({
   coverageType: z.string().optional(),
   billingAddress: z.string().optional(),
   paymentMethod: z.string().optional(),
-  roomNumber: z.string().optional(),
-  wardDepartment: z.string().optional(),
+  assignedRoom: z.string().optional(),
+  Department: z.string().optional(),
   bedNumber: z.string().optional(),
   attendingDoctor: z.string().optional(),
 

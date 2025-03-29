@@ -20,8 +20,8 @@ export default function AdministrationInformation({ setSelectedTab }: { setSelec
     coverageType: '',
     billingAddress: '',
     paymentMethod: '',
-    roomNumber: '',
-    wardDepartment: '',
+    assignedRoom: '',
+    Department: '',
     bedNumber: '',
     attendingDoctor: '',
   });
@@ -45,14 +45,14 @@ export default function AdministrationInformation({ setSelectedTab }: { setSelec
           ["Coverage Type", "coverageType"],
           ["Billing Address", "billingAddress"],
           ["Payment Method", "paymentMethod"],
-          ["Assigned Room Number", "roomNumber"],
-          ["Department", "wardDepartment"],
+          ["Assigned Room", "assignedRoom"],
+          ["Department", "Department"],
           ["Bed Number", "bedNumber"],
           ["Attending Doctor", "attendingDoctor"],
         ].map(([label, name]) => (
           <div key={name} className="flex items-center gap-2">
             <label className="text-sm font-medium w-40">{label}</label>
-            {name === "coverageType" || name === "wardDepartment" ? (
+            {name === "coverageType" || name === "Department" ? (
               <Select onValueChange={(value) => handleChange(value, name)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={`Select ${label}`} />
@@ -62,60 +62,13 @@ export default function AdministrationInformation({ setSelectedTab }: { setSelec
                     {name === "coverageType" && ["Full", "Partial", "Copay"].map((option) => (
                       <SelectItem key={option} value={option}>{option}</SelectItem>
                     ))}
-                    {name === "wardDepartment" && ["Aged Health, Chronic Care & Rehabilitation",
-                        "Allied Health",
-                        "Anaesthetics and Pain Management",
-                        "Andrology",
-                        "Audiology",
-                        "Basic Physician Training Network",
-                        "Bereavement",
-                        "Blood Cancers",
-                        "Breast and Endocrine Surgery",
-                        "Burns – NSW Statewide Burn Injury Service",
-                        "Cardiology",
-                        "Centre for STRONG Medicine",
-                        "Concord Cancer Centre",
-                        "Chaplaincy",
-                        "Colorectal",
-                        "Dermatology",
-                        "Drug and Alcohol",
-                        "Emergency",
-                        "Endocrinology and Metabolism",
-                        "Ear Nose and Throat",
-                        "Eye Clinic",
-                        "Gastroenterology",
-                        "Gynaecology",
-                        "Haematology Department",
-                        "Hospital in The Home",
-                        "Immunology",
-                        "Interpreter Services",
-                        "Intensive Care Unit",
-                        "Mental Health",
-                        "Microbiology and Infectious Diseases",
-                        "Molecular Imaging",
-                        "National Centre for Veterans' Healthcare (NCVH)",
-                        "Neurosciences",
-                        "Neurosurgery",
-                        "Nutrition and Dietetics",
-                        "Ophthalmology",
-                        "Orthopaedics",
-                        "Palliative and Supportive Care",
-                        "Pathology Department",
-                        "Patient and Family Experience Officer",
-                        "Plastic, Reconstructive and Hand Surgery Unit",
-                        "Podiatry",
-                        "Pre-Admission Clinic",
-                        "Psychology",
-                        "Radiology",
-                        "Renal",
-                        "Respiratory and Sleep Medicine",
-                        "Rheumatology",
-                        "Social Work",
-                        "Speech Pathology",
-                        "Stomal Therapy",
-                        "The Sydney Cancer Survivorship Centre",
-                        "Urology",
-                        "Vascular Surgery"].map((option) => (
+                    {name === "Department" && [
+                      "Behaviour and Mental",
+                      "ICU",
+                      "Maternity Care",
+                      "Medical Surgical",
+                      "Senior Living"
+                    ].map((option) => (
                       <SelectItem key={option} value={option}>{option}</SelectItem>
                     ))}
                   </SelectGroup>
