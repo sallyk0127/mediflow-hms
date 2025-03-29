@@ -14,7 +14,7 @@ export default function EducationContentPage() {
 
   useEffect(() => {
     if (indicatorRef.current && tabRefs.current[selectedTab]) {
-      const tabElement = tabRefs.current[selectedTab]!;
+      const tabElement = tabRefs.current[selectedTab]!; 
       indicatorRef.current.style.left = `${tabElement.offsetLeft}px`;
       indicatorRef.current.style.width = `${tabElement.offsetWidth}px`;
     }
@@ -25,24 +25,24 @@ export default function EducationContentPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Education Content</h1>
       <div className="bg-white rounded-lg shadow-md p-6 flex-1">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="relative flex border-b">
+          <TabsList className="relative flex border-b mb-4"> {/* Added mb-4 here for more space below tabs */}
             <div
               ref={indicatorRef}
-              className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300"
+              className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300 border-b mb-4"  // Added border-b and mb-4 to the indicator
             ></div>
-            {[
+            {[ 
               { value: "case-studies", label: "Case Studies" },
               { value: "training", label: "Training" },
               { value: "wellness", label: "Wellness" },
-              { value: "news", label: "News" },
+              { value: "news", label: "News" }
             ].map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
                 onClick={() => setSelectedTab(tab.value)}
-                className={`relative px-6 py-3 text-lg font-medium transition-all text-center border-b-2 $ {
-                  selectedTab === tab.value ? "border-blue-500 text-blue-600" : "border-transparent text-gray-600"
-                }`}
+                className={`relative px-4 py-2 transition-all text-center ${
+                  selectedTab === tab.value ? "font-bold text-blue-600" : "text-gray-600"
+                }`} // Updated padding and active tab styles
               >
                 {tab.label}
               </TabsTrigger>
