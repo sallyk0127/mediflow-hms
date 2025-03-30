@@ -15,8 +15,7 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { useToast } from '@/components/hooks/use-toast';
-import { patientSchema } from '../actions/schemas-patients';
-import { z } from 'zod';
+
 
 type Props = {
   patientData: Record<string, string>;
@@ -51,52 +50,7 @@ export default function PatientRegistration({ patientData, handlePatientChange, 
     setSelectedTab("administration-information");
   };
 
-  const handleSubmit = async () => {
-    if (!patientData.firstName || !patientData.lastName || !date) {
-      toast({
-        title: "Error",
-        description: "First Name, Last Name, and Date of Birth are required.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    try {
-      const validatedData = patientSchema.parse({
-        ...patientData,
-        dob: date.toISOString(),
-      });
-
-      const response = await fetch("/api/patients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validatedData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast({ title: "Patient Registered Successfully!" });
-        setSelectedTab("administration-information");
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Unknown error.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors.map((err) => err.message).join(", "),
-          variant: "destructive",
-        });
-      } else {
-        console.error("Submission error:", error);
-      }
-    }
-  };
 
   const formFields = [
     { label: "Title", field: "title", type: "select", options: ['Mr', 'Mrs', 'Miss', 'Ms', 'Mx', 'Sir', 'Dame', 'Dr', 'Cllr', 'Lady', 'Lord', 'General', 'Captain', 'Father', 'Doctor', 'Earl'] },
@@ -159,7 +113,6 @@ export default function PatientRegistration({ patientData, handlePatientChange, 
 
       <div className="flex justify-end gap-2 mt-6 col-span-2">
         <Button className="bg-blue-600 text-white" onClick={handleNext}>Next</Button>
-        <Button className="bg-blue-600 text-white" onClick={handleSubmit}>Submit</Button>
       </div>
     </div>
   );

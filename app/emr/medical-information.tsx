@@ -4,12 +4,14 @@ import React from "react";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/hooks/use-toast';
+import { patientSchema } from '../actions/schemas-patients';
+import { z } from 'zod';
 
 const allergySuggestionsList = ["Cold", "Cough", "Dust", "Pollen", "Peanuts", "Shellfish"];
 const conditionSuggestionsList = ["Diabetes", "Hypertension", "Asthma", "Arthritis", "Chronic Pain"];
 
 interface Props {
-  patientData: Record<string, string>;
+  patientData: Record<string, string>; // Allow for Date or string types
   handlePatientChange: (value: string, field: string) => void;
 }
 
@@ -25,12 +27,41 @@ export default function MedicalInformation({
       : [];
   };
 
-  const handleSubmit = () => {
-    toast({
-      title: 'Submitted',
-      description: 'Patient Registered Successfully',
-    });
-    console.log('Full Patient Data:', patientData); // Debugging output
+  const handleSubmit = async () => {
+    try {
+      const validatedData = patientSchema.parse({
+        ...patientData,
+        dob: new Date(patientData.dob).toISOString(),
+      });
+
+      const response = await fetch("/api/patients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validatedData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({ title: "Patient Registered Successfully!" });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Unknown error.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors.map((err) => err.message).join(", "),
+          variant: "destructive",
+        });
+      } else {
+        console.error("Submission error:", error);
+      }
+    }
   };
 
   return (
