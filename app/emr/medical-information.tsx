@@ -1,92 +1,77 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/hooks/use-toast' 
+import { useToast } from '@/components/hooks/use-toast';
 
-// Predefined suggestions for allergies and conditions
 const allergySuggestionsList = ["Cold", "Cough", "Dust", "Pollen", "Peanuts", "Shellfish"];
 const conditionSuggestionsList = ["Diabetes", "Hypertension", "Asthma", "Arthritis", "Chronic Pain"];
 
-export default function MedicalInformation() {
-  const [medicalHistory, setMedicalHistory] = useState("");
-  const [medications, setMedications] = useState("");
-  const [allergies, setAllergies] = useState("");
-  const [conditions, setConditions] = useState("");
-  const [allergySuggestions, setAllergySuggestions] = useState<string[]>([]);
-  const [conditionSuggestions, setConditionSuggestions] = useState<string[]>([]);
+interface Props {
+  patientData: Record<string, string>;
+  handlePatientChange: (value: string, field: string) => void;
+}
 
-  const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setAllergies(value);
-    setAllergySuggestions(value ? allergySuggestionsList.filter(item => item.toLowerCase().startsWith(value.toLowerCase())) : []);
-  };
-
-  const handleConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setConditions(value);
-    setConditionSuggestions(value ? conditionSuggestionsList.filter(item => item.toLowerCase().startsWith(value.toLowerCase())) : []);
-  };
-
+export default function MedicalInformation({
+  patientData,
+  handlePatientChange,
+}: Props) {
   const { toast } = useToast();
 
+  const handleSuggest = (value: string, list: string[]) => {
+    return value
+      ? list.filter((item) => item.toLowerCase().startsWith(value.toLowerCase()))
+      : [];
+  };
 
-  
-  const handleSubmit = () => {  
-      toast({
-        title: 'Submitted',
-        description: 'Patient Registered Successfully',
-      });
-
-  
+  const handleSubmit = () => {
+    toast({
+      title: 'Submitted',
+      description: 'Patient Registered Successfully',
+    });
+    console.log('Full Patient Data:', patientData); // Debugging output
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-      {/* Medical History */}
       <div className="col-span-2">
         <label className="text-sm font-medium">Medical History</label>
         <textarea
           className="w-full border p-2 rounded mt-1"
           rows={3}
           placeholder="Enter medical history"
-          value={medicalHistory}
-          onChange={(e) => setMedicalHistory(e.target.value)}
+          value={patientData.medicalHistory || ''}
+          onChange={(e) => handlePatientChange(e.target.value, 'medicalHistory')}
         />
       </div>
 
-      {/* Current Medications */}
       <div className="col-span-2">
         <label className="text-sm font-medium">Current Medications</label>
         <textarea
           className="w-full border p-2 rounded mt-1"
           rows={2}
           placeholder="Enter current medications"
-          value={medications}
-          onChange={(e) => setMedications(e.target.value)}
+          value={patientData.medications || ''}
+          onChange={(e) => handlePatientChange(e.target.value, 'medications')}
         />
       </div>
 
-      {/* Allergies */}
       <div className="col-span-2">
         <label className="text-sm font-medium">Allergies</label>
         <Input
           name="allergies"
-          value={allergies}
-          onChange={handleAllergyChange}
+          value={patientData.allergies || ''}
+          onChange={(e) => handlePatientChange(e.target.value, 'allergies')}
           placeholder="Enter allergies"
         />
-        {allergySuggestions.length > 0 && (
+        {handleSuggest(patientData.allergies || '', allergySuggestionsList).length > 0 && (
           <ul className="border border-gray-300 rounded mt-1">
-            {allergySuggestions.map((suggestion, index) => (
+            {handleSuggest(patientData.allergies || '', allergySuggestionsList).map((suggestion, index) => (
               <li
                 key={index}
                 className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setAllergies(suggestion);
-                  setAllergySuggestions([]);
-                }}
+                onClick={() => handlePatientChange(suggestion, 'allergies')}
               >
                 {suggestion}
               </li>
@@ -95,25 +80,21 @@ export default function MedicalInformation() {
         )}
       </div>
 
-      {/* Chronic Conditions */}
       <div className="col-span-2">
         <label className="text-sm font-medium">Chronic Conditions</label>
         <Input
           name="conditions"
-          value={conditions}
-          onChange={handleConditionChange}
+          value={patientData.conditions || ''}
+          onChange={(e) => handlePatientChange(e.target.value, 'conditions')}
           placeholder="Enter chronic conditions"
         />
-        {conditionSuggestions.length > 0 && (
+        {handleSuggest(patientData.conditions || '', conditionSuggestionsList).length > 0 && (
           <ul className="border border-gray-300 rounded mt-1">
-            {conditionSuggestions.map((suggestion, index) => (
+            {handleSuggest(patientData.conditions || '', conditionSuggestionsList).map((suggestion, index) => (
               <li
                 key={index}
                 className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setConditions(suggestion);
-                  setConditionSuggestions([]);
-                }}
+                onClick={() => handlePatientChange(suggestion, 'conditions')}
               >
                 {suggestion}
               </li>

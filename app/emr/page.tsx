@@ -3,20 +3,57 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PatientRegistration from "./patient-registration";
-import MedicalInformation from "./medical-information";
 import AdministrationInformation from "./administration-information";
+import MedicalInformation from "./medical-information";
 import PatientList from "./patient-list";
 
 export default function EMRPage() {
   const [selectedTab, setSelectedTab] = useState("patient-registration");
   const indicatorRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const [patientData, setPatientData] = useState({
+    title: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    gender: '',
+    preferredName: '',
+    dob: '',
+    maritalStatus: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    emergencyContactName: '',
+    emergencyContactNumber: '',
+    billingNote: '',
+    previousNames: '',
+
+    medicareNumber: '',
+    insuranceProvider: '',
+    policyNumber: '',
+    coverageType: '',
+    billingAddress: '',
+    paymentMethod: '',
+    assignedRoom: '',
+    Department: '',
+    bedNumber: '',
+    attendingDoctor: '',
+
+    medicalHistory: '',
+    medications: '',
+    allergies: '',
+    conditions: '',
+  });
+
+  const handlePatientChange = (value: string, field: string) => {
+    setPatientData((prev) => ({ ...prev, [field]: value }));
+  };
 
   useEffect(() => {
-    if (indicatorRef.current && tabRefs.current[selectedTab]) {
-      const tabElement = tabRefs.current[selectedTab]!;
-      indicatorRef.current.style.left = `${tabElement.offsetLeft}px`;
-      indicatorRef.current.style.width = `${tabElement.offsetWidth}px`;
+    const activeTab = document.querySelector(`[data-tab="${selectedTab}"]`) as HTMLElement | null;
+    if (indicatorRef.current && activeTab) {
+      indicatorRef.current.style.left = `${activeTab.offsetLeft}px`;
+      indicatorRef.current.style.width = `${activeTab.offsetWidth}px`;
     }
   }, [selectedTab]);
 
@@ -39,6 +76,7 @@ export default function EMRPage() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
+                data-tab={tab.value}
                 onClick={() => setSelectedTab(tab.value)}
                 className={`relative px-4 py-2 transition-all text-center ${
                   selectedTab === tab.value ? "font-bold text-blue-600" : "text-gray-600"
@@ -48,10 +86,28 @@ export default function EMRPage() {
               </TabsTrigger>
             ))}
           </TabsList>
+
           <div className="p-4">
-            {selectedTab === "patient-registration" && <PatientRegistration setSelectedTab={setSelectedTab} />}
-            {selectedTab === "administration-information" && <AdministrationInformation setSelectedTab={setSelectedTab} />}
-            {selectedTab === "medical-information" && <MedicalInformation />}
+            {selectedTab === "patient-registration" && (
+              <PatientRegistration
+                setSelectedTab={setSelectedTab}
+                patientData={patientData}
+                handlePatientChange={handlePatientChange}
+              />
+            )}
+            {selectedTab === "administration-information" && (
+              <AdministrationInformation
+                setSelectedTab={setSelectedTab}
+                patientData={patientData}
+                handlePatientChange={handlePatientChange}
+              />
+            )}
+            {selectedTab === "medical-information" && (
+              <MedicalInformation
+                patientData={patientData}
+                handlePatientChange={handlePatientChange}
+              />
+            )}
             {selectedTab === "patient-list" && <PatientList />}
           </div>
         </Tabs>
