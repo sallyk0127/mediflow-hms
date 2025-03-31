@@ -50,8 +50,6 @@ export default function PatientRegistration({ patientData, handlePatientChange, 
     setSelectedTab("administration-information");
   };
 
-
-
   const formFields = [
     { label: "Title", field: "title", type: "select", options: ['Mr', 'Mrs', 'Miss', 'Ms', 'Mx', 'Sir', 'Dame', 'Dr', 'Cllr', 'Lady', 'Lord', 'General', 'Captain', 'Father', 'Doctor', 'Earl'] },
     { label: "First Name", field: "firstName", required: true },
