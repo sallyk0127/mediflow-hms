@@ -7,14 +7,14 @@ import { buttonVariants } from "@/components/ui/button";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps) { // Removed `classNames`
+function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps) {
   const [month, setMonth] = React.useState(new Date());
 
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 50 + i);
+  const years = Array.from({ length: 130 }, (_, i) => new Date().getFullYear() - 110 + i);
 
   return (
     <DayPicker
@@ -33,6 +33,7 @@ function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps
           "[&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50"
         ),
         day: cn(buttonVariants({ variant: "ghost" }), "h-8 w-8 p-0 font-normal aria-selected:opacity-100"),
+        day_outside: "text-gray-400", // grey out outside days
       }}
       components={{
         Caption: ({ displayMonth }) => (
@@ -41,7 +42,7 @@ function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps
             <select
               className="border rounded-md px-2 py-1 text-sm"
               value={displayMonth.getMonth()}
-              onChange={(e) => setMonth(new Date(displayMonth.getFullYear(), Number(e.target.value)))}
+              onChange={(e) => setMonth(new Date(displayMonth.getFullYear(), Number(e.target.value))) }
             >
               {months.map((monthName, index) => (
                 <option key={monthName} value={index}>
@@ -49,12 +50,11 @@ function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps
                 </option>
               ))}
             </select>
-            
             {/* Year Dropdown */}
             <select
               className="border rounded-md px-2 py-1 text-sm"
               value={displayMonth.getFullYear()}
-              onChange={(e) => setMonth(new Date(Number(e.target.value), displayMonth.getMonth()))}
+              onChange={(e) => setMonth(new Date(Number(e.target.value), displayMonth.getMonth())) }
             >
               {years.map((year) => (
                 <option key={year} value={year}>
@@ -65,7 +65,7 @@ function Calendar({ className, showOutsideDays = true, ...props }: CalendarProps
           </div>
         ),
       }}
-      {...props} // Keep other props to ensure flexibility
+      {...props}
     />
   );
 }

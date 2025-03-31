@@ -16,7 +16,6 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { useToast } from '@/components/hooks/use-toast';
 
-
 type Props = {
   patientData: Record<string, string>;
   handlePatientChange: (value: string, field: string) => void;
@@ -35,6 +34,7 @@ export default function PatientRegistration({ patientData, handlePatientChange, 
     if (selectedDate) {
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
       handlePatientChange(formattedDate, "dob");
+      setOpen(false);
     }
   };
 

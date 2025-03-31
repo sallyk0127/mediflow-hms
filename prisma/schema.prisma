@@ -33,7 +33,7 @@ model Patient {
   billingAddress         String?
   paymentMethod          String?
   assignedRoom           String?
-  Department         String?
+  Department             String?
   bedNumber              String?
   attendingDoctor        String?
 
