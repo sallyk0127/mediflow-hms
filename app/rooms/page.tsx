@@ -93,6 +93,23 @@ const initialData: Record<string, RoomData[]> = {
   ],
 };
 
+// Mock shadcn UI components if they're not available
+const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className || ''}`}>{children}</div>
+);
+
+const CardHeader = ({ children }: { children: React.ReactNode }) => (
+  <div className="p-4 border-b">{children}</div>
+);
+
+const CardTitle = ({ children }: { children: React.ReactNode }) => (
+  <h3 className="text-lg font-semibold">{children}</h3>
+);
+
+const CardContent = ({ children }: { children: React.ReactNode }) => (
+  <div className="p-4">{children}</div>
+);
+
 export default function RoomAvailabilityChart() {
   // collect today date
   const today = new Date().toISOString().split('T')[0];
@@ -125,13 +142,19 @@ export default function RoomAvailabilityChart() {
     usedUntil: "",
   });
 
-  // Date format
-  // Replace this function
+  // Date format - Fixed to use safer locale handling
   const formatDisplayDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      // Change 'id-ID' to 'en-US' for English locale
-      return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      if (isNaN(date.getTime())) return dateString;
+      
+      // Use more universal date formatting
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
     } catch (e) {
       return dateString;
     }
@@ -166,13 +189,15 @@ export default function RoomAvailabilityChart() {
     setIsEditModalOpen(true);
   };
 
-  // Handle input change for editing room
+  // Handle input change for editing room - FIXED: removed duplicate definition
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
+    if (!editingRoom) return;
+    
     if (name === "status") {
       // If changing status, store the previous status
-      setPreviousStatus(editingRoom?.status || "Available");
+      setPreviousStatus(editingRoom.status);
     }
     
     setEditingRoom(prev => prev ? { ...prev, [name]: value } : null);
@@ -186,7 +211,7 @@ export default function RoomAvailabilityChart() {
     }
 
     // Validation for Occupied status
-    if (editingRoom.status === "Occupied" && !editingRoom.patientName) {
+    if (editingRoom.status === "Occupied" && (!editingRoom.patientName || editingRoom.patientName === "-")) {
       alert("Patient name is required for occupied rooms");
       return;
     }
@@ -245,7 +270,7 @@ export default function RoomAvailabilityChart() {
     setEditingRoom(null);
   };
 
-  // Filter room data berdasarkan divisi dan status yang dipilih
+  // Filter room data based on division and selected status
   const filteredRoomData = getDataForSelectedDate().filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDivision = selectedDivision === "All" || room.name === selectedDivision;
@@ -297,15 +322,20 @@ export default function RoomAvailabilityChart() {
     }
 
     // Collect Index
-    const divisionIndex = getDataForSelectedDate().findIndex(
+    const divisions = getDataForSelectedDate();
+    const divisionIndex = divisions.findIndex(
       (room) => room.name === selectedDivision
     );
 
     if (divisionIndex === -1) return;
 
     // Create new id use selected div
-    const division = getDataForSelectedDate()[divisionIndex];
-    const prefix = division.details[0]?.id.split('-')[0] || division.name.substring(0, 2).toUpperCase();
+    const division = divisions[divisionIndex];
+    // FIXED: Added a safe check for empty details array
+    const prefix = division.details.length > 0 
+      ? division.details[0]?.id.split('-')[0] 
+      : division.name.substring(0, 2).toUpperCase();
+      
     const newId = `${prefix}-${String(division.details.length + 1).padStart(3, '0')}`;
 
     // Add new detail room
@@ -317,21 +347,8 @@ export default function RoomAvailabilityChart() {
       ...(newRoom.status === "Occupied" && newRoom.usedUntil ? { usedUntil: newRoom.usedUntil } : {}),
     };
 
-    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      
-      if (!editingRoom) return;
-      
-      if (name === "status") {
-        // If changing status, store the previous status
-        setPreviousStatus(editingRoom.status || "Available");
-      }
-      
-      setEditingRoom(prev => prev ? { ...prev, [name]: value } : null);
-    };
-
     const updatedDataByDate = { ...dataByDate };
-    const currentData = [ ...getDataForSelectedDate() ];
+    const currentData = [ ...divisions ];
     const updatedDivision = { ...division };
     
     updatedDivision.details = [...updatedDivision.details, newBed];
@@ -387,6 +404,7 @@ export default function RoomAvailabilityChart() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
+            max={today}
             className="border p-2 rounded-lg"
           />
           <span className="text-sm text-gray-600 ml-2">
