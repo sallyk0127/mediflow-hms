@@ -126,10 +126,12 @@ export default function RoomAvailabilityChart() {
   });
 
   // Date format
+  // Replace this function
   const formatDisplayDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      // Change 'id-ID' to 'en-US' for English locale
+      return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     } catch (e) {
       return dateString;
     }
@@ -385,7 +387,6 @@ export default function RoomAvailabilityChart() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            max={today}
             className="border p-2 rounded-lg"
           />
           <span className="text-sm text-gray-600 ml-2">
