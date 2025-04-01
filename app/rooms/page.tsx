@@ -143,6 +143,11 @@ export default function RoomAvailabilityChart() {
    
     const availableDates = Object.keys(dataByDate).sort();
     
+    // Add fallback if no dates are available
+    if (availableDates.length === 0) {
+      return [];
+    }
+    
     for (let i = availableDates.length - 1; i >= 0; i--) {
       if (availableDates[i] <= selectedDate) {
         return dataByDate[availableDates[i]];
@@ -310,6 +315,19 @@ export default function RoomAvailabilityChart() {
       ...(newRoom.status === "Occupied" && newRoom.usedUntil ? { usedUntil: newRoom.usedUntil } : {}),
     };
 
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      
+      if (!editingRoom) return;
+      
+      if (name === "status") {
+        // If changing status, store the previous status
+        setPreviousStatus(editingRoom.status || "Available");
+      }
+      
+      setEditingRoom(prev => prev ? { ...prev, [name]: value } : null);
+    };
+
     const updatedDataByDate = { ...dataByDate };
     const currentData = [ ...getDataForSelectedDate() ];
     const updatedDivision = { ...division };
@@ -346,9 +364,11 @@ export default function RoomAvailabilityChart() {
     
     try {
       const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return "-";
       return date.toLocaleDateString();
     } catch (e) {
-      return dateString; 
+      return "-"; 
     }
   };
 
