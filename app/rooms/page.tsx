@@ -93,23 +93,6 @@ const initialData: Record<string, RoomData[]> = {
   ],
 };
 
-// Mock shadcn UI components if they're not available
-const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className || ''}`}>{children}</div>
-);
-
-const CardHeader = ({ children }: { children: React.ReactNode }) => (
-  <div className="p-4 border-b">{children}</div>
-);
-
-const CardTitle = ({ children }: { children: React.ReactNode }) => (
-  <h3 className="text-lg font-semibold">{children}</h3>
-);
-
-const CardContent = ({ children }: { children: React.ReactNode }) => (
-  <div className="p-4">{children}</div>
-);
-
 export default function RoomAvailabilityChart() {
   // collect today date
   const today = new Date().toISOString().split('T')[0];
@@ -223,7 +206,7 @@ export default function RoomAvailabilityChart() {
 
     // Find the division that contains this room
     const divisions = getDataForSelectedDate();
-    let updatedDivisions = [...divisions];
+    const updatedDivisions = [...divisions];
     
     for (let i = 0; i < updatedDivisions.length; i++) {
       const division = updatedDivisions[i];
@@ -231,7 +214,7 @@ export default function RoomAvailabilityChart() {
       
       if (roomIndex !== -1) {
         // Update the room details
-        let updatedDivision = { ...division };
+        const updatedDivision = { ...division };
         const updatedDetails = [...updatedDivision.details];
         
         // Handle status change and patient name logic
