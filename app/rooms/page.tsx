@@ -138,7 +138,7 @@ export default function RoomAvailabilityChart() {
         month: 'long', 
         day: 'numeric' 
       });
-    } catch (e) {
+    } catch (_) {
       return dateString;
     }
   };
@@ -369,7 +369,7 @@ export default function RoomAvailabilityChart() {
       // Check if date is valid
       if (isNaN(date.getTime())) return "-";
       return date.toLocaleDateString();
-    } catch (e) {
+    } catch (_) {
       return "-"; 
     }
   };
