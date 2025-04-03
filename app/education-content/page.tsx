@@ -25,10 +25,10 @@ export default function EducationContentPage() {
       <h1 className="text-2xl font-semibold mb-4">Education Content</h1>
       <div className="bg-white rounded-lg shadow p-6">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="relative flex border-b mb-4"> {/* Added mb-4 here for more space below tabs */}
+          <TabsList className="relative flex border-b mb-4"> {/* Minimal space below tabs */}
             <div
               ref={indicatorRef}
-              className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300 border-b mb-4"  // Added border-b and mb-4 to the indicator
+              className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300"
             ></div>
             {[ 
               { value: "case-studies", label: "Case Studies" },
@@ -42,13 +42,14 @@ export default function EducationContentPage() {
                 onClick={() => setSelectedTab(tab.value)}
                 className={`relative px-4 py-2 transition-all text-center ${
                   selectedTab === tab.value ? "font-bold text-blue-600" : "text-gray-600"
-                }`} // Updated padding and active tab styles
+                }`}
               >
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="p-6">
+
+          <div className="p-4">
             {selectedTab === "case-studies" && <CaseStudies />}
             {selectedTab === "training" && <Training />}
             {selectedTab === "wellness" && <Wellness />}

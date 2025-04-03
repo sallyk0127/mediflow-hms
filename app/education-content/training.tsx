@@ -161,10 +161,8 @@ const Training: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Training Sessions</h1>
-        
         {/* Add New Training Button */}
         <div className="mb-6">
           <button

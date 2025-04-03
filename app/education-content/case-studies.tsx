@@ -58,12 +58,7 @@ const CaseStudies = () => {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">📚 Medical Case Studies</h2>
-      <p className="mb-6 text-gray-700">
-        Explore real-world case studies to enhance learning and practical understanding.
-      </p>
-
+    <div className="space-y-6"> {/* Increased from space-y-4 for more gap between cards */}
       {caseStudies.map((study) => (
         <div key={study.id} className={`mb-6 p-4 border-l-4 ${study.borderColor} ${study.bgColor} rounded`}>
           <h3 className="text-xl font-semibold">{study.title}</h3>
