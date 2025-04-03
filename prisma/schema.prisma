@@ -32,8 +32,8 @@ model Patient {
   coverageType           String?
   billingAddress         String?
   paymentMethod          String?
-  roomNumber             String?
-  wardDepartment         String?
+  assignedRoom           String?
+  Department             String?
   bedNumber              String?
   attendingDoctor        String?
 

@@ -9,7 +9,10 @@ export const patientSchema = z.object({
   preferredName: z.string().optional(),
   dob: z.string().min(1, 'Date of Birth is required'),
   maritalStatus: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.union( [
+    z.literal( '' ),
+    z.string().email(),
+] ),
   phoneNumber: z.string().optional(),
   address: z.string().optional(),
   emergencyContactName: z.string().optional(),
@@ -24,8 +27,8 @@ export const patientSchema = z.object({
   coverageType: z.string().optional(),
   billingAddress: z.string().optional(),
   paymentMethod: z.string().optional(),
-  roomNumber: z.string().optional(),
-  wardDepartment: z.string().optional(),
+  assignedRoom: z.string().optional(),
+  Department: z.string().optional(),
   bedNumber: z.string().optional(),
   attendingDoctor: z.string().optional(),
 
