@@ -58,7 +58,7 @@ const CaseStudies = () => {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
+    <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">📚 Medical Case Studies</h2>
       <p className="mb-6 text-gray-700">
         Explore real-world case studies to enhance learning and practical understanding.
