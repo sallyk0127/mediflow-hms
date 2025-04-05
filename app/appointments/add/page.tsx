@@ -128,7 +128,7 @@ export default function AddAppointmentPage() {
 
       {/* Appointment Date */}
       <div className="mb-4">
-        <label className="font-medium">Select Appointment Date:</label>
+        <label className="font-medium mb-2 block">Select Appointment Date:</label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
