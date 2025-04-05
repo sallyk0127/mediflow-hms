@@ -152,19 +152,17 @@ const Training: React.FC = () => {
       setShowAddForm(false);
     }
   };
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
     const { name, value } = e.target;
     setNewTraining(prev => ({ ...prev, [name]: value }));
   };
-
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
         {/* Add New Training Button */}
-        <div className="mb-6">
+        <div className="mb-4">
           <button
             onClick={() => setShowAddForm(true)}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
@@ -174,15 +172,15 @@ const Training: React.FC = () => {
         </div>
 
         {/* Training List */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {sessions.map((session, index) => (
             <motion.div 
               key={index}
               whileHover={{ scale: 1.01 }}
-              className="bg-white p-6 rounded-lg shadow-md cursor-pointer"
+              className="bg-white p-4 rounded-lg shadow-md cursor-pointer"
               onClick={() => setSelectedSession(session)}
             >
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">{session.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{session.title}</h2>
               <p className="text-gray-600">For: {session.role}</p>
             </motion.div>
           ))}
@@ -190,9 +188,9 @@ const Training: React.FC = () => {
 
         {/* Training Details Popup */}
         {selectedSession && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50">
             <motion.div
-              className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+              className="bg-white p-4 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
             >
@@ -275,6 +273,31 @@ const Training: React.FC = () => {
             </motion.div>
           </div>
         )}
+        <div className="fixed bottom-6 right-6 z-50">
+    <a
+        href="https://openwho.org"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
+    >
+        <svg 
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-5 h-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            />
+        </svg>
+        Latest Healthcare Update
+    </a>
+</div>
+
       </div>
     </div>
   );

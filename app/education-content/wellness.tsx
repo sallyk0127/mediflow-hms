@@ -70,12 +70,7 @@ const Wellness = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Wellness Tips</h2>
-      <p className="mb-6 text-gray-700">
-        Explore tips and resources for maintaining physical and mental well-being.
-      </p>
-
+    <div className="p-6">
       {wellnessItems.map((wellness) => (
         <div key={wellness.id} className="mb-6 p-6 border-l-4 border-green-500 bg-green-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
           <h3 className="text-xl font-semibold mb-2">{wellness.title}</h3>

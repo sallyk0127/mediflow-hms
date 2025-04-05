@@ -90,12 +90,7 @@ const News = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Medical News & Updates</h2>
-      <p className="mb-6 text-gray-700">
-        Stay informed with the latest developments in healthcare, medical research, and industry news.
-      </p>
-
+    <div className="p-6">
       {newsItems.map((news) => (
         <div key={news.id} className="mb-6 p-6 border-l-4 border-blue-500 bg-blue-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
           <h3 className="text-xl font-semibold mb-2">{news.title}</h3>

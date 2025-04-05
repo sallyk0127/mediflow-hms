@@ -57,7 +57,7 @@ const CaseStudies = () => {
     setExpandedCaseStudy((prev) => (prev === id ? null : id))
   }
 
-  return (
+return (
     <div className="space-y-6"> {/* Increased from space-y-4 for more gap between cards */}
       {caseStudies.map((study) => (
         <div key={study.id} className={`mb-6 p-4 border-l-4 ${study.borderColor} ${study.bgColor} rounded`}>
@@ -91,4 +91,4 @@ const CaseStudies = () => {
   )
 }
 
-export default CaseStudies
+export default CaseStudies  
