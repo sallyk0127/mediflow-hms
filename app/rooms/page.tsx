@@ -23,85 +23,78 @@ type RoomData = {
 };
 
 // Initial data
-const initialData: Record<string, RoomData[]> = {
-  "2025-04-01": [
-    {
-      id: "R001",
-      name: "Med-Surgical",
-      totalBeds: 30,
-      occupiedBeds: 20,
-      availableBeds: 10,
-      color: "#5B9BD5",
-      details: [
-        { id: "MS-001", patientName: "-", location: "Floor 2, Room 201", status: "Available" },
-        { id: "MS-002", patientName: "John Doe", location: "Floor 2, Room 202", status: "Occupied", usedUntil: "2025-04-05" },
-        { id: "MS-003", patientName: "-", location: "Floor 2, Room 203", status: "Available" },
-      ],
-    },
-    {
-      id: "R002",
-      name: "ICU",
-      totalBeds: 30,
-      occupiedBeds: 10,
-      availableBeds: 20,
-      color: "#ED7D31",
-      details: [
-        { id: "ICU-001", patientName: "Jane Smith", location: "Floor 1, Room 101", status: "Occupied", usedUntil: "2025-04-03" },
-        { id: "ICU-002", patientName: "-", location: "Floor 1, Room 102", status: "Available" },
-        { id: "ICU-003", patientName: "-", location: "Floor 1, Room 103", status: "Available" },
-      ],
-    },
-    {
-      id: "R003",
-      name: "Maternity Care",
-      totalBeds: 40,
-      occupiedBeds: 25,
-      availableBeds: 15,
-      color: "#FF6384",
-      details: [
-        { id: "MC-001", patientName: "-", location: "Floor 3, Room 301", status: "Available" },
-        { id: "MC-002", patientName: "Sarah Johnson", location: "Floor 3, Room 302", status: "Occupied", usedUntil: "2025-04-10" },
-        { id: "MC-003", patientName: "-", location: "Floor 3, Room 303", status: "Available" },
-      ],
-    },
-    {
-      id: "R004",
-      name: "Behaviour and Mental",
-      totalBeds: 25,
-      occupiedBeds: 18,
-      availableBeds: 7,
-      color: "#9C27B0",
-      details: [
-        { id: "BM-001", patientName: "Robert Brown", location: "Floor 4, Room 401", status: "Occupied", usedUntil: "2025-04-08" },
-        { id: "BM-002", patientName: "-", location: "Floor 4, Room 402", status: "Available" },
-        { id: "BM-003", patientName: "Michael Davis", location: "Floor 4, Room 403", status: "Occupied", usedUntil: "2025-04-15" },
-      ],
-    },
-    {
-      id: "R005",
-      name: "Senior Living",
-      totalBeds: 35,
-      occupiedBeds: 28,
-      availableBeds: 7,
-      color: "#4CAF50",
-      details: [
-        { id: "SL-001", patientName: "Helen Wilson", location: "Floor 5, Room 501", status: "Occupied", usedUntil: "2025-04-06" },
-        { id: "SL-002", patientName: "George Miller", location: "Floor 5, Room 502", status: "Occupied", usedUntil: "2025-04-07" },
-        { id: "SL-003", patientName: "-", location: "Floor 5, Room 503", status: "Available" },
-      ],
-    },
-  ],
-};
+const initialData: RoomData[] = [
+  {
+    id: "R001",
+    name: "Med-Surgical",
+    totalBeds: 30,
+    occupiedBeds: 20,
+    availableBeds: 10,
+    color: "#5B9BD5",
+    details: [
+      { id: "MS-001", patientName: "-", location: "Floor 2, Room 201", status: "Available" },
+      { id: "MS-002", patientName: "John Doe", location: "Floor 2, Room 202", status: "Occupied", usedUntil: "2025-04-05" },
+      { id: "MS-003", patientName: "-", location: "Floor 2, Room 203", status: "Available" },
+    ],
+  },
+  {
+    id: "R002",
+    name: "ICU",
+    totalBeds: 30,
+    occupiedBeds: 10,
+    availableBeds: 20,
+    color: "#ED7D31",
+    details: [
+      { id: "ICU-001", patientName: "Jane Smith", location: "Floor 1, Room 101", status: "Occupied", usedUntil: "2025-04-03" },
+      { id: "ICU-002", patientName: "-", location: "Floor 1, Room 102", status: "Available" },
+      { id: "ICU-003", patientName: "-", location: "Floor 1, Room 103", status: "Available" },
+    ],
+  },
+  {
+    id: "R003",
+    name: "Maternity Care",
+    totalBeds: 40,
+    occupiedBeds: 25,
+    availableBeds: 15,
+    color: "#FF6384",
+    details: [
+      { id: "MC-001", patientName: "-", location: "Floor 3, Room 301", status: "Available" },
+      { id: "MC-002", patientName: "Sarah Johnson", location: "Floor 3, Room 302", status: "Occupied", usedUntil: "2025-04-10" },
+      { id: "MC-003", patientName: "-", location: "Floor 3, Room 303", status: "Available" },
+    ],
+  },
+  {
+    id: "R004",
+    name: "Behaviour and Mental",
+    totalBeds: 25,
+    occupiedBeds: 18,
+    availableBeds: 7,
+    color: "#9C27B0",
+    details: [
+      { id: "BM-001", patientName: "Robert Brown", location: "Floor 4, Room 401", status: "Occupied", usedUntil: "2025-04-08" },
+      { id: "BM-002", patientName: "-", location: "Floor 4, Room 402", status: "Available" },
+      { id: "BM-003", patientName: "Michael Davis", location: "Floor 4, Room 403", status: "Occupied", usedUntil: "2025-04-15" },
+    ],
+  },
+  {
+    id: "R005",
+    name: "Senior Living",
+    totalBeds: 35,
+    occupiedBeds: 28,
+    availableBeds: 7,
+    color: "#4CAF50",
+    details: [
+      { id: "SL-001", patientName: "Helen Wilson", location: "Floor 5, Room 501", status: "Occupied", usedUntil: "2025-04-06" },
+      { id: "SL-002", patientName: "George Miller", location: "Floor 5, Room 502", status: "Occupied", usedUntil: "2025-04-07" },
+      { id: "SL-003", patientName: "-", location: "Floor 5, Room 503", status: "Available" },
+    ],
+  },
+];
 
 export default function RoomAvailabilityChart() {
-  // collect today date
-  const today = new Date().toISOString().split('T')[0];
+  // Convert data to state
+  const [roomData, setRoomData] = useState<RoomData[]>(initialData);
   
-  // Convert dataByDate to state
-  const [dataByDate, setDataByDate] = useState<Record<string, RoomData[]>>(initialData);
-  
-  // use today as default
-  const [selectedDate, setSelectedDate] = useState<string>("2025-04-01");
   const [activeTab, setActiveTab] = useState<string>("chart");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -125,46 +118,6 @@ export default function RoomAvailabilityChart() {
     usedUntil: "",
   });
 
-  // Date format - Fixed to use safer locale handling
-  const formatDisplayDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-      
-      // Use more universal date formatting
-      return date.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-    }  catch {
-      return dateString;
-    }
-  };
-
-  // Get data use date
-  const getDataForSelectedDate = () => {
-    if (dataByDate[selectedDate]) {
-      return dataByDate[selectedDate];
-    }
-   
-    const availableDates = Object.keys(dataByDate).sort();
-    
-    // Add fallback if no dates are available
-    if (availableDates.length === 0) {
-      return [];
-    }
-    
-    for (let i = availableDates.length - 1; i >= 0; i--) {
-      if (availableDates[i] <= selectedDate) {
-        return dataByDate[availableDates[i]];
-      }
-    }
-    
-    return dataByDate[availableDates[0]];
-  };
-
   // Handler for opening edit modal
   const handleEditRoom = (room: RoomDetail) => {
     setEditingRoom(room);
@@ -172,7 +125,7 @@ export default function RoomAvailabilityChart() {
     setIsEditModalOpen(true);
   };
 
-  // Handle input change for editing room - FIXED: removed duplicate definition
+  // Handle input change for editing room
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
@@ -205,11 +158,10 @@ export default function RoomAvailabilityChart() {
     }
 
     // Find the division that contains this room
-    const divisions = getDataForSelectedDate();
-    const updatedDivisions = [...divisions];
+    const updatedRoomData = [...roomData];
     
-    for (let i = 0; i < updatedDivisions.length; i++) {
-      const division = updatedDivisions[i];
+    for (let i = 0; i < updatedRoomData.length; i++) {
+      const division = updatedRoomData[i];
       const roomIndex = division.details.findIndex(r => r.id === editingRoom.id);
       
       if (roomIndex !== -1) {
@@ -235,14 +187,10 @@ export default function RoomAvailabilityChart() {
         
         updatedDetails[roomIndex] = editingRoom;
         updatedDivision.details = updatedDetails;
-        updatedDivisions[i] = updatedDivision;
-        
-        // Update the data
-        const updatedDataByDate = { ...dataByDate };
-        updatedDataByDate[selectedDate] = updatedDivisions;
+        updatedRoomData[i] = updatedDivision;
         
         // Update the state with the new data
-        setDataByDate(updatedDataByDate);
+        setRoomData(updatedRoomData);
         
         break;
       }
@@ -254,7 +202,7 @@ export default function RoomAvailabilityChart() {
   };
 
   // Filter room data based on division and selected status
-  const filteredRoomData = getDataForSelectedDate().filter((room) => {
+  const filteredRoomData = roomData.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDivision = selectedDivision === "All" || room.name === selectedDivision;
     const matchesStatus = statusFilter === "All" || 
@@ -265,7 +213,7 @@ export default function RoomAvailabilityChart() {
   });
 
   // Collect Room Details
-  const allRoomDetails = getDataForSelectedDate()
+  const allRoomDetails = roomData
     .filter(room => selectedDivision === "All" || room.name === selectedDivision)
     .flatMap(room => room.details);
 
@@ -305,15 +253,14 @@ export default function RoomAvailabilityChart() {
     }
 
     // Collect Index
-    const divisions = getDataForSelectedDate();
-    const divisionIndex = divisions.findIndex(
+    const divisionIndex = roomData.findIndex(
       (room) => room.name === selectedDivision
     );
 
     if (divisionIndex === -1) return;
 
     // Create new id use selected div
-    const division = divisions[divisionIndex];
+    const division = roomData[divisionIndex];
     // FIXED: Added a safe check for empty details array
     const prefix = division.details.length > 0 
       ? division.details[0]?.id.split('-')[0] 
@@ -330,8 +277,7 @@ export default function RoomAvailabilityChart() {
       ...(newRoom.status === "Occupied" && newRoom.usedUntil ? { usedUntil: newRoom.usedUntil } : {}),
     };
 
-    const updatedDataByDate = { ...dataByDate };
-    const currentData = [ ...divisions ];
+    const updatedRoomData = [...roomData];
     const updatedDivision = { ...division };
     
     updatedDivision.details = [...updatedDivision.details, newBed];
@@ -344,11 +290,10 @@ export default function RoomAvailabilityChart() {
       updatedDivision.availableBeds += 1;
     }
     
-    currentData[divisionIndex] = updatedDivision;
-    updatedDataByDate[selectedDate] = currentData;
+    updatedRoomData[divisionIndex] = updatedDivision;
     
     // Update state with the new data
-    setDataByDate(updatedDataByDate);
+    setRoomData(updatedRoomData);
     
     // Reset form and close modal
     setNewRoom({
@@ -378,23 +323,9 @@ export default function RoomAvailabilityChart() {
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Room Availability</h1>
       
-      {/* Date Picker & Tabs */}
+      {/* Tabs */}
       <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-md">
-        <div className="flex items-center space-x-2">
-          <label htmlFor="date-picker" className="text-sm font-medium text-gray-600">Date:</label>
-          <input
-            id="date-picker"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            max={today}
-            className="border p-2 rounded-lg"
-          />
-          <span className="text-sm text-gray-600 ml-2">
-            {formatDisplayDate(selectedDate)}
-          </span>
-        </div>
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 ml-auto">
           <button
             onClick={() => setActiveTab("chart")}
             className={`px-4 py-2 ${activeTab === "chart" ? "text-blue-600 font-bold" : ""}`}
@@ -439,7 +370,7 @@ export default function RoomAvailabilityChart() {
               className="border p-2 rounded-lg"
             >
               <option value="All">All Divisions</option>
-              {getDataForSelectedDate().map((room) => (
+              {roomData.map((room) => (
                 <option key={room.id} value={room.name}>
                   {room.name}
                 </option>
@@ -470,12 +401,12 @@ export default function RoomAvailabilityChart() {
           <>
             <h2 className="text-lg font-semibold">Total Beds</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={getDataForSelectedDate()}>
+              <BarChart data={roomData}>
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="totalBeds" radius={[10, 10, 0, 0]}>
-                  {getDataForSelectedDate().map((entry, index) => (
+                  {roomData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Bar>
@@ -487,7 +418,7 @@ export default function RoomAvailabilityChart() {
               <div className="bg-white p-4 rounded-lg">
                 <h2 className="text-lg font-semibold mb-4">Available Beds</h2>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={getDataForSelectedDate()}>
+                  <BarChart data={roomData}>
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                     <YAxis />
                     <Tooltip />
@@ -500,7 +431,7 @@ export default function RoomAvailabilityChart() {
               <div className="bg-white p-4 rounded-lg">
                 <h2 className="text-lg font-semibold mb-4">Occupied Beds</h2>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={getDataForSelectedDate()}>
+                  <BarChart data={roomData}>
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                     <YAxis />
                     <Tooltip />
