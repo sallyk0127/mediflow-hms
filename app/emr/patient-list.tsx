@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -30,31 +30,27 @@ function getInitials(name: string) {
 
 export default function PatientList() {
   const [patients, setPatients] = useState<Patient[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const { toast } = useToast()
   const patientsPerPage = 10
 
-  useEffect(() => {
-    fetchPatients()
-  }, [currentPage])
-
-  const fetchPatients = async () => {
+  const fetchPatients = useCallback(async () => {
     try {
-      setLoading(true)
       const response = await fetch(`/api/patients/list?page=${currentPage}&limit=${patientsPerPage}&search=${encodeURIComponent(searchTerm)}`)
-      if (!response.ok) throw new Error(await response.text())
       const data = await response.json()
       setPatients(data.patients)
       setTotalPages(Math.ceil(data.total / patientsPerPage))
-    } catch (error) {
+    } catch {
       toast({ title: "Error", description: "Failed to load patient data.", variant: "destructive" })
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [currentPage, searchTerm, toast])
+  
+  useEffect(() => {
+    fetchPatients()
+  }, [fetchPatients])
+  
 
   const handleSearch = () => {
     setCurrentPage(1)
