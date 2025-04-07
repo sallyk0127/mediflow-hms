@@ -89,14 +89,15 @@ export default function PatientList() {
       toast({ title: "Deleted", description: "Patient deleted successfully" })
       fetchPatients()
     } catch (error) {
+      console.error("Something went wrong:", error);
       toast({
         title: "Error",
         description: "Failed to delete patient.",
         variant: "destructive",
-      })
+      });
     }
   }
-
+    
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
