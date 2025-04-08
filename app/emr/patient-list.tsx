@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ChevronLeft, ChevronRight, Edit, Eye, Trash2, Search } from "lucide-react"
 import { useToast } from "@/components/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 type Patient = {
   id: number
@@ -33,8 +34,10 @@ export default function PatientList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [totalPatients, setTotalPatients] = useState(0)
   const { toast } = useToast()
   const patientsPerPage = 10
+  const router = useRouter()
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -43,6 +46,7 @@ export default function PatientList() {
       )
       const data = await response.json()
       setPatients(data.patients)
+      setTotalPatients(data.total)
       setTotalPages(Math.ceil(data.total / patientsPerPage))
     } catch {
       toast({
@@ -76,7 +80,7 @@ export default function PatientList() {
       }
 
       toast({ title: "Deleted", description: "Patient deleted successfully." })
-      fetchPatients() // Refresh list after deletion
+      fetchPatients()
     } catch (error) {
       console.error("Delete error:", error)
       toast({
@@ -140,7 +144,7 @@ export default function PatientList() {
                   <Button size="sm" variant="outline" onClick={() => toast({ title: "View", description: `Patient ID: ${p.id}` })}>
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Edit", description: `Edit Patient ID: ${p.id}` })}>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/emr/patient-registration?id=${p.id}`)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
@@ -160,7 +164,7 @@ export default function PatientList() {
 
       <div className="flex items-center justify-between mt-4">
         <div className="text-sm text-gray-500">
-          Showing {patients.length} of {patientsPerPage * totalPages} patients
+          Showing {patients.length} of {totalPatients} patients
         </div>
         <div className="flex items-center space-x-2">
           <Button
