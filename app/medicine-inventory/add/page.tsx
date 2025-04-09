@@ -12,14 +12,20 @@ import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-const types = ["Tablet", "Syrup", "Cream", "Capsule", "Inhaler", "Soap"];
-const manufacturers = [
-  "John's Health Care",
-  "David's Ltd",
-  "Nickel’s Lab",
-  "Joe Industries",
-  "Johnson & Johnson",
-  "Pattikson Pvt Ltd"
+const types = [
+  "Liquid",
+  "Tablet",
+  "Soluble Tablet",
+  "Dispersible Tablet",
+  "Capsule",
+  "Topical",
+  "Suppository",
+  "Drops (Eye/Ear/Nose)",
+  "Inhaler",
+  "Injection)",
+  "Implant or Patch",
+  "Buccal Tablet",
+  "Sublingual Tablet",
 ];
 
 export default function AddMedicinePage() {
@@ -30,7 +36,7 @@ export default function AddMedicinePage() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState<number | undefined>(undefined);
   const [selectedType, setSelectedType] = useState<{ label: string; value: string } | null>(null);
-  const [selectedManufacturer, setSelectedManufacturer] = useState<{ label: string; value: string } | null>(null);
+  const [manufacturer, setManufacturer] = useState("");
   const [expiryDate, setExpiryDate] = useState<Date | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
 
@@ -135,13 +141,11 @@ export default function AddMedicinePage() {
         <div>
           <label className="font-medium">Manufacturer:</label>
           {isClient && (
-            <Select
-              options={manufacturers.map((m) => ({ label: m, value: m }))}
-              value={selectedManufacturer}
-              onChange={(selected) =>
-                setSelectedManufacturer(selected as { label: string; value: string } | null)
-              }
-              placeholder="Select manufacturer"
+            <Input
+              type="text"
+              placeholder="Enter manufacturer"
+              value={manufacturer}
+              onChange={(e) => setManufacturer(e.target.value)}
             />
           )}
         </div>
