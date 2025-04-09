@@ -161,16 +161,6 @@ const Training: React.FC = () => {
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Add New Training Button */}
-        <div className="mb-4">
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-          >
-            Add New Training
-          </button>
-        </div>
-
         {/* Training List */}
         <div className="space-y-6">
           {sessions.map((session, index) => (
