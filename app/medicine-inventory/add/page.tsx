@@ -56,7 +56,7 @@ export default function AddMedicinePage() {
       price,
       stock,
       type: selectedType.value,
-      manufacturer: selectedManufacturer.value,
+      manufacturer,
       expiry: format(expiryDate, "dd MMM yyyy"),
     };
 
@@ -69,7 +69,7 @@ export default function AddMedicinePage() {
     setPrice("");
     setStock(undefined);
     setSelectedType(null);
-    setSelectedManufacturer(null);
+    setManufacturer("");
     setExpiryDate(undefined);
   };
 
