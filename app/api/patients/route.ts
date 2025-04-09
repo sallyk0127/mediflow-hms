@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createPatient } from '../../actions/actions-patients';
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
@@ -17,5 +18,18 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Server Error:', error);
     return NextResponse.json({ success: false, error: 'Server Error' }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const patients = await prisma.patient.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json({ success: true, data: patients });
+  } catch (error) {
+    console.error('Fetch Error:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch patients' }, { status: 500 });
   }
 }
