@@ -9,7 +9,7 @@ import PatientList from "./patient-list";
 import { useToast } from "@/components/hooks/use-toast";
 
 export default function EMRPage() {
-  const [selectedTab, setSelectedTab] = useState("patient-registration");
+  const [selectedTab, setSelectedTab] = useState("patient-list");
   const indicatorRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -96,10 +96,10 @@ export default function EMRPage() {
               className="absolute bottom-0 h-1 bg-blue-500 transition-all duration-300"
             ></div>
             {[
+              { value: "patient-list", label: "Patient List" },
               { value: "patient-registration", label: "Patient Registration" },
               { value: "administration-information", label: "Administration Information" },
               { value: "medical-information", label: "Medical Information" },
-              { value: "patient-list", label: "Patient List" },
             ].map((tab) => (
               <TabsTrigger
                 key={tab.value}
