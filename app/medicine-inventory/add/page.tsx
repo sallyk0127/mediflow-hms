@@ -45,7 +45,7 @@ export default function AddMedicinePage() {
   }, []);
 
   const handleSave = () => {
-    if (!productName || !medicineCode || !price || !stock || !selectedType || !expiryDate || !selectedManufacturer) {
+    if (!productName || !medicineCode || !price || !stock || !selectedType || !expiryDate || !manufacturer) {
       alert("Please fill out all fields.");
       return;
     }
