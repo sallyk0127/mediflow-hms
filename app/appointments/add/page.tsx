@@ -12,61 +12,76 @@ import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-const departments = [
-    "Aged Health, Chronic Care & Rehabilitation",
-    "Allied Health",
-    "Anaesthetics and Pain Management",
-    "Andrology",
-    "Audiology",
-    "Basic Physician Training Network",
-    "Bereavement",
-    "Blood Cancers",
-    "Breast and Endocrine Surgery",
-    "Burns – NSW Statewide Burn Injury Service",
-    "Cardiology",
-    "Centre for STRONG Medicine",
-    "Concord Cancer Centre",
-    "Chaplaincy",
-    "Colorectal",
-    "Dermatology",
-    "Drug and Alcohol",
-    "Emergency",
-    "Endocrinology and Metabolism",
-    "Ear Nose and Throat",
-    "Eye Clinic",
-    "Gastroenterology",
-    "Gynaecology",
-    "Haematology Department",
-    "Hospital in The Home",
-    "Immunology",
-    "Interpreter Services",
-    "Intensive Care Unit",
-    "Mental Health",
-    "Microbiology and Infectious Diseases",
-    "Molecular Imaging",
-    "National Centre for Veterans' Healthcare (NCVH)",
-    "Neurosciences",
-    "Neurosurgery",
-    "Nutrition and Dietetics",
-    "Ophthalmology",
-    "Orthopaedics",
-    "Palliative and Supportive Care",
-    "Pathology Department",
-    "Patient and Family Experience Officer",
-    "Plastic, Reconstructive and Hand Surgery Unit",
-    "Podiatry",
-    "Pre-Admission Clinic",
-    "Psychology",
-    "Radiology",
-    "Renal",
-    "Respiratory and Sleep Medicine",
-    "Rheumatology",
-    "Social Work",
-    "Speech Pathology",
-    "Stomal Therapy",
-    "The Sydney Cancer Survivorship Centre",
-    "Urology",
-    "Vascular Surgery",
+const departmentDoctors = {
+  "Cardiology": [
+    "Dr. Ethan Wright (Interventional Cardiologist)",
+    "Dr. Sophia Chen (Electrophysiologist)",
+    "Dr. Marcus Reynolds (Cardiac Surgeon)"
+  ],
+  "Neurology": [
+    "Dr. Olivia Park (Movement Disorder Specialist)",
+    "Dr. Nathan Brooks (Epileptologist)",
+    "Dr. Aisha Khan (Neuroimmunologist)"
+  ],
+  "Pediatrics": [
+    "Dr. Liam Foster (General Pediatrician)",
+    "Dr. Isabella Wong (Pediatric Cardiologist)",
+    "Dr. Caleb Rivera (Pediatric Neurologist)"
+  ],
+  "Orthopedics": [
+    "Dr. Hannah Pierce (Sports Medicine)",
+    "Dr. Derek Coleman (Spinal Surgeon)",
+    "Dr. Zoe Ramirez (Joint Replacement Specialist)"
+  ],
+  "Oncology": [
+    "Dr. Evelyn Shaw (Medical Oncologist)",
+    "Dr. Julian Torres (Radiation Oncologist)",
+    "Dr. Naomi Patel (Hematologist)"
+  ],
+  "Gastroenterology": [
+    "Dr. Vincent Cho (Hepatologist)",
+    "Dr. Audrey Simmons (Endoscopist)",
+    "Dr. Dominic Ferraro (IBD Specialist)"
+  ],
+  "Pulmonology": [
+    "Dr. Samantha Hughes (Critical Care)",
+    "Dr. Theodore Grant (Sleep Medicine)",
+    "Dr. Priya Malhotra (Interventional Pulmonologist)"
+  ],
+  "Endocrinology": [
+    "Dr. Daniel Kim (Diabetologist)",
+    "Dr. Rachel Nguyen (Thyroid Specialist)",
+    "Dr. Gabriel Silva (Metabolic Bone Disease)"
+  ],
+  "Rheumatology": [
+    "Dr. Maya Patel (Lupus Specialist)",
+    "Dr. Connor Fitzgerald (Vasculitis Expert)",
+    "Dr. Jasmine Zhao (Pediatric Rheumatologist)"
+  ],
+  "Nephrology": [
+    "Dr. Elijah Thompson (Dialysis Director)",
+    "Dr. Valentina Costa (Transplant Nephrologist)",
+    "Dr. Simon Wu (Hypertension Specialist)"
+  ]
+};
+
+// Department list for dropdown
+const departments = Object.keys(departmentDoctors).sort();
+
+const doctors = [
+  "Dr. Smith (Cardiology)",
+  "Dr. Johnson (Neurology)",
+  "Dr. Williams (Pediatrics)",
+  // Add more doctors as needed
+];
+
+const timeSlots = [
+  "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
+  "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
+  "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
+  "1:00 PM", "1:15 PM", "1:30 PM", "1:45 PM",
+  "2:00 PM", "2:15 PM", "2:30 PM", "2:45 PM",
+  "3:00 PM", "3:15 PM", "3:30 PM", "3:45 PM"
 ];
 
 export default function AddAppointmentPage() {
@@ -74,6 +89,9 @@ export default function AddAppointmentPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
   useEffect(() => { if (selectedDepartment) console.log(selectedDepartment); }, [selectedDepartment]); 
+  const [selectedDoctor, setSelectedDoctor] = useState<{ label: string; value: string } | null>(null);
+  const [filteredDoctors, setFilteredDoctors] = useState<{label: string, value: string}[]>([]);
+  const [selectedTime, setSelectedTime] = useState<{ label: string; value: string } | null>(null);
   const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
   useEffect(() => { if (selectedMedication.length > 0) console.log(selectedMedication); }, [selectedMedication]);
   const [contactPreference, setContactPreference] = useState("email");
@@ -125,9 +143,21 @@ export default function AddAppointmentPage() {
           />
         )}
       </div>
+       {/* ▼▼▼ ADDED DOCTOR SELECTION ▼▼▼ */}
+       <div className="mb-4">
+          <label className="font-medium">Select Doctor:</label>
+          {isClient && (
+            <Select
+              options={doctors.map(doctor => ({ label: doctor, value: doctor }))}
+              onChange={(selectedOption) => setSelectedDoctor(selectedOption as { label: string; value: string } | null)}
+              placeholder="Search & select doctor"
+              className="mt-2"
+            />
+          )}
+        </div>
 
-      {/* Appointment Date */}
-      <div className="mb-4">
+       {/* Appointment Date */}
+       <div className="mb-4">
         <label className="font-medium mb-2 block">Select Appointment Date:</label>
         <Popover>
           <PopoverTrigger asChild>
@@ -145,6 +175,20 @@ export default function AddAppointmentPage() {
         </Popover>
       </div>
 
+       {/* Time Selector */}
+  <div>
+    <label className="font-medium mb-2 block">Select Time:</label>
+    {isClient && (
+      <Select
+        options={timeSlots.map(time => ({ label: time, value: time }))}
+        onChange={(selectedOption) => 
+          setSelectedTime(selectedOption as { label: string; value: string } | null)
+        }
+        placeholder="Select time slot"
+      />
+    )}
+  </div>
+  
       {/* Medication Selection */}
       <div className="mb-4">
         <label className="font-medium">Select Medication:</label>

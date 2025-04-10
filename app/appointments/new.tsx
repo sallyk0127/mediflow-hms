@@ -61,6 +61,7 @@ export default function NewAppointmentsPage() {
         <div className="relative w-72">
           <Input type="search" placeholder="Search" className="pl-8" />
         </div>
+        
         <Popover>
           <PopoverTrigger asChild>
             <Button
