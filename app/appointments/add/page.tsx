@@ -12,7 +12,18 @@ import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-const departmentDoctors = {
+// ▼▼▼ ADDED TYPE DEFINITIONS ▼▼▼
+type Department = 'Cardiology' | 'Neurology' | 'Pediatrics' | 'Orthopedics' | 
+                 'Oncology' | 'Gastroenterology' | 'Pulmonology' | 
+                 'Endocrinology' | 'Rheumatology' | 'Nephrology';
+
+interface DepartmentDoctors {
+  [key: string]: string[];
+}
+// ▲▲▲ END OF TYPE DEFINITIONS ▲▲▲
+
+// ▼▼▼ UPDATED WITH TYPE ANNOTATION ▼▼▼
+const departmentDoctors: DepartmentDoctors = {
   "Cardiology": [
     "Dr. Ethan Wright (Interventional Cardiologist)",
     "Dr. Sophia Chen (Electrophysiologist)",
@@ -68,13 +79,6 @@ const departmentDoctors = {
 // Department list for dropdown
 const departments = Object.keys(departmentDoctors).sort();
 
-const doctors = [
-  "Dr. Smith (Cardiology)",
-  "Dr. Johnson (Neurology)",
-  "Dr. Williams (Pediatrics)",
-  // Add more doctors as needed
-];
-
 const timeSlots = [
   "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
   "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
@@ -88,129 +92,169 @@ export default function AddAppointmentPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
-  useEffect(() => { if (selectedDepartment) console.log(selectedDepartment); }, [selectedDepartment]); 
   const [selectedDoctor, setSelectedDoctor] = useState<{ label: string; value: string } | null>(null);
   const [filteredDoctors, setFilteredDoctors] = useState<{label: string, value: string}[]>([]);
   const [selectedTime, setSelectedTime] = useState<{ label: string; value: string } | null>(null);
   const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
-  useEffect(() => { if (selectedMedication.length > 0) console.log(selectedMedication); }, [selectedMedication]);
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => { setIsClient(true); }, []);
+
+  // ▼▼▼ UPDATED USEFFECT WITH PROPER TYPING ▼▼▼
+  useEffect(() => {
+    if (selectedDepartment) {
+      const doctors = departmentDoctors[selectedDepartment.value] || [];
+      setFilteredDoctors(doctors.map((doctor: string) => ({ 
+        label: doctor, 
+        value: doctor 
+      })));
+      setSelectedDoctor(null);
+    } else {
+      setFilteredDoctors([]);
+    }
+  }, [selectedDepartment]);
+
+  const handleGenerateBill = () => {
+    if (!selectedDoctor || !selectedTime) {
+      alert("Please select both doctor and time slot");
+      return;
+    }
+    console.log("Generating bill for:", {
+      doctor: selectedDoctor,
+      time: selectedTime,
+      department: selectedDepartment,
+      date,
+      medications: selectedMedication
+    });
+    // Add your actual bill generation logic here
+  };
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Add New Appointment</h1>
       <div className="bg-white rounded-lg shadow p-6">
 
-      {/* Search Patient */}
-      <Input type="search" placeholder="Search patient by name or ID" className="mb-4 w-full" />
+        {/* Search Patient */}
+        <Input type="search" placeholder="Search patient by name or ID" className="mb-4 w-full" />
 
-      {/* Contact Preference */}
-      <div className="mb-4">
-        <label className="font-medium">Contact Preference:</label>
-        <div className="flex gap-4 mt-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="email"
-              checked={contactPreference === "email"}
-              onChange={() => setContactPreference("email")}
-            />
-            Via Email
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="phone"
-              checked={contactPreference === "phone"}
-              onChange={() => setContactPreference("phone")}
-            />
-            Via Phone
-          </label>
+        {/* Contact Preference */}
+        <div className="mb-4">
+          <label className="font-medium">Contact Preference:</label>
+          <div className="flex gap-4 mt-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="email"
+                checked={contactPreference === "email"}
+                onChange={() => setContactPreference("email")}
+              />
+              Via Email
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="phone"
+                checked={contactPreference === "phone"}
+                onChange={() => setContactPreference("phone")}
+              />
+              Via Phone
+            </label>
+          </div>
         </div>
-      </div>
 
-      {/* Select Department */}
-      <div className="mb-4">
-        <label className="font-medium">Select Department:</label>
-        {isClient && (
-          <Select
-            options={departments.map((dept) => ({ label: dept, value: dept }))}
-            onChange={(selectedOption) => setSelectedDepartment(selectedOption as { label: string; value: string } | null)}
-            placeholder="Search & select department"
-          />
-        )}
-      </div>
-       {/* ▼▼▼ ADDED DOCTOR SELECTION ▼▼▼ */}
-       <div className="mb-4">
+        {/* Select Department */}
+        <div className="mb-4">
+          <label className="font-medium">Select Department:</label>
+          {isClient && (
+            <Select
+              options={departments.map((dept) => ({ label: dept, value: dept }))}
+              onChange={(selectedOption) => setSelectedDepartment(selectedOption as { label: string; value: string } | null)}
+              placeholder="Search & select department"
+            />
+          )}
+        </div>
+
+        {/* Doctor Select */}
+        <div className="mb-4">
           <label className="font-medium">Select Doctor:</label>
           {isClient && (
             <Select
-              options={doctors.map(doctor => ({ label: doctor, value: doctor }))}
+              options={filteredDoctors}
+              value={selectedDoctor}
               onChange={(selectedOption) => setSelectedDoctor(selectedOption as { label: string; value: string } | null)}
-              placeholder="Search & select doctor"
+              placeholder={selectedDepartment ? "Select doctor" : "First select department"}
+              isDisabled={!selectedDepartment}
               className="mt-2"
             />
           )}
         </div>
 
-       {/* Appointment Date */}
-       <div className="mb-4">
-        <label className="font-medium mb-2 block">Select Appointment Date:</label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : "Select date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            {isClient && <Calendar mode="single" selected={date} onSelect={(day) => setDate(day || undefined)} initialFocus />}
-          </PopoverContent>
-        </Popover>
-      </div>
+        {/* Appointment Date */}
+        <div className="mb-4">
+          <label className="font-medium mb-2 block">Select Appointment Date:</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP") : "Select date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              {isClient && <Calendar mode="single" selected={date} onSelect={(day) => setDate(day || undefined)} initialFocus />}
+            </PopoverContent>
+          </Popover>
+        </div>
 
-       {/* Time Selector */}
-  <div>
-    <label className="font-medium mb-2 block">Select Time:</label>
-    {isClient && (
-      <Select
-        options={timeSlots.map(time => ({ label: time, value: time }))}
-        onChange={(selectedOption) => 
-          setSelectedTime(selectedOption as { label: string; value: string } | null)
-        }
-        placeholder="Select time slot"
-      />
-    )}
-  </div>
-  
-      {/* Medication Selection */}
-      <div className="mb-4">
-        <label className="font-medium">Select Medication:</label>
-        {isClient && (
-          <Select
-            isMulti
-            options={[
-              { label: "Paracetamol", value: "Paracetamol" },
-              { label: "Ibuprofen", value: "Ibuprofen" },
-              { label: "Aspirin", value: "Aspirin" },
-            ]}
-            onChange={(selectedOptions) => setSelectedMedication(selectedOptions as { label: string; value: string }[])}
-            placeholder="Search & select medication"
-          />
-        )}
-      </div>
+        {/* Time Select */}
+        <div>
+          <label className="font-medium mb-2 block">Select Time:</label>
+          {isClient && (
+            <Select
+              options={timeSlots.map(time => ({ label: time, value: time }))}
+              value={selectedTime}
+              onChange={(selectedOption) => setSelectedTime(selectedOption as { label: string; value: string } | null)}
+              placeholder="Select time slot"
+            />
+          )}
+        </div>
 
-      {/* Generate Bill Button */}
-      <Button className="bg-green-500 hover:bg-green-600 flex justify-end gap-2 mt-6">Generate Bill</Button>
-      {/* View Scheduled Appointments Button */}
-      <Button className="bg-blue-500 hover:bg-blue-600 flex justify-end gap-2 mt-6" onClick={() => router.push("/appointments")}>View Scheduled Appointments</Button>
+        {/* Medication Selection */}
+        <div className="mb-4">
+          <label className="font-medium">Select Medication:</label>
+          {isClient && (
+            <Select
+              isMulti
+              options={[
+                { label: "Paracetamol", value: "Paracetamol" },
+                { label: "Ibuprofen", value: "Ibuprofen" },
+                { label: "Aspirin", value: "Aspirin" },
+              ]}
+              onChange={(selectedOptions) => setSelectedMedication(selectedOptions as { label: string; value: string }[])}
+              placeholder="Search & select medication"
+            />
+          )}
+        </div>
+
+        {/* Generate Bill Button */}
+        <Button 
+          className="bg-green-500 hover:bg-green-600 flex justify-end gap-2 mt-6"
+          onClick={handleGenerateBill}
+        >
+          Generate Bill
+        </Button>
+        
+        {/* View Scheduled Appointments Button */}
+        <Button 
+          className="bg-blue-500 hover:bg-blue-600 flex justify-end gap-2 mt-6" 
+          onClick={() => router.push("/appointments")}
+        >
+          View Scheduled Appointments
+        </Button>
+      </div>
     </div>
-  </div>
   );
 }
