@@ -12,18 +12,8 @@ import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-// ▼▼▼ ADDED TYPE DEFINITIONS ▼▼▼
-type Department = 'Cardiology' | 'Neurology' | 'Pediatrics' | 'Orthopedics' | 
-                 'Oncology' | 'Gastroenterology' | 'Pulmonology' | 
-                 'Endocrinology' | 'Rheumatology' | 'Nephrology';
-
-interface DepartmentDoctors {
-  [key: string]: string[];
-}
-// ▲▲▲ END OF TYPE DEFINITIONS ▲▲▲
-
-// ▼▼▼ UPDATED WITH TYPE ANNOTATION ▼▼▼
-const departmentDoctors: DepartmentDoctors = {
+// Department-Doctor Mapping with type inference
+const departmentDoctors = {
   "Cardiology": [
     "Dr. Ethan Wright (Interventional Cardiologist)",
     "Dr. Sophia Chen (Electrophysiologist)",
@@ -74,10 +64,13 @@ const departmentDoctors: DepartmentDoctors = {
     "Dr. Valentina Costa (Transplant Nephrologist)",
     "Dr. Simon Wu (Hypertension Specialist)"
   ]
-};
+} as const;
 
 // Department list for dropdown
-const departments = Object.keys(departmentDoctors).sort();
+const departments = Object.keys(departmentDoctors).map(dept => ({
+  label: dept,
+  value: dept
+}));
 
 const timeSlots = [
   "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
@@ -101,11 +94,11 @@ export default function AddAppointmentPage() {
 
   useEffect(() => { setIsClient(true); }, []);
 
-  // ▼▼▼ UPDATED USEFFECT WITH PROPER TYPING ▼▼▼
+  // Updated useEffect with proper typing
   useEffect(() => {
-    if (selectedDepartment) {
-      const doctors = departmentDoctors[selectedDepartment.value] || [];
-      setFilteredDoctors(doctors.map((doctor: string) => ({ 
+    if (selectedDepartment?.value) {
+      const doctors = departmentDoctors[selectedDepartment.value as keyof typeof departmentDoctors] || [];
+      setFilteredDoctors(doctors.map(doctor => ({ 
         label: doctor, 
         value: doctor 
       })));
@@ -168,7 +161,7 @@ export default function AddAppointmentPage() {
           <label className="font-medium">Select Department:</label>
           {isClient && (
             <Select
-              options={departments.map((dept) => ({ label: dept, value: dept }))}
+              options={departments}
               onChange={(selectedOption) => setSelectedDepartment(selectedOption as { label: string; value: string } | null)}
               placeholder="Search & select department"
             />
