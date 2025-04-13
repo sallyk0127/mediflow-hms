@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
+
 // Department-Doctor Mapping with type inference
 const departmentDoctors = {
   "Cardiology": [
@@ -128,8 +129,14 @@ export default function AddAppointmentPage() {
       <h1 className="text-2xl font-semibold mb-4">Add New Appointment</h1>
       <div className="bg-white rounded-lg shadow p-6">
 
-        {/* Search Patient */}
-        <Input type="search" placeholder="Search patient by name or ID" className="mb-4 w-full" />
+      <div className="mb-4">
+       <label className="font-medium">Select Patient</label>
+        <Input 
+         type="search" 
+         placeholder="Search patient by name or ID" 
+         className="w-full" 
+         />
+        </div>
 
         {/* Contact Preference */}
         <div className="mb-4">
