@@ -130,11 +130,11 @@ export default function AddAppointmentPage() {
       <div className="bg-white rounded-lg shadow p-6">
 
       <div className="mb-4">
-       <label className="font-medium">Select Patient</label>
+       <label className="font-medium">Select Patient:</label>
         <Input 
          type="search" 
          placeholder="Search patient by name or ID" 
-         className="w-full" 
+         className="mt-2" 
          />
         </div>
 
