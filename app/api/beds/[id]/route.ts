@@ -1,30 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const bedId = params.id;
+export async function PATCH(req: NextRequest) {
+  const url = new URL(req.url);
+  const id = url.pathname.split("/").pop(); // Get bed id
   const body = await req.json();
 
   try {
     const updatedBed = await prisma.bed.update({
-      where: { id: bedId },
+      where: { id: id as string },
       data: {
         status: body.status,
         patientName: body.patientName,
         usedUntil: body.usedUntil ? new Date(body.usedUntil) : null,
       },
     });
+
     return NextResponse.json(updatedBed);
   } catch (error) {
     console.error("Error updating bed:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse("Failed to update bed", { status: 500 });
   }
 }
 
-// Optional dummy GET to avoid build errors
-export const GET = () => new Response(null, { status: 405 });
+// Dummy GET to prevent Vercel errors
+export async function GET() {
+  return new NextResponse("Method not allowed", { status: 405 });
+}
