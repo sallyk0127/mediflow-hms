@@ -2,6 +2,15 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
+// Define RoomDetail type
+type RoomDetail = {
+  id: string;
+  patientName: string;
+  location: string;
+  status: "Available" | "Occupied";
+  usedUntil?: string;
+};
+
 type RoomData = {
   id: string;
   name: string;
@@ -9,7 +18,7 @@ type RoomData = {
   occupiedBeds: number;
   availableBeds: number;
   color: string;
-  details: any[];
+  details: RoomDetail[];
 };
 
 type Props = {

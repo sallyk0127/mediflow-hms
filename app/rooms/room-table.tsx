@@ -1,8 +1,8 @@
 "use client";
 
-import { format } from "date-fns";
 import React from "react";
 
+// Corrected types
 type RoomDetail = {
   id: string;
   patientName: string;
@@ -97,7 +97,10 @@ export default function RoomTable({ viewMode, selectedDivision, filteredRoomData
                 <td className="px-6 py-4">{bed.status}</td>
                 <td className="px-6 py-4">{formatDate(bed.usedUntil)}</td>
                 <td className="px-6 py-4">
-                  <button onClick={() => onEdit(bed)} className="text-blue-600 hover:text-blue-800 font-medium">
+                  <button
+                    onClick={() => onEdit(bed)}
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
                     Edit
                   </button>
                 </td>

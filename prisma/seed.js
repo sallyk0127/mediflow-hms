@@ -12,7 +12,7 @@ const departments = [
 
 async function main() {
   for (const department of departments) {
-    let currentRoomNumber = 100; // Start room numbering
+    let currentRoomNumber = department.floor * 100; // Start Room based on Floor, e.g., 500
     let bedsInCurrentRoom = 0;
 
     for (let i = 1; i <= department.totalBeds; i++) {
@@ -30,7 +30,7 @@ async function main() {
       bedsInCurrentRoom++;
 
       if (bedsInCurrentRoom >= department.bedsPerRoom) {
-        // After reaching bedsPerRoom, increment room number
+        // After filling the room, move to next room
         currentRoomNumber++;
         bedsInCurrentRoom = 0;
       }
