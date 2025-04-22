@@ -1,9 +1,12 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function PATCH(req: NextRequest, { params }: { params: Record<string, string> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const bedId = params.id;
   const body = await req.json();
 
@@ -18,9 +21,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Record<strin
     });
     return NextResponse.json(updatedBed);
   } catch (error) {
-    console.error('Error updating bed:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Error updating bed:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
+// Optional dummy GET to avoid build errors
 export const GET = () => new Response(null, { status: 405 });
