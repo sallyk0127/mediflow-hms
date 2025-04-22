@@ -25,5 +25,6 @@ export async function PATCH(req: NextRequest) {
 
 // Dummy GET to prevent Vercel errors
 export async function GET() {
-  return new NextResponse("Method not allowed", { status: 405 });
+  const beds = await prisma.bed.findMany();
+  return NextResponse.json(beds);
 }
