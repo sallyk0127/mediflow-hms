@@ -46,3 +46,20 @@ model Patient {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }
+
+model Bed {
+  id            String   @id @default(cuid())
+  bedId         String   @unique // E.g., MS-001
+  division      String   // E.g., "Med-Surgical", "ICU", "Maternity Care", etc.
+  patientName   String?  // Null if available
+  location      String
+  status        BedStatus @default(AVAILABLE)
+  usedUntil     DateTime? // Null if available
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+}
