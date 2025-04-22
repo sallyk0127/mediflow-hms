@@ -1,45 +1,15 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; 
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const bedId = params.id;
-  const body = await req.json();
-
+export async function GET() {
   try {
-    const updatedBed = await prisma.bed.update({
-      where: { id: bedId },
-      data: {
-        status: body.status,
-        patientName: body.patientName,
-        usedUntil: body.usedUntil ? new Date(body.usedUntil) : null,
-      },
+    const beds = await prisma.bed.findMany({
+      orderBy: { bedId: "asc" },
     });
-    return NextResponse.json(updatedBed);
+
+    return NextResponse.json({ beds });
   } catch (error) {
-    console.error('Error updating bed:', error);
+    console.error("Failed to fetch beds:", error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
-
-export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
-  ) {
-    const bedId = params.id;
-    
-    const bed = await prisma.bed.findUnique({
-      where: { id: bedId },
-    });
-  
-    if (!bed) {
-      return new NextResponse("Bed not found", { status: 404 });
-    }
-  
-    return NextResponse.json(bed);
-  }
-  
