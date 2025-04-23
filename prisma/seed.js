@@ -1,5 +1,4 @@
 const { PrismaClient } = require('@prisma/client');
-
 const prisma = new PrismaClient();
 
 const departments = [
@@ -11,28 +10,32 @@ const departments = [
 ];
 
 async function main() {
-  for (const department of departments) {
-    let currentRoomNumber = department.floor * 100; // Start Room based on Floor, e.g., 500
-    let bedsInCurrentRoom = 0;
+  for (const dept of departments) {
+    let roomCount = 0;
+    let bedsInRoom = 0;
 
-    for (let i = 1; i <= department.totalBeds; i++) {
+    for (let i = 1; i <= dept.totalBeds; i++) {
+      // Calculate room number like: 400, 401, 402
+      const roomNumber = dept.floor * 100 + roomCount;
+      const location = `Floor ${dept.floor}, Room ${roomNumber}`;
+
       await prisma.bed.create({
         data: {
-          bedId: `${department.prefix}-${String(i).padStart(3, "0")}`,
-          division: department.name,
-          location: `Floor ${department.floor}, Room ${currentRoomNumber}`,
+          bedId: `${dept.prefix}-${String(i).padStart(3, "0")}`,
+          division: dept.name,
+          location,
           status: "AVAILABLE",
           patientName: null,
           usedUntil: null,
         },
       });
 
-      bedsInCurrentRoom++;
+      bedsInRoom++;
 
-      if (bedsInCurrentRoom >= department.bedsPerRoom) {
-        // After filling the room, move to next room
-        currentRoomNumber++;
-        bedsInCurrentRoom = 0;
+      // Move to next room when room is full
+      if (bedsInRoom >= dept.bedsPerRoom) {
+        roomCount++;
+        bedsInRoom = 0;
       }
     }
   }

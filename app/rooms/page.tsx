@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import RoomChart from "./room-chart";
 import RoomTable from "./room-table";
-import { useToast } from "@/components/hooks/use-toast"; 
+import { useToast } from "@/components/hooks/use-toast";
 
 // Types
 type RoomDetail = {
@@ -34,6 +34,12 @@ type Bed = {
   usedUntil: string | null;
 };
 
+type Patient = {
+  id: number;
+  firstName: string;
+  lastName: string;
+};
+
 const getDivisionColor = (divisionName: string) => {
   switch (divisionName) {
     case "Med-Surgical": return "#5B9BD5";
@@ -57,13 +63,20 @@ export default function RoomAvailabilityChart() {
   const [showEditModal, setShowEditModal] = useState(false);
   const { toast } = useToast();
 
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [patientQuery, setPatientQuery] = useState<string>("");
+  const [patientSuggestions, setPatientSuggestions] = useState<Patient[]>([]);
+  const [assignedPatientsMap, setAssignedPatientsMap] = useState<Map<number, string>>(new Map());
+
   const fetchBeds = async () => {
     try {
       const res = await fetch("/api/beds");
       const data = await res.json();
-      const beds: Bed[] = Array.isArray(data) ? data : data.beds; 
-  
+      const beds: Bed[] = Array.isArray(data) ? data : data.beds;
+
+      const map = new Map<number, string>();
       const divisionsMap: Record<string, RoomData> = {};
+
       for (const bed of beds) {
         const divisionName = bed.division;
         if (!divisionsMap[divisionName]) {
@@ -77,24 +90,35 @@ export default function RoomAvailabilityChart() {
             details: [],
           };
         }
+
+        if (bed.status === "OCCUPIED" && bed.patientName) {
+          const match = bed.patientName.match(/\[(\d+)\]$/);
+          if (match) map.set(Number(match[1]), bed.bedId);
+        }
+
+        const displayName = bed.patientName?.replace(/ \[\d+\]$/, "") || "-";
+
         divisionsMap[divisionName].details.push({
           id: bed.bedId,
-          patientName: bed.patientName || "-",
+          patientName: displayName,
           location: bed.location,
           status: bed.status === "AVAILABLE" ? "Available" : "Occupied",
           usedUntil: bed.usedUntil || undefined,
         });
-        divisionsMap[divisionName].totalBeds += 1;
-        if (bed.status === "AVAILABLE") divisionsMap[divisionName].availableBeds += 1;
-        else divisionsMap[divisionName].occupiedBeds += 1;
+
+        divisionsMap[divisionName].totalBeds++;
+        if (bed.status === "AVAILABLE") divisionsMap[divisionName].availableBeds++;
+        else divisionsMap[divisionName].occupiedBeds++;
       }
+
+      setAssignedPatientsMap(map);
       setRoomData(Object.values(divisionsMap));
     } catch (error) {
       console.error("Failed to fetch beds:", error);
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   useEffect(() => { fetchBeds(); }, []);
 
@@ -105,60 +129,73 @@ export default function RoomAvailabilityChart() {
       division: "",
       location: bed.location,
       status: bed.status === "Available" ? "AVAILABLE" : "OCCUPIED",
-      patientName: bed.patientName === "-" ? "" : bed.patientName,
+      patientName: bed.patientName === "-" ? null : bed.patientName,
       usedUntil: bed.usedUntil || null,
     });
+
+    const match = bed.patientName?.match(/\[(\d+)\]$/);
+    if (match) {
+      setSelectedPatient({
+        id: Number(match[1]),
+        firstName: bed.patientName!.split(" ")[0],
+        lastName: bed.patientName!.split(" ")[1],
+      });
+    } else {
+      setSelectedPatient(null);
+    }
+
+    setPatientQuery(bed.patientName?.replace(/ \[\d+\]$/, "") || "");
+    setPatientSuggestions([]);
     setShowEditModal(true);
   };
 
   const handleSaveBed = async () => {
     if (!editingBed) return;
+
+    const isClearing = editingBed.status === "AVAILABLE";
+    const patientId = selectedPatient?.id || null;
+
+    if (!isClearing && !selectedPatient && !editingBed.patientName) {
+      toast({ title: "Patient Required", description: "Please select a patient before assigning this bed.", variant: "destructive" });
+      return;
+    }
+
+    if (!isClearing && selectedPatient && assignedPatientsMap.has(selectedPatient.id) && assignedPatientsMap.get(selectedPatient.id) !== editingBed.bedId) {
+      toast({ title: "Already Assigned", description: "This patient is already assigned to another bed.", variant: "destructive" });
+      return;
+    }
+
     try {
       await fetch(`/api/beds/${editingBed.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          patientName: editingBed.patientName,
+          patientId: isClearing ? null : patientId,
+          patientName: isClearing || !selectedPatient ? null : `${selectedPatient.firstName} ${selectedPatient.lastName} [${selectedPatient.id}]`,
           status: editingBed.status,
-          usedUntil: editingBed.usedUntil,
+          usedUntil: isClearing ? null : editingBed.usedUntil,
         }),
       });
       await fetchBeds();
       setShowEditModal(false);
-  
-      toast({
-        title: "Bed Updated",
-        description: "The bed information was successfully updated!",
-      });
-  
+      toast({ title: "Bed Updated", description: "The bed information was successfully updated!" });
     } catch (error) {
       console.error("Error saving bed:", error);
-  
-      toast({
-        title: "Update Failed",
-        description: "Something went wrong while saving. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Update Failed", description: "Something went wrong while saving. Please try again.", variant: "destructive" });
     }
   };
 
   const filteredRoomData = roomData.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDivision = selectedDivision === "All" || room.name === selectedDivision;
-    const matchesStatus = statusFilter === "All" ||
-      (statusFilter === "Available" && room.availableBeds > 0) ||
-      (statusFilter === "Occupied" && room.occupiedBeds > 0);
+    const matchesStatus = statusFilter === "All" || (statusFilter === "Available" && room.availableBeds > 0) || (statusFilter === "Occupied" && room.occupiedBeds > 0);
     return matchesSearch && matchesDivision && matchesStatus;
   });
 
-  const allRoomDetails = roomData
-    .filter((room) => selectedDivision === "All" || room.name === selectedDivision)
-    .flatMap((room) => room.details);
+  const allRoomDetails = roomData.filter((room) => selectedDivision === "All" || room.name === selectedDivision).flatMap((room) => room.details);
 
   const filteredBedDetails = allRoomDetails.filter((bed) => {
-    const matchesSearch = bed.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      bed.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (bed.patientName !== "-" && bed.patientName.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = bed.id.toLowerCase().includes(searchQuery.toLowerCase()) || bed.location.toLowerCase().includes(searchQuery.toLowerCase()) || (bed.patientName !== "-" && bed.patientName.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === "All" || bed.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -169,6 +206,92 @@ export default function RoomAvailabilityChart() {
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Room Availability</h1>
 
+      {showEditModal && editingBed && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Edit Bed {editingBed.bedId}</h2>
+
+            {/* Patient Search */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Patient Name</label>
+              <input
+                type="text"
+                placeholder="Search patient"
+                value={patientQuery}
+                onChange={async (e) => {
+                  const query = e.target.value;
+                  setPatientQuery(query);
+                  if (query.length < 2) return;
+
+                  try {
+                    const res = await fetch(`/api/patients/search?query=${query}`);
+                    const data = await res.json();
+                    setPatientSuggestions(data.patients || []);
+                  } catch (err) {
+                    console.error("Patient search failed:", err);
+                  }
+                }}
+                className="w-full p-2 border rounded-lg mt-1"
+              />
+              {patientSuggestions.length > 0 && (
+                <ul className="border mt-1 rounded-lg shadow text-sm bg-white max-h-40 overflow-y-auto">
+                  {patientSuggestions.map((patient) => {
+                    const isAssigned = assignedPatientsMap.has(patient.id);
+                    return (
+                      <li
+                        key={patient.id}
+                        onClick={() => {
+                          if (isAssigned && assignedPatientsMap.get(patient.id) !== editingBed.bedId) return;
+                          setSelectedPatient(patient);
+                          setPatientQuery(`${patient.firstName} ${patient.lastName}`);
+                          setPatientSuggestions([]);
+                          setEditingBed((prev) => prev ? { ...prev, patientName: `${patient.firstName} ${patient.lastName}` } : prev);
+                        }}
+                        className={`px-4 py-2 ${isAssigned && assignedPatientsMap.get(patient.id) !== editingBed.bedId ? "text-gray-400 cursor-not-allowed" : "hover:bg-blue-100 cursor-pointer"}`}
+                      >
+                        {patient.firstName} {patient.lastName}{isAssigned && assignedPatientsMap.get(patient.id) !== editingBed.bedId ? " (already assigned)" : ""}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            {/* Status */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <select
+                value={editingBed.status}
+                onChange={(e) => setEditingBed({ ...editingBed, status: e.target.value as "AVAILABLE" | "OCCUPIED" })}
+                className="w-full p-2 border rounded-lg mt-1"
+              >
+                <option value="AVAILABLE">Available</option>
+                <option value="OCCUPIED">Occupied</option>
+              </select>
+            </div>
+
+            {/* Used Until */}
+            {editingBed.status === "OCCUPIED" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Used Until</label>
+                <input
+                  type="date"
+                  value={editingBed.usedUntil?.slice(0, 10) || ""}
+                  onChange={(e) => setEditingBed({ ...editingBed, usedUntil: e.target.value })}
+                  className="w-full p-2 border rounded-lg mt-1"
+                />
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex justify-end space-x-3 mt-6">
+              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">Cancel</button>
+              <button onClick={handleSaveBed} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tabs and Filters */}
       <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-md">
         <div className="flex space-x-4 ml-auto">
@@ -177,6 +300,7 @@ export default function RoomAvailabilityChart() {
         </div>
       </div>
 
+      {/* Filters */}
       {activeTab === "table" && (
         <div className="space-y-3">
           <div className="flex space-x-4">
@@ -215,36 +339,6 @@ export default function RoomAvailabilityChart() {
           />
         )}
       </div>
-
-      {/* Edit Modal */}
-      {showEditModal && editingBed && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Edit Bed {editingBed.bedId}</h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Patient Name</label>
-              <input type="text" value={editingBed.patientName || ""} onChange={(e) => setEditingBed({ ...editingBed, patientName: e.target.value })} className="w-full p-2 border rounded-lg mt-1" />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Status</label>
-              <select value={editingBed.status} onChange={(e) => setEditingBed({ ...editingBed, status: e.target.value as "AVAILABLE" | "OCCUPIED" })} className="w-full p-2 border rounded-lg mt-1">
-                <option value="AVAILABLE">Available</option>
-                <option value="OCCUPIED">Occupied</option>
-              </select>
-            </div>
-            {editingBed.status === "OCCUPIED" && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Used Until</label>
-                <input type="date" value={editingBed.usedUntil?.slice(0, 10) || ""} onChange={(e) => setEditingBed({ ...editingBed, usedUntil: e.target.value })} className="w-full p-2 border rounded-lg mt-1" />
-              </div>
-            )}
-            <div className="flex justify-end space-x-3 mt-6">
-              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">Cancel</button>
-              <button onClick={handleSaveBed} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Save Changes</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

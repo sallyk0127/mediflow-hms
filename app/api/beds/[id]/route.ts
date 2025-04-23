@@ -8,7 +8,7 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const updatedBed = await prisma.bed.update({
-      where: { id: id as string },
+      where: { bedId: id as string },
       data: {
         status: body.status,
         patientName: body.patientName,

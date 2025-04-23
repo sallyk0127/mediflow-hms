@@ -9,7 +9,7 @@ datasource db {
 
 model Patient {
   id                     Int      @id @default(autoincrement())
-  title                  String?  // Title (e.g., Mr, Mrs, Miss)
+  title                  String? // Title (e.g., Mr, Mrs, Miss)
   firstName              String
   middleName             String?
   lastName               String
@@ -26,37 +26,42 @@ model Patient {
   previousNames          String?
 
   // Administration Information
-  medicareNumber         String? 
-  insuranceProvider      String?
-  policyNumber           String?
-  coverageType           String?
-  billingAddress         String?
-  paymentMethod          String?
-  assignedRoom           String?
-  Department             String?
-  bedNumber              String?
-  attendingDoctor        String?
+  medicareNumber    String?
+  insuranceProvider String?
+  policyNumber      String?
+  coverageType      String?
+  billingAddress    String?
+  paymentMethod     String?
+  assignedRoom      String?
+  Department        String?
+  bedNumber         String?
+  attendingDoctor   String?
 
   // Medical Information
-  medicalHistory         String?
-  medications            String?
-  allergies              String?
-  conditions             String?
+  medicalHistory String?
+  medications    String?
+  allergies      String?
+  conditions     String?
 
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  beds Bed[]
 }
 
 model Bed {
-  id            String   @id @default(cuid())
-  bedId         String   @unique // E.g., MS-001
-  division      String   // E.g., "Med-Surgical", "ICU", "Maternity Care", etc.
-  patientName   String?  // Null if available
-  location      String
-  status        BedStatus @default(AVAILABLE)
-  usedUntil     DateTime? // Null if available
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String    @id @default(cuid())
+  bedId       String    @unique // E.g., MS-001
+  division    String // E.g., "Med-Surgical", "ICU", "Maternity Care", etc.
+  patientName String? // Null if available
+  patientId   Int?
+  location    String
+  status      BedStatus @default(AVAILABLE)
+  usedUntil   DateTime? // Null if available
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  patient Patient? @relation(fields: [patientId], references: [id])
 }
 
 enum BedStatus {
