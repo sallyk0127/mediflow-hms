@@ -121,9 +121,9 @@ export default function RoomAvailabilityChart() {
   useEffect(() => { fetchBeds(); }, []);
 
   const handleEditBed = (bed: RoomDetail) => {
-    const foundEntry = Array.from(assignedPatientsMap.entries()).find(([, bedId]) => bedId === bed.id);
+    const foundEntry = Array.from(assignedPatientsMap.entries()).find(([_, bId]) => bId === bed.id);
     const patientId = foundEntry?.[0];
-
+  
     setEditingBed({
       id: bed.id,
       bedId: bed.id,
@@ -134,50 +134,84 @@ export default function RoomAvailabilityChart() {
       patientId,
       usedUntil: bed.usedUntil || null,
     });
-
-    setSelectedPatient(null);
-    setPatientQuery("");
+  
+    if (bed.patientName && bed.patientName !== "-") {
+      // Find matching patient from allPatients
+      const matched = patientSuggestions.find(p => `${p.firstName} ${p.lastName}` === bed.patientName);
+      if (matched) {
+        setSelectedPatient(matched);
+        setPatientQuery(`${matched.firstName} ${matched.lastName}`);
+      } else {
+        setPatientQuery(bed.patientName); // fallback
+      }
+    } else {
+      setSelectedPatient(null);
+      setPatientQuery("");
+    }
+  
     setPatientSuggestions([]);
     setShowEditModal(true);
-  };
+  };  
 
   const handleSaveBed = async () => {
     if (!editingBed) return;
-
+  
     const isClearing = editingBed.status === "AVAILABLE";
-    const patientId = isClearing ? null : selectedPatient?.id ?? editingBed.patientId ?? null;
-    const patientName = isClearing ? null : selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName} [${selectedPatient.id}]` : null;
-
-    if (!isClearing && (!patientId || !patientName || !editingBed.usedUntil)) {
+  
+    // Determine final patient ID and name
+    const finalPatientId = selectedPatient?.id ?? editingBed.patientId ?? null;
+    const finalPatientName = selectedPatient
+      ? `${selectedPatient.firstName} ${selectedPatient.lastName} [${selectedPatient.id}]`
+      : editingBed.patientName;
+  
+    // Validation: if OCCUPIED, both patient and usedUntil must exist
+    if (!isClearing && (!finalPatientId || !finalPatientName || !editingBed.usedUntil)) {
       toast({
         title: "Incomplete Assignment",
         description: "Patient and Used Until date must be provided.",
         variant: "destructive",
       });
       return;
-    }    
-
-    if (!isClearing && patientId && assignedPatientsMap.has(patientId) && assignedPatientsMap.get(patientId) !== editingBed.bedId) {
-      toast({ title: "Already Assigned", description: "This patient is already assigned to another bed.", variant: "destructive" });
+    }
+  
+    if (
+      !isClearing &&
+      finalPatientId &&
+      assignedPatientsMap.has(finalPatientId) &&
+      assignedPatientsMap.get(finalPatientId) !== editingBed.bedId
+    ) {
+      toast({
+        title: "Already Assigned",
+        description: "This patient is already assigned to another bed.",
+        variant: "destructive",
+      });
       return;
     }
-
+  
     try {
       await fetch(`/api/beds/${editingBed.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientId, patientName, status: editingBed.status, usedUntil: isClearing ? null : editingBed.usedUntil })
+        body: JSON.stringify({
+          patientId: isClearing ? null : finalPatientId,
+          patientName: isClearing ? null : finalPatientName,
+          status: editingBed.status,
+          usedUntil: isClearing ? null : editingBed.usedUntil,
+        }),
       });
-      await fetchBeds();
+  
+      await fetchBeds(); // Refresh table
       setShowEditModal(false);
-      setSelectedPatient(null);
-      setPatientQuery("");
       toast({ title: "Bed Updated", description: "The bed information was successfully updated!" });
     } catch (error) {
       console.error("Error saving bed:", error);
-      toast({ title: "Update Failed", description: "Something went wrong while saving. Please try again.", variant: "destructive" });
+      toast({
+        title: "Update Failed",
+        description: "Something went wrong while saving. Please try again.",
+        variant: "destructive",
+      });
     }
-  };
+  };  
 
   const filteredRoomData = roomData.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase());
