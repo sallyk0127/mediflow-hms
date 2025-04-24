@@ -136,7 +136,7 @@ export default function RoomAvailabilityChart() {
     });
 
     setSelectedPatient(null);
-    setPatientQuery(bed.patientName === "-" ? "" : bed.patientName);
+    setPatientQuery("");
     setPatientSuggestions([]);
     setShowEditModal(true);
   };
