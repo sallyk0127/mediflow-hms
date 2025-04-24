@@ -121,7 +121,7 @@ export default function RoomAvailabilityChart() {
   useEffect(() => { fetchBeds(); }, []);
 
   const handleEditBed = (bed: RoomDetail) => {
-    const foundEntry = Array.from(assignedPatientsMap.entries()).find(([_, bId]) => bId === bed.id);
+    const foundEntry = Array.from(assignedPatientsMap.entries()).find(([, bId]) => bId === bed.id);
     const patientId = foundEntry?.[0];
   
     setEditingBed({
