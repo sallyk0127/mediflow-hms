@@ -12,6 +12,7 @@ export async function PATCH(req: NextRequest) {
       data: {
         status: body.status,
         patientName: body.patientName,
+        patientId: body.patientId ?? null, 
         usedUntil: body.usedUntil ? new Date(body.usedUntil) : null,
       },
     });

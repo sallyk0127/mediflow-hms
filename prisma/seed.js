@@ -38,6 +38,7 @@ async function main() {
         bedsInRoom = 0;
       }
     }
+    console.log(`✅ Seeded ${dept.totalBeds} beds for ${dept.name}`);
   }
 }
 

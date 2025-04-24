@@ -31,6 +31,7 @@ type Bed = {
   location: string;
   status: "AVAILABLE" | "OCCUPIED";
   patientName: string | null;
+  patientId?: number;
   usedUntil: string | null;
 };
 
@@ -91,24 +92,21 @@ export default function RoomAvailabilityChart() {
           };
         }
 
-        if (bed.status === "OCCUPIED" && bed.patientName) {
-          const match = bed.patientName.match(/\[(\d+)\]$/);
-          if (match) map.set(Number(match[1]), bed.bedId);
+        if (bed.status === "OCCUPIED" && bed.patientId !== undefined) {
+          map.set(bed.patientId, bed.bedId);
         }
-
-        const displayName = bed.patientName?.replace(/ \[\d+\]$/, "") || "-";
 
         divisionsMap[divisionName].details.push({
           id: bed.bedId,
-          patientName: displayName,
+          patientName: bed.patientName?.replace(/ \[\d+\]$/, "") || "-",
           location: bed.location,
           status: bed.status === "AVAILABLE" ? "Available" : "Occupied",
           usedUntil: bed.usedUntil || undefined,
         });
 
-        divisionsMap[divisionName].totalBeds++;
-        if (bed.status === "AVAILABLE") divisionsMap[divisionName].availableBeds++;
-        else divisionsMap[divisionName].occupiedBeds++;
+        divisionsMap[divisionName].totalBeds += 1;
+        if (bed.status === "AVAILABLE") divisionsMap[divisionName].availableBeds += 1;
+        else divisionsMap[divisionName].occupiedBeds += 1;
       }
 
       setAssignedPatientsMap(map);
@@ -123,6 +121,9 @@ export default function RoomAvailabilityChart() {
   useEffect(() => { fetchBeds(); }, []);
 
   const handleEditBed = (bed: RoomDetail) => {
+    const foundEntry = Array.from(assignedPatientsMap.entries()).find(([_, bId]) => bId === bed.id);
+    const patientId = foundEntry?.[0];
+
     setEditingBed({
       id: bed.id,
       bedId: bed.id,
@@ -130,21 +131,12 @@ export default function RoomAvailabilityChart() {
       location: bed.location,
       status: bed.status === "Available" ? "AVAILABLE" : "OCCUPIED",
       patientName: bed.patientName === "-" ? null : bed.patientName,
+      patientId,
       usedUntil: bed.usedUntil || null,
     });
 
-    const match = bed.patientName?.match(/\[(\d+)\]$/);
-    if (match) {
-      setSelectedPatient({
-        id: Number(match[1]),
-        firstName: bed.patientName!.split(" ")[0],
-        lastName: bed.patientName!.split(" ")[1],
-      });
-    } else {
-      setSelectedPatient(null);
-    }
-
-    setPatientQuery(bed.patientName?.replace(/ \[\d+\]$/, "") || "");
+    setSelectedPatient(null);
+    setPatientQuery(bed.patientName === "-" ? "" : bed.patientName);
     setPatientSuggestions([]);
     setShowEditModal(true);
   };
@@ -153,14 +145,19 @@ export default function RoomAvailabilityChart() {
     if (!editingBed) return;
 
     const isClearing = editingBed.status === "AVAILABLE";
-    const patientId = selectedPatient?.id || null;
+    const patientId = isClearing ? null : selectedPatient?.id ?? editingBed.patientId ?? null;
+    const patientName = isClearing ? null : selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName} [${selectedPatient.id}]` : null;
 
-    if (!isClearing && !selectedPatient && !editingBed.patientName) {
-      toast({ title: "Patient Required", description: "Please select a patient before assigning this bed.", variant: "destructive" });
+    if (!isClearing && (!patientId || !patientName || !editingBed.usedUntil)) {
+      toast({
+        title: "Incomplete Assignment",
+        description: "Patient and Used Until date must be provided.",
+        variant: "destructive",
+      });
       return;
-    }
+    }    
 
-    if (!isClearing && selectedPatient && assignedPatientsMap.has(selectedPatient.id) && assignedPatientsMap.get(selectedPatient.id) !== editingBed.bedId) {
+    if (!isClearing && patientId && assignedPatientsMap.has(patientId) && assignedPatientsMap.get(patientId) !== editingBed.bedId) {
       toast({ title: "Already Assigned", description: "This patient is already assigned to another bed.", variant: "destructive" });
       return;
     }
@@ -169,15 +166,12 @@ export default function RoomAvailabilityChart() {
       await fetch(`/api/beds/${editingBed.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: isClearing ? null : patientId,
-          patientName: isClearing || !selectedPatient ? null : `${selectedPatient.firstName} ${selectedPatient.lastName} [${selectedPatient.id}]`,
-          status: editingBed.status,
-          usedUntil: isClearing ? null : editingBed.usedUntil,
-        }),
+        body: JSON.stringify({ patientId, patientName, status: editingBed.status, usedUntil: isClearing ? null : editingBed.usedUntil })
       });
       await fetchBeds();
       setShowEditModal(false);
+      setSelectedPatient(null);
+      setPatientQuery("");
       toast({ title: "Bed Updated", description: "The bed information was successfully updated!" });
     } catch (error) {
       console.error("Error saving bed:", error);
@@ -188,14 +182,20 @@ export default function RoomAvailabilityChart() {
   const filteredRoomData = roomData.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDivision = selectedDivision === "All" || room.name === selectedDivision;
-    const matchesStatus = statusFilter === "All" || (statusFilter === "Available" && room.availableBeds > 0) || (statusFilter === "Occupied" && room.occupiedBeds > 0);
+    const matchesStatus = statusFilter === "All" ||
+      (statusFilter === "Available" && room.availableBeds > 0) ||
+      (statusFilter === "Occupied" && room.occupiedBeds > 0);
     return matchesSearch && matchesDivision && matchesStatus;
   });
 
-  const allRoomDetails = roomData.filter((room) => selectedDivision === "All" || room.name === selectedDivision).flatMap((room) => room.details);
+  const allRoomDetails = roomData
+    .filter((room) => selectedDivision === "All" || room.name === selectedDivision)
+    .flatMap((room) => room.details);
 
   const filteredBedDetails = allRoomDetails.filter((bed) => {
-    const matchesSearch = bed.id.toLowerCase().includes(searchQuery.toLowerCase()) || bed.location.toLowerCase().includes(searchQuery.toLowerCase()) || (bed.patientName !== "-" && bed.patientName.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = bed.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bed.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (bed.patientName !== "-" && bed.patientName.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === "All" || bed.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -236,20 +236,24 @@ export default function RoomAvailabilityChart() {
               {patientSuggestions.length > 0 && (
                 <ul className="border mt-1 rounded-lg shadow text-sm bg-white max-h-40 overflow-y-auto">
                   {patientSuggestions.map((patient) => {
-                    const isAssigned = assignedPatientsMap.has(patient.id);
+                    const isAssigned = assignedPatientsMap.has(patient.id) && assignedPatientsMap.get(patient.id) !== editingBed.bedId;
                     return (
                       <li
                         key={patient.id}
                         onClick={() => {
-                          if (isAssigned && assignedPatientsMap.get(patient.id) !== editingBed.bedId) return;
+                          if (isAssigned) return;
                           setSelectedPatient(patient);
                           setPatientQuery(`${patient.firstName} ${patient.lastName}`);
                           setPatientSuggestions([]);
-                          setEditingBed((prev) => prev ? { ...prev, patientName: `${patient.firstName} ${patient.lastName}` } : prev);
+                          setEditingBed((prev) =>
+                            prev ? { ...prev, patientName: `${patient.firstName} ${patient.lastName}`, patientId: patient.id } : prev
+                          );
                         }}
-                        className={`px-4 py-2 ${isAssigned && assignedPatientsMap.get(patient.id) !== editingBed.bedId ? "text-gray-400 cursor-not-allowed" : "hover:bg-blue-100 cursor-pointer"}`}
+                        className={`px-4 py-2 ${
+                          isAssigned ? "text-gray-400 cursor-not-allowed" : "hover:bg-blue-100 cursor-pointer"
+                        }`}
                       >
-                        {patient.firstName} {patient.lastName}{isAssigned && assignedPatientsMap.get(patient.id) !== editingBed.bedId ? " (already assigned)" : ""}
+                        {patient.firstName} {patient.lastName}{isAssigned ? " (already assigned)" : ""}
                       </li>
                     );
                   })}
@@ -257,7 +261,7 @@ export default function RoomAvailabilityChart() {
               )}
             </div>
 
-            {/* Status */}
+            {/* Status & Date */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Status</label>
               <select
@@ -269,8 +273,6 @@ export default function RoomAvailabilityChart() {
                 <option value="OCCUPIED">Occupied</option>
               </select>
             </div>
-
-            {/* Used Until */}
             {editingBed.status === "OCCUPIED" && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Used Until</label>
@@ -282,7 +284,6 @@ export default function RoomAvailabilityChart() {
                 />
               </div>
             )}
-
             {/* Buttons */}
             <div className="flex justify-end space-x-3 mt-6">
               <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">Cancel</button>
