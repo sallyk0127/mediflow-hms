@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import DashboardBarChart from './DashboardBarChart';
 import {
   ChevronDown,
   Users,
   Calendar,
   FilePlus2,
-  Maximize2,
   UserCheck,
   Filter,
   CheckSquare,
@@ -82,6 +82,7 @@ const Dashboard = () => {
       return true;
     }
 
+
     // Apply selected filters
     return filterOptions.some(option => {
       if (!option.checked) return false;
@@ -139,6 +140,15 @@ const Dashboard = () => {
   
   // Count active filters
   const activeFiltersCount = filterOptions.filter(option => option.checked).length;
+
+  // Room Availibility Data
+  const roomData = [
+    { label: 'Med-Surgical', value: 50, color: 'bg-teal-400', textColor: 'text-teal-600' },
+    { label: 'ICU', value: 75, color: 'bg-yellow-400', textColor: 'text-yellow-600' },
+    { label: 'Maternity', value: 65, color: 'bg-red-500', textColor: 'text-red-600' },
+    { label: 'Mental', value: 65, color: 'bg-blue-500', textColor: 'text-blue-600' },
+    { label: 'Senior', value: 40, color: 'bg-green-400', textColor: 'text-green-600' }
+  ];  
 
   return (
     <div className="p-2 h-screen flex flex-col">
@@ -363,9 +373,6 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-700">Education Content</h2>
-            <button className="p-0.5 hover:bg-gray-100 rounded-full transition-colors">
-              <Maximize2 size={12} />
-            </button>
           </div>
           <div className="p-2 flex-grow">
             {educationContents.map((content, index) => (
@@ -393,9 +400,6 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-700">Patient Fee</h2>
-            <button className="p-0.5 hover:bg-gray-100 rounded-full transition-colors">
-              <Maximize2 size={12} />
-            </button>
           </div>
           <div className="p-2 flex-grow">
             {patientFees.map((patient, index) => (
@@ -422,60 +426,36 @@ const Dashboard = () => {
 
       {/* Room Availability Chart */}
       <div className="bg-white rounded-lg shadow-sm p-2 pb-2 mb-2">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-sm font-medium text-gray-700 p-2">Room Availability</h2>
-          <div className="relative">
-            {/* <button 
-              className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded hover:bg-gray-200 transition-colors text-xs"
-              onClick={() => setShowRoomTimeframeDropdown(!showRoomTimeframeDropdown)}
-            >
-              <span className="text-xs text-gray-600">{roomTimeframe}</span>
-              <ChevronDown size={12} className={`transform transition-transform ${showRoomTimeframeDropdown ? 'rotate-180' : ''}`} />
-            </button> */}
-            
-            {showRoomTimeframeDropdown && (
-              <div className="absolute right-0 mt-1 w-32 bg-white shadow-lg rounded-md z-10 py-1 border border-gray-200">
-                {roomTimeframeOptions.map((option) => (
-                  <button
-                    key={option}
-                    className={`block w-full text-left px-3 py-1 text-xs hover:bg-blue-50 transition-colors ${roomTimeframe === option ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
-                    onClick={() => {
-                      setRoomTimeframe(option);
-                      setShowRoomTimeframeDropdown(false);
-                    }}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex items-end h-32 gap-2">
-          <div className="relative h-8 w-full bg-teal-400 rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="absolute -top-4 w-full text-center text-xs">50</div>
-          </div>
-          <div className="relative h-12 w-full bg-yellow-400 rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="absolute -top-4 w-full text-center text-xs">75</div>
-          </div>
-          <div className="relative h-10 w-full bg-red-500 rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="absolute -top-4 w-full text-center text-xs">65</div>
-          </div>
-          <div className="relative h-10 w-full bg-blue-500 rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="absolute -top-4 w-full text-center text-xs">65</div>
-          </div>
-          <div className="relative h-6 w-full bg-green-400 rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="absolute -top-4 w-full text-center text-xs">40</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-5 mt-1 text-xs text-center p-1">
-          <div className="text-teal-600 text-xs">Med-Surgical</div>
-          <div className="text-yellow-600 text-xs">ICU</div>
-          <div className="text-red-600 text-xs">Maternity</div>
-          <div className="text-blue-600 text-xs">Mental</div>
-          <div className="text-green-600 text-xs">Senior</div>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-sm font-medium text-gray-700 p-2">Room Availability</h2>
+        <div className="relative">
+          <button 
+            className="flex items-center text-xs text-gray-600 hover:text-blue-600 focus:outline-none"
+            onClick={() => setShowRoomTimeframeDropdown(!showRoomTimeframeDropdown)}
+          >
+            {roomTimeframe} <ChevronDown size={12} className="ml-1" />
+          </button>
+          
+          {showRoomTimeframeDropdown && (
+            <div className="absolute right-0 mt-1 w-32 bg-white shadow-lg rounded-md z-10 py-1 border border-gray-200">
+              {roomTimeframeOptions.map((option) => (
+                <button
+                  key={option}
+                  className={`block w-full text-left px-3 py-1 text-xs hover:bg-blue-50 transition-colors ${roomTimeframe === option ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
+                  onClick={() => {
+                    setRoomTimeframe(option);
+                    setShowRoomTimeframeDropdown(false);
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+      <DashboardBarChart data={roomData} />
+    </div>
     </div>
   );
 };
