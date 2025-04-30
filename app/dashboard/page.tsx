@@ -40,16 +40,33 @@ interface FilterOption {
   checked: boolean;
 }
 
+interface RoomDetail {
+  id: string;
+  patientName: string;
+  location: string;
+  status: "Available" | "Occupied";
+  usedUntil?: string;
+}
+
+interface RoomData {
+  id: string;
+  name: string;
+  totalBeds: number;
+  occupiedBeds: number;
+  availableBeds: number;
+  color: string;
+  details: RoomDetail[];
+}
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('new');
   const [timeframe, setTimeframe] = useState('Weekly');
-  const [roomTimeframe, setRoomTimeframe] = useState('Today');
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
-  const [showRoomTimeframeDropdown, setShowRoomTimeframeDropdown] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [roomData, setRoomData] = useState<RoomData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const timeframeOptions = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
-  const roomTimeframeOptions = ['Today', 'This Week', 'This Month'];
 
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -61,6 +78,68 @@ const Dashboard = () => {
       document.body.style.overflow = originalStyle;
       document.documentElement.style.overflow = '';
     };
+  }, []);
+
+  // Fetch real room data
+  useEffect(() => {
+
+    const fetchRoomData = async () => {
+      try {
+        // Try to fetch real data
+        const res = await fetch("/api/beds");
+        const data = await res.json();
+        const beds = Array.isArray(data) ? data : data.beds;
+
+        const divisionsMap: Record<string, RoomData> = {};
+        
+        // Define division colors
+        const getDivisionColor = (divisionName: string) => {
+          switch (divisionName) {
+            case "Med-Surgical": return "bg-blue-500";
+            case "ICU": return "bg-orange-500";
+            case "Maternity Care": return "bg-pink-500";
+            case "Behaviour and Mental": return "bg-purple-500";
+            case "Senior Living": return "bg-green-500";
+            default: return "bg-indigo-500";
+          }
+        };
+
+        for (const bed of beds) {
+          const divisionName = bed.division;
+          if (!divisionsMap[divisionName]) {
+            divisionsMap[divisionName] = {
+              id: divisionName,
+              name: divisionName,
+              totalBeds: 0,
+              occupiedBeds: 0,
+              availableBeds: 0,
+              color: getDivisionColor(divisionName),
+              details: [],
+            };
+          }
+
+          divisionsMap[divisionName].details.push({
+            id: bed.bedId,
+            patientName: bed.patientName?.replace(/ \[\d+\]$/, "") || "-",
+            location: bed.location,
+            status: bed.status === "AVAILABLE" ? "Available" : "Occupied",
+            usedUntil: bed.usedUntil || undefined,
+          });
+
+          divisionsMap[divisionName].totalBeds += 1;
+          if (bed.status === "AVAILABLE") divisionsMap[divisionName].availableBeds += 1;
+          else divisionsMap[divisionName].occupiedBeds += 1;
+        }
+
+        setRoomData(Object.values(divisionsMap));
+      } catch (error) {
+        console.error("Failed to fetch beds:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoomData();
   }, []);
 
   const [filterOptions, setFilterOptions] = useState<FilterOption[]>([
@@ -81,7 +160,6 @@ const Dashboard = () => {
     if (filterOptions.every(option => !option.checked)) {
       return true;
     }
-
 
     // Apply selected filters
     return filterOptions.some(option => {
@@ -141,14 +219,13 @@ const Dashboard = () => {
   // Count active filters
   const activeFiltersCount = filterOptions.filter(option => option.checked).length;
 
-  // Room Availibility Data
-  const roomData = [
-    { label: 'Med-Surgical', value: 50, color: 'bg-teal-400', textColor: 'text-teal-600' },
-    { label: 'ICU', value: 75, color: 'bg-yellow-400', textColor: 'text-yellow-600' },
-    { label: 'Maternity', value: 65, color: 'bg-red-500', textColor: 'text-red-600' },
-    { label: 'Mental', value: 65, color: 'bg-blue-500', textColor: 'text-blue-600' },
-    { label: 'Senior', value: 40, color: 'bg-green-400', textColor: 'text-green-600' }
-  ];  
+  // Create chart data for available beds 
+  const availableBedData = roomData.map(room => ({
+    label: room.name,
+    value: room.availableBeds, 
+    color: room.color,
+    textColor: 'text-gray-700'
+  }));
 
   return (
     <div className="p-2 h-screen flex flex-col">
@@ -223,11 +300,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content Area - All sections in a compact layout */}
-      <div className="grid grid-cols-4 gap-2 mb-2" style={{ height: '35vh' }}>
-        {/* Appointments Section - Takes 2 out of 4 columns */}
-        <div className="col-span-2 bg-white rounded-lg shadow-sm flex flex-col">
-        <h2 className="text-sm font-medium text-gray-700 p-2">Appointment</h2>
+      {/* Main Content Area */}
+      <div className="grid grid-cols-2 gap-2 mb-2" style={{ height: '35vh' }}>
+        {/* Appointments Section  */}
+        <div className="bg-white rounded-lg shadow-sm flex flex-col">
+          <h2 className="text-sm font-medium text-gray-700 p-2">Appointment</h2>
           <div className="border-b border-gray-200 flex items-center h-8 p-2">
             <button 
               className={`px-3 py-1 text-xs font-medium transition-colors duration-200 hover:bg-gray-50 ${activeTab === 'new' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
@@ -369,7 +446,24 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Education Content - Takes 1 out of 4 columns */}
+        {/* Room Availability Chart */}
+        <div className="bg-white rounded-lg shadow-sm flex flex-col">
+          <div className="flex justify-between items-center">
+            <h2 className="text-sm font-medium text-gray-700 p-2">Beds Availability</h2>
+          </div>
+          <div className="flex-grow flex flex-col justify-center p-2">
+            {loading ? (
+              <div className="text-center py-4 text-gray-500 text-sm">Loading...</div>
+            ) : (
+              <DashboardBarChart data={availableBedData} />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Second row for Education Content and Patient Fee */}
+      <div className="grid grid-cols-2 gap-2 mb-2" style={{ height: '25vh' }}>
+        {/* Education Content */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-700">Education Content</h2>
@@ -384,7 +478,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xs font-medium truncate max-w-28">{content.title}</h3>
+                    <h3 className="text-xs font-medium truncate max-w-xs">{content.title}</h3>
                     <p className="text-xs text-gray-500">{content.author}</p>
                   </div>
                 </div>
@@ -396,7 +490,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Patient Fee - Takes 1 out of 4 columns */}
+        {/* Patient Fee */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-700">Patient Fee</h2>
@@ -411,7 +505,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xs font-medium truncate max-w-28">{patient.name}</h3>
+                    <h3 className="text-xs font-medium truncate max-w-xs">{patient.name}</h3>
                     <p className="text-xs text-red-500">Fee pending</p>
                   </div>
                 </div>
@@ -423,39 +517,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Room Availability Chart */}
-      <div className="bg-white rounded-lg shadow-sm p-2 pb-2 mb-2">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-sm font-medium text-gray-700 p-2">Room Availability</h2>
-        <div className="relative">
-          <button 
-            className="flex items-center text-xs text-gray-600 hover:text-blue-600 focus:outline-none"
-            onClick={() => setShowRoomTimeframeDropdown(!showRoomTimeframeDropdown)}
-          >
-            {roomTimeframe} <ChevronDown size={12} className="ml-1" />
-          </button>
-          
-          {showRoomTimeframeDropdown && (
-            <div className="absolute right-0 mt-1 w-32 bg-white shadow-lg rounded-md z-10 py-1 border border-gray-200">
-              {roomTimeframeOptions.map((option) => (
-                <button
-                  key={option}
-                  className={`block w-full text-left px-3 py-1 text-xs hover:bg-blue-50 transition-colors ${roomTimeframe === option ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
-                  onClick={() => {
-                    setRoomTimeframe(option);
-                    setShowRoomTimeframeDropdown(false);
-                  }}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      <DashboardBarChart data={roomData} />
-    </div>
     </div>
   );
 };

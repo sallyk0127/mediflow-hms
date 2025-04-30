@@ -238,7 +238,7 @@ export default function RoomAvailabilityChart() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Room Availability</h1>
+      <h1 className="text-2xl font-semibold">Beds Availability</h1>
 
       {showEditModal && editingBed && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

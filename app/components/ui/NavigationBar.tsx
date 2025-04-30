@@ -11,7 +11,7 @@ const navItems = [
   { name: 'EMR', href: '/emr', icon: UsersIcon },
   { name: 'Staff Management', href: '/staff-management', icon: UsersIcon },
   { name: 'Education Content', href: '/education-content', icon: UsersIcon },
-  { name: 'Rooms', href: '/rooms', icon: UsersIcon },
+  { name: 'Beds Management', href: '/rooms', icon: UsersIcon },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: UsersIcon },
   { name: 'Settings', href: '/settings', icon: SettingsIcon },
 ];
