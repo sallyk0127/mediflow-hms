@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format, parse } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -17,80 +18,51 @@ import {
 } from "@/components/ui/dialog";
 
 interface Roster {
-  time: string;
-  date: string;
-  role: string;
-  staff: {
-    name: string;
-    avatar: string;
-    initials: string;
-  };
+  id: string;
+  name: string;
   staffId: string;
+  role: string;
   shift: string;
+  date: string;
+  time: string;
 }
-
-const rosters: Roster[] = [
-  {
-    time: "08:00 AM",
-    date: "28/03/2025",
-    role: "Registered Nurse",
-    staff: {
-      name: "Emily Clark",
-      avatar: "/placeholder.svg",
-      initials: "EC",
-    },
-    staffId: "RN00123",
-    shift: "Morning",
-  },
-  {
-    time: "02:00 PM",
-    date: "28/03/2025",
-    role: "Dietitian",
-    staff: {
-      name: "Michael Brown",
-      avatar: "/placeholder.svg",
-      initials: "MB",
-    },
-    staffId: "DT00456",
-    shift: "Afternoon",
-  },
-  {
-    time: "09:00 PM",
-    date: "28/03/2025",
-    role: "Resident",
-    staff: {
-      name: "Sophia Martinez",
-      avatar: "/placeholder.svg",
-      initials: "SM",
-    },
-    staffId: "RS00789",
-    shift: "Night",
-  },
-];
 
 export default function NewRosterPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedStaff, setSelectedStaff] = useState<Roster["staff"] | null>(null);
+  const [rosters, setRosters] = useState<Roster[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<Roster | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false); // ✅ Fix for SSR warning
-
-  const handleStaffClick = (staff: Roster["staff"]) => {
-    setSelectedStaff(staff);
-    setIsModalOpen(true);
-  };
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setIsHydrated(true); 
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    const fetchRosters = async () => {
+      try {
+        const res = await fetch("/api/staff");
+        const data: Roster[] = await res.json();
+        const validData = data.filter((r) => r.date && r.name);
+        setRosters(validData);
+      } catch (error) {
+        console.error("Failed to fetch rosters", error);
+      }
+    };
+
+    fetchRosters();
   }, []);
 
   const today = new Date();
 
-  const filteredRosters = rosters.filter((roster) => {
-    const rosterDate = parse(roster.date, "dd/MM/yyyy", new Date());
-    const isFutureOrToday = rosterDate >= new Date(today.setHours(0, 0, 0, 0));
-    const isMatchingDate = date ? rosterDate.toDateString() === date.toDateString() : true;
-    return isFutureOrToday && isMatchingDate;
-  });
+  const filteredRosters = rosters
+    .filter((roster) => roster.date)
+    .filter((roster) => {
+      const rosterDate = parseISO(roster.date);
+      const isFutureOrToday = rosterDate >= new Date(today.setHours(0, 0, 0, 0));
+      const isMatchingDate = date ? rosterDate.toDateString() === date.toDateString() : true;
+      return isFutureOrToday && isMatchingDate;
+    });
 
   return (
     <div className="container mx-auto">
@@ -109,7 +81,7 @@ export default function NewRosterPage() {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={date} onSelect={(day) => setDate(day || undefined)} initialFocus />
+            <Calendar mode="single" selected={date} onSelect={(d) => setDate(d || undefined)} initialFocus />
           </PopoverContent>
         </Popover>
       </div>
@@ -135,9 +107,9 @@ export default function NewRosterPage() {
                 </td>
               </tr>
             ) : (
-              filteredRosters.map((roster, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-4">{roster.date}</td>
+              filteredRosters.map((roster) => (
+                <tr key={roster.id} className="border-b">
+                  <td className="p-4">{format(parseISO(roster.date), "dd/MM/yyyy")}</td>
                   <td className="p-4">
                     <span className="px-2 py-1 rounded-md text-white text-sm bg-blue-500">
                       {roster.role}
@@ -146,13 +118,23 @@ export default function NewRosterPage() {
                   <td className="p-4">
                     <div
                       className="flex items-center cursor-pointer text-blue-600 hover:underline"
-                      onClick={() => handleStaffClick(roster.staff)}
+                      onClick={() => {
+                        setSelectedStaff(roster);
+                        setIsModalOpen(true);
+                      }}
                     >
                       <Avatar className="h-8 w-8 mr-2">
-                        <AvatarImage src={roster.staff.avatar} />
-                        <AvatarFallback>{roster.staff.initials}</AvatarFallback>
+                        <AvatarImage src="/placeholder.svg" />
+                        <AvatarFallback>
+                          {roster.name
+                            ? roster.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                            : "?"}
+                        </AvatarFallback>
                       </Avatar>
-                      {roster.staff.name}
+                      {roster.name}
                     </div>
                   </td>
                   <td className="p-4">{roster.staffId}</td>
@@ -172,8 +154,10 @@ export default function NewRosterPage() {
             <DialogHeader>
               <DialogTitle>{selectedStaff?.name}</DialogTitle>
               <DialogDescription>
-                <span className="mt-2 text-sm text-gray-600 block">
-                  Test.
+                <span className="block mt-1">Role: {selectedStaff?.role}</span>
+                <span className="block">Shift: {selectedStaff?.shift}</span>
+                <span className="block">
+                  Rostered for: {selectedStaff?.time} on {selectedStaff?.date}
                 </span>
               </DialogDescription>
             </DialogHeader>

@@ -68,3 +68,21 @@ enum BedStatus {
   AVAILABLE
   OCCUPIED
 }
+
+model Staff {
+  id        String           @id @default(cuid())
+  name      String
+  staffId   String           @unique
+  role      String
+  createdAt DateTime         @default(now())
+  schedules WeeklySchedule[] // Relation to weekly schedule
+}
+
+model WeeklySchedule {
+  id        String   @id @default(cuid())
+  day       String   // "Monday", "Tuesday", etc.
+  startTime String   // e.g., "08:00"
+  endTime   String   // e.g., "16:00"
+  staff     Staff    @relation(fields: [staffId], references: [id])
+  staffId   String
+}

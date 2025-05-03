@@ -1,16 +1,10 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import dynamic from "next/dynamic";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
+import Select from "react-select";
 
 const roles = [
   "Senior Consultants", "Registrars", "Residents", "Interns", "Student Doctors",
@@ -21,149 +15,152 @@ const roles = [
   "Porters", "Ward Clerks"
 ];
 
-const shifts = ["Morning", "Afternoon", "Evening", "Night"];
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+interface StaffOption {
+  name: string;
+  staffId: string;
+}
+
+interface ScheduleEntry {
+  day: string;
+  startTime: string;
+  endTime: string;
+}
+
+function WeeklyScheduleForm({ onChange }: { onChange: (schedules: ScheduleEntry[]) => void }) {
+  const [schedule, setSchedule] = useState<ScheduleEntry[]>(
+    days.map((day) => ({ day, startTime: "", endTime: "" }))
+  );
+
+  const updateTime = (index: number, field: "startTime" | "endTime", value: string) => {
+    const newSchedule = [...schedule];
+    newSchedule[index][field] = value;
+    setSchedule(newSchedule);
+    const filled = newSchedule.filter((s) => s.startTime && s.endTime);
+    onChange(filled);
+  };
+
+  return (
+    <div className="space-y-3 mt-6">
+      <h2 className="font-semibold text-lg">Weekly Schedule</h2>
+      {schedule.map((entry, index) => (
+        <div key={entry.day} className="flex items-center gap-4">
+          <span className="w-24">{entry.day}</span>
+          <Input
+            type="time"
+            className="w-32"
+            value={entry.startTime}
+            onChange={(e) => updateTime(index, "startTime", e.target.value)}
+          />
+          <span>-</span>
+          <Input
+            type="time"
+            className="w-32"
+            value={entry.endTime}
+            onChange={(e) => updateTime(index, "endTime", e.target.value)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AddRosterPage() {
   const router = useRouter();
 
-  const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedRole, setSelectedRole] = useState<{ label: string; value: string } | null>(null);
-  const [selectedShift, setSelectedShift] = useState<{ label: string; value: string } | null>(null);
-  const [staffName, setStaffName] = useState("");
-  const [staffId, setStaffId] = useState("");
-  const [time, setTime] = useState("");
+  const [selectedStaff, setSelectedStaff] = useState<{ label: string; value: string } | null>(null);
+  const [staffOptions, setStaffOptions] = useState<{ label: string; value: string }[]>([]);
+  const [schedules, setSchedules] = useState<ScheduleEntry[]>([]);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handleSave = () => {
-    if (!date || !selectedRole || !selectedShift || !staffName || !staffId || !time) {
-      alert("Please fill out all fields.");
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const res = await fetch("/api/staff");
+        if (!res.ok) throw new Error("Failed to fetch staff list.");
+        const data: StaffOption[] = await res.json();
+        const options = data.map((staff: StaffOption) => ({
+          label: `${staff.name} (${staff.staffId})`,
+          value: staff.staffId,
+        }));
+        setStaffOptions(options);
+      } catch (err) {
+        console.error("Error loading staff data:", err);
+      }
+    };
+
+    fetchStaff();
+  }, []);
+
+  const handleSave = async () => {
+    if (!selectedStaff || !selectedRole || schedules.length === 0) {
+      alert("Please fill out all fields and schedule at least one day.");
       return;
     }
 
-    const newRoster = {
-      date: format(date, "dd/MM/yyyy"),
-      role: selectedRole.value,
-      staffName,
-      staffId,
-      shift: selectedShift.value,
-      time,
-    };
+    const res = await fetch("/api/staff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: selectedStaff.label.split(" (")[0],
+        staffId: selectedStaff.value,
+        role: selectedRole.value,
+        schedules,
+      }),
+    });
 
-    console.log("New Roster:", newRoster);
-    alert("Roster saved (mock)");
-
-    // Reset form (optional)
-    setDate(undefined);
-    setSelectedRole(null);
-    setSelectedShift(null);
-    setStaffName("");
-    setStaffId("");
-    setTime("");
+    if (res.ok) {
+      alert("Roster saved.");
+      router.push("/staff-management");
+    } else {
+      alert("Error saving staff schedule.");
+    }
   };
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Add New Roster</h1>
+      <h1 className="text-2xl font-semibold mb-4">Add New Staff</h1>
       <div className="bg-white rounded-lg shadow p-6 space-y-4">
 
-        {/* Staff Name */}
+        {/* Select Staff */}
         <div>
-          <label className="font-medium">Staff Name:</label>
-          <Input
-            type="text"
-            placeholder="Enter staff name"
-            value={staffName}
-            onChange={(e) => setStaffName(e.target.value)}
-          />
-        </div>
-
-        {/* Staff ID */}
-        <div>
-          <label className="font-medium">Staff ID:</label>
-          <Input
-            type="text"
-            placeholder="Enter staff ID"
-            value={staffId}
-            onChange={(e) => setStaffId(e.target.value)}
-          />
+          <label className="font-medium">Select Staff:</label>
+          {isClient && (
+            <Select<{ label: string; value: string }>
+              options={staffOptions}
+              value={selectedStaff}
+              onChange={(selected: { label: string; value: string } | null) => setSelectedStaff(selected)}
+              placeholder="Search & select staff"
+            />
+          )}
         </div>
 
         {/* Select Role */}
         <div>
           <label className="font-medium">Select Role:</label>
           {isClient && (
-            <Select
+            <Select<{ label: string; value: string }>
               options={roles.map((role) => ({ label: role, value: role }))}
               value={selectedRole}
-              onChange={(selected) =>
-                setSelectedRole(selected as { label: string; value: string } | null)
-              }
+              onChange={(selected: { label: string; value: string } | null) => setSelectedRole(selected)}
               placeholder="Search & select role"
             />
           )}
         </div>
 
-        {/* Select Shift */}
-        <div>
-          <label className="font-medium">Select Shift:</label>
-          {isClient && (
-            <Select
-              options={shifts.map((shift) => ({ label: shift, value: shift }))}
-              value={selectedShift}
-              onChange={(selected) =>
-                setSelectedShift(selected as { label: string; value: string } | null)
-              }
-              placeholder="Search & select shift"
-            />
-          
-          )}
-        </div>
-
-        {/* Select Date */}
-        <div>
-          <label className="font-medium">Select Roster Date:</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : "Select date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              {isClient && (
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(d) => setDate(d || undefined)}
-                  initialFocus
-                />
-              )}
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* Time */}
-        <div>
-          <label className="font-medium">Time:</label>
-          <Input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="w-[240px]"
-          />
-        </div>
+        {/* Weekly Schedule */}
+        <WeeklyScheduleForm onChange={setSchedules} />
 
         {/* Save Button */}
         <div className="flex gap-4 mt-6">
           <Button className="bg-green-500 hover:bg-green-600" onClick={handleSave}>
-            Save Roster
+            Save Staff Schedule
           </Button>
 
           <Button
