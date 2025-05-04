@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UsersIcon, SettingsIcon } from '@/components/ui/icons';
+import { UsersIcon } from '@/components/ui/icons';
 import Image from 'next/image';
 
 const navItems = [
@@ -13,7 +13,6 @@ const navItems = [
   { name: 'Education Content', href: '/education-content', icon: UsersIcon },
   { name: 'Bed Management', href: '/bed-management', icon: UsersIcon },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: UsersIcon },
-  { name: 'Settings', href: '/settings', icon: SettingsIcon },
 ];
 
 export default function NavigationBar() {
@@ -23,7 +22,7 @@ export default function NavigationBar() {
     <nav className="fixed top-0 left-0 h-screen w-64 bg-white text-gray-900 flex flex-col p-4 shadow-md">
       {/* Company Logo */}
       <div className="flex items-center justify-center py-4 border-b border-gray-200">
-        <Link href="/dashboard">
+        <Link href="/">
           <Image src="/logo.png" alt="Company Logo" width={120} height={40} className="cursor-pointer" />
         </Link>
       </div>
