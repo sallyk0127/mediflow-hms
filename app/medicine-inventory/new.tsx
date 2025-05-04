@@ -84,13 +84,9 @@ export default function NewMedicineInventory() {
   return (
     <div className="container mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <Input
-          type="search"
-          placeholder="Search"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-72"
-        />
+      <div className="relative w-72">
+          <Input type="search" placeholder="Search" className="pl-8" />
+        </div>
         <Popover>
           <PopoverTrigger asChild>
             <Button
