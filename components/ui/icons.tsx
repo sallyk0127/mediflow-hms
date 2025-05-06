@@ -59,4 +59,3 @@ export function UsersIcon(props: React.SVGProps<SVGSVGElement>) {
       </svg>
     );
   }
-  

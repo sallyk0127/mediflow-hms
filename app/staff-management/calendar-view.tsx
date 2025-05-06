@@ -51,16 +51,18 @@ export default function WeeklyCalendar() {
       }[] = await res.json();
 
       const allSchedules: Schedule[] = data.flatMap((staff) =>
-        staff.schedules.map((s) => ({
-          ...s,
-          staff: {
-            name: staff.name,
-            role: staff.role,
-            department: staff.department || undefined,
-            staffId: staff.staffId
-          }
-        }))
-      );
+        Array.isArray(staff.schedules)
+          ? staff.schedules.map((s) => ({
+              ...s,
+              staff: {
+                name: staff.name,
+                role: staff.role,
+                department: staff.department || undefined,
+                staffId: staff.staffId
+              }
+            }))
+          : []
+      );      
 
       setSchedules(allSchedules);
     };

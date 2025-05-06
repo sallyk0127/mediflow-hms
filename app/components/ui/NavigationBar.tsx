@@ -2,18 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UsersIcon, SettingsIcon } from '@/components/ui/icons';
+import {
+  LayoutDashboard,
+  CalendarDays,
+  FilePlus,
+  Users,
+  BookOpen,
+  BedDouble,
+  Pill,
+  LogOut,
+} from 'lucide-react';
 import Image from 'next/image';
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: UsersIcon },
-  { name: 'Appointments', href: '/appointments', icon: UsersIcon },
-  { name: 'EMR', href: '/emr', icon: UsersIcon },
-  { name: 'Staff Management', href: '/staff-management', icon: UsersIcon },
-  { name: 'Education Content', href: '/education-content', icon: UsersIcon },
-  { name: 'Bed Management', href: '/bed-management', icon: UsersIcon },
-  { name: 'Medicine Inventory', href: '/medicine-inventory', icon: UsersIcon },
-  { name: 'Settings', href: '/settings', icon: SettingsIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Appointments', href: '/appointments', icon: CalendarDays },
+  { name: 'EMR', href: '/emr', icon: FilePlus },
+  { name: 'Staff Management', href: '/staff-management', icon: Users },
+  { name: 'Education Content', href: '/education-content', icon: BookOpen },
+  { name: 'Bed Management', href: '/bed-management', icon: BedDouble },
+  { name: 'Medicine Inventory', href: '/medicine-inventory', icon: Pill },
 ];
 
 export default function NavigationBar() {
@@ -23,7 +31,7 @@ export default function NavigationBar() {
     <nav className="fixed top-0 left-0 h-screen w-64 bg-white text-gray-900 flex flex-col p-4 shadow-md">
       {/* Company Logo */}
       <div className="flex items-center justify-center py-4 border-b border-gray-200">
-        <Link href="/dashboard">
+        <Link href="/">
           <Image src="/logo.png" alt="Company Logo" width={120} height={40} className="cursor-pointer" />
         </Link>
       </div>
@@ -45,6 +53,18 @@ export default function NavigationBar() {
           </li>
         ))}
       </ul>
+        <div className="mt-auto pt-4 border-t border-gray-200">
+        <button
+          onClick={() => {
+            // Replace with your logout logic
+            console.log("Logging out...");
+          }}
+          className="flex items-center p-2 w-full text-left rounded-md transition-all hover:bg-gray-100"
+        >
+          <LogOut className="w-5 h-5 mr-3" />
+          <span>Logout</span>
+        </button>
+      </div>
     </nav>
   );
 }
