@@ -6,15 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Select from "react-select";
 
-const roles = [
-  "Senior Consultants", "Registrars", "Residents", "Interns", "Student Doctors",
-  "Nurse Unit Manager", "Associate Nurse Unit Manager", "Nurse Practitioners",
-  "Specialist Nurses", "Registered Nurses", "Enrolled Nurses", "Dietitians",
-  "Occupational Therapists", "Pharmacists", "Physiotherapists", "Podiatrists",
-  "Speech Pathologists", "Clinical Assistants", "Patient Service Assistants",
-  "Porters", "Ward Clerks"
-];
-
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 interface StaffOption {
@@ -69,11 +60,14 @@ function WeeklyScheduleForm({ onChange }: { onChange: (schedules: ScheduleEntry[
 export default function AddRosterPage() {
   const router = useRouter();
 
-  const [selectedRole, setSelectedRole] = useState<{ label: string; value: string } | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<{ label: string; value: string } | null>(null);
   const [staffOptions, setStaffOptions] = useState<{ label: string; value: string }[]>([]);
   const [schedules, setSchedules] = useState<ScheduleEntry[]>([]);
   const [isClient, setIsClient] = useState(false);
+
+  // Moved useState hooks inside the functional component
+  const [role, setRole] = useState('');
+  const [department, setDepartment] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -98,8 +92,20 @@ export default function AddRosterPage() {
     fetchStaff();
   }, []);
 
+  useEffect(() => {
+    if (selectedStaff) {
+      // Temporary mock logic (replace with real data later)
+      setRole("Nurse");
+      setDepartment("Emergency");
+    } else {
+      setRole("");
+      setDepartment("");
+    }
+  }, [selectedStaff]);
+  
+
   const handleSave = async () => {
-    if (!selectedStaff || !selectedRole || schedules.length === 0) {
+    if (!selectedStaff || !role || !department || schedules.length === 0) {
       alert("Please fill out all fields and schedule at least one day.");
       return;
     }
@@ -110,7 +116,8 @@ export default function AddRosterPage() {
       body: JSON.stringify({
         name: selectedStaff.label.split(" (")[0],
         staffId: selectedStaff.value,
-        role: selectedRole.value,
+        role,
+        department,
         schedules,
       }),
     });
@@ -141,18 +148,28 @@ export default function AddRosterPage() {
           )}
         </div>
 
-        {/* Select Role */}
-        <div>
-          <label className="font-medium">Select Role:</label>
-          {isClient && (
-            <Select<{ label: string; value: string }>
-              options={roles.map((role) => ({ label: role, value: role }))}
-              value={selectedRole}
-              onChange={(selected: { label: string; value: string } | null) => setSelectedRole(selected)}
-              placeholder="Search & select role"
-            />
-          )}
+        {/* Info Boxes: Role, Department, ID */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block font-medium mb-1">Role:</label>
+            <div className="border rounded px-3 py-2 bg-gray-100 text-gray-700">
+              {role || "-"}
+            </div>
+          </div>
+          <div className="flex-1">
+            <label className="block font-medium mb-1">Department:</label>
+            <div className="border rounded px-3 py-2 bg-gray-100 text-gray-700">
+              {department || "-"}
+            </div>
+          </div>
+          <div className="flex-1">
+            <label className="block font-medium mb-1">Staff ID:</label>
+            <div className="border rounded px-3 py-2 bg-gray-100 text-gray-700">
+              {selectedStaff?.value || "-"}
+            </div>
+          </div>
         </div>
+
 
         {/* Weekly Schedule */}
         <WeeklyScheduleForm onChange={setSchedules} />
