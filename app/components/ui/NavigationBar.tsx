@@ -11,6 +11,7 @@ import {
   BedDouble,
   Pill,
   LogOut,
+  UserCircle,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -26,6 +27,11 @@ const navItems = [
 
 export default function NavigationBar() {
   const pathname = usePathname();
+
+  // Don't show navbar on auth pages
+  if (pathname === '/auth') {
+    return null;
+  }
 
   return (
     <nav className="fixed top-0 left-0 h-screen w-64 bg-white text-gray-900 flex flex-col p-4 shadow-md">
@@ -53,7 +59,22 @@ export default function NavigationBar() {
           </li>
         ))}
       </ul>
-        <div className="mt-auto pt-4 border-t border-gray-200">
+      
+      {/* Login/Auth Link - Added here */}
+      <div className="mt-6 border-t border-gray-200 pt-4">
+        <Link href="/auth">
+          <div
+            className={`flex items-center p-2 rounded-md transition-all cursor-pointer ${
+              pathname === '/auth' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
+            }`}
+          >
+            <UserCircle className="w-5 h-5 mr-3" />
+            <span>Login / Register</span>
+          </div>
+        </Link>
+      </div>
+      
+      <div className="mt-auto pt-4 border-t border-gray-200">
         <button
           onClick={() => {
             // Replace with your logout logic
