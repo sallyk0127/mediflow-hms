@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   CalendarDays,
@@ -10,7 +10,6 @@ import {
   BookOpen,
   BedDouble,
   Pill,
-  LogOut,
   UserCircle,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -27,6 +26,7 @@ const navItems = [
 
 export default function NavigationBar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   // Don't show navbar on auth pages
   if (pathname === '/auth') {
@@ -60,30 +60,16 @@ export default function NavigationBar() {
         ))}
       </ul>
       
-      {/* Login/Auth Link - Added here */}
-      <div className="mt-6 border-t border-gray-200 pt-4">
-        <Link href="/auth">
-          <div
-            className={`flex items-center p-2 rounded-md transition-all cursor-pointer ${
-              pathname === '/auth' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
-            }`}
-          >
-            <UserCircle className="w-5 h-5 mr-3" />
-            <span>Login / Register</span>
-          </div>
-        </Link>
-      </div>
-      
+      {/* Login / Register Button */}
       <div className="mt-auto pt-4 border-t border-gray-200">
         <button
           onClick={() => {
-            // Replace with your logout logic
-            console.log("Logging out...");
+            router.push('/auth');
           }}
           className="flex items-center p-2 w-full text-left rounded-md transition-all hover:bg-gray-100"
         >
-          <LogOut className="w-5 h-5 mr-3" />
-          <span>Logout</span>
+          <UserCircle className="w-5 h-5 mr-3" />
+          <span>Login / Register</span>
         </button>
       </div>
     </nav>
