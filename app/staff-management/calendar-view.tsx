@@ -19,7 +19,6 @@ interface Schedule {
   };
 }
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0:00 to 23:00
 
 const roleColors: Record<string, string> = {
