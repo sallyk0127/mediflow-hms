@@ -35,26 +35,30 @@ function WeeklyScheduleForm({ onChange }: { onChange: (schedules: ScheduleEntry[
   };
 
   return (
-    <div className="space-y-3 mt-6">
-      <h2 className="font-semibold text-lg">Weekly Schedule</h2>
-      {schedule.map((entry, index) => (
-        <div key={entry.day} className="flex items-center gap-4">
-          <span className="w-24">{entry.day}</span>
-          <Input
-            type="time"
-            className="w-32"
-            value={entry.startTime}
-            onChange={(e) => updateTime(index, "startTime", e.target.value)}
-          />
-          <span>-</span>
-          <Input
-            type="time"
-            className="w-32"
-            value={entry.endTime}
-            onChange={(e) => updateTime(index, "endTime", e.target.value)}
-          />
-        </div>
-      ))}
+    <div className="mt-6 w-full">
+      <h2 className="mb-4 text-lg font-semibold">Weekly Schedule</h2>
+      <div className="space-y-3 w-full">
+        {schedule.map((entry, index) => (
+          <div key={entry.day} className="flex items-center w-full">
+            <span className="w-24 pr-3 text-right font-medium">{entry.day}</span>
+            <div className="flex items-center gap-2 flex-1">
+              <Input
+                type="time"
+                className="flex-1 max-w-[140px]"
+                value={entry.startTime}
+                onChange={(e) => updateTime(index, "startTime", e.target.value)}
+              />
+              <span className="w-4 text-center">-</span>
+              <Input
+                type="time"
+                className="flex-1 max-w-[140px]"
+                value={entry.endTime}
+                onChange={(e) => updateTime(index, "endTime", e.target.value)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
