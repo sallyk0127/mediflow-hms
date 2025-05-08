@@ -5,7 +5,15 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const existing = await prisma.staff.findUnique({ where: { staffId: body.staffId } });
+    // Validation: ensure required fields exist
+    if (!body.name || !body.staffId || !body.role || !body.department) {
+      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+    }
+
+    const existing = await prisma.staff.findUnique({
+      where: { staffId: body.staffId },
+    });
+
     if (existing) {
       return NextResponse.json({ error: "Staff ID already exists." }, { status: 400 });
     }
@@ -15,7 +23,10 @@ export async function POST(req: Request) {
         name: body.name,
         staffId: body.staffId,
         role: body.role,
-        schedules: { create: body.schedules || [] },
+        department: body.department, 
+        schedules: {
+          create: body.schedules || [],
+        },
       },
     });
 
@@ -32,6 +43,9 @@ export async function GET() {
       select: {
         name: true,
         staffId: true,
+        role: true,
+        department: true,
+        schedules: true,
       },
     });
     return NextResponse.json(staffList);

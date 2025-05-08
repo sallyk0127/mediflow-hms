@@ -70,12 +70,13 @@ enum BedStatus {
 }
 
 model Staff {
-  id        String           @id @default(cuid())
-  name      String
-  staffId   String           @unique
-  role      String
-  createdAt DateTime         @default(now())
-  schedules WeeklySchedule[] // Relation to weekly schedule
+  id         String           @id @default(cuid())
+  name       String
+  staffId    String           @unique
+  role       String
+  department String
+  createdAt  DateTime         @default(now())
+  schedules  WeeklySchedule[] 
 }
 
 model WeeklySchedule {

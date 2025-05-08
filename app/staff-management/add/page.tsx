@@ -8,9 +8,11 @@ import Select from "react-select";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-interface StaffOption {
+interface StaffRecord {
   name: string;
   staffId: string;
+  role: string;
+  department: string;
 }
 
 interface ScheduleEntry {
@@ -60,14 +62,10 @@ function WeeklyScheduleForm({ onChange }: { onChange: (schedules: ScheduleEntry[
 export default function AddRosterPage() {
   const router = useRouter();
 
-  const [selectedStaff, setSelectedStaff] = useState<{ label: string; value: string } | null>(null);
-  const [staffOptions, setStaffOptions] = useState<{ label: string; value: string }[]>([]);
+  const [staffOptions, setStaffOptions] = useState<StaffRecord[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<StaffRecord | null>(null);
   const [schedules, setSchedules] = useState<ScheduleEntry[]>([]);
   const [isClient, setIsClient] = useState(false);
-
-  // Moved useState hooks inside the functional component
-  const [role, setRole] = useState('');
-  const [department, setDepartment] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -78,12 +76,9 @@ export default function AddRosterPage() {
       try {
         const res = await fetch("/api/staff");
         if (!res.ok) throw new Error("Failed to fetch staff list.");
-        const data: StaffOption[] = await res.json();
-        const options = data.map((staff: StaffOption) => ({
-          label: `${staff.name} (${staff.staffId})`,
-          value: staff.staffId,
-        }));
-        setStaffOptions(options);
+        const data: StaffRecord[] = await res.json();
+        console.log("Fetched staff:", data);
+        setStaffOptions(data);
       } catch (err) {
         console.error("Error loading staff data:", err);
       }
@@ -92,21 +87,9 @@ export default function AddRosterPage() {
     fetchStaff();
   }, []);
 
-  useEffect(() => {
-    if (selectedStaff) {
-      // Temporary mock logic (replace with real data later)
-      setRole("Nurse");
-      setDepartment("Emergency");
-    } else {
-      setRole("");
-      setDepartment("");
-    }
-  }, [selectedStaff]);
-  
-
   const handleSave = async () => {
-    if (!selectedStaff || !role || !department || schedules.length === 0) {
-      alert("Please fill out all fields and schedule at least one day.");
+    if (!selectedStaff || schedules.length === 0) {
+      alert("Please select a staff and schedule at least one day.");
       return;
     }
 
@@ -114,10 +97,10 @@ export default function AddRosterPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: selectedStaff.label.split(" (")[0],
-        staffId: selectedStaff.value,
-        role,
-        department,
+        name: selectedStaff.name,
+        staffId: selectedStaff.staffId,
+        role: selectedStaff.role,
+        department: selectedStaff.department,
         schedules,
       }),
     });
@@ -139,10 +122,12 @@ export default function AddRosterPage() {
         <div>
           <label className="font-medium">Select Staff:</label>
           {isClient && (
-            <Select<{ label: string; value: string }>
+            <Select<StaffRecord>
               options={staffOptions}
+              getOptionLabel={(s) => `${s.name} (${s.staffId})`}
+              getOptionValue={(s) => s.staffId}
               value={selectedStaff}
-              onChange={(selected: { label: string; value: string } | null) => setSelectedStaff(selected)}
+              onChange={(selected) => setSelectedStaff(selected ?? null)}
               placeholder="Search & select staff"
             />
           )}
@@ -153,23 +138,22 @@ export default function AddRosterPage() {
           <div className="flex-1">
             <label className="block font-medium mb-1">Role:</label>
             <div className="border rounded px-3 py-2 bg-gray-100 text-gray-700">
-              {role || "-"}
+              {selectedStaff?.role || "-"}
             </div>
           </div>
           <div className="flex-1">
             <label className="block font-medium mb-1">Department:</label>
             <div className="border rounded px-3 py-2 bg-gray-100 text-gray-700">
-              {department || "-"}
+              {selectedStaff?.department || "-"}
             </div>
           </div>
           <div className="flex-1">
             <label className="block font-medium mb-1">Staff ID:</label>
             <div className="border rounded px-3 py-2 bg-gray-100 text-gray-700">
-              {selectedStaff?.value || "-"}
+              {selectedStaff?.staffId || "-"}
             </div>
           </div>
         </div>
-
 
         {/* Weekly Schedule */}
         <WeeklyScheduleForm onChange={setSchedules} />
