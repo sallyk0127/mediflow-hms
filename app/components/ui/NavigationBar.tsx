@@ -19,9 +19,9 @@ const navItems = [
   { name: 'Appointments', href: '/appointments', icon: CalendarDays },
   { name: 'EMR', href: '/emr', icon: FilePlus },
   { name: 'Staff Management', href: '/staff-management', icon: Users },
-  { name: 'Education Content', href: '/education-content', icon: BookOpen },
   { name: 'Bed Management', href: '/bed-management', icon: BedDouble },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: Pill },
+  { name: 'Education Content', href: '/education-content', icon: BookOpen },
 ];
 
 export default function NavigationBar() {
