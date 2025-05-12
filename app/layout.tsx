@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import NavigationBar from '@/appComponents/ui/NavigationBar';
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster"; 
-
+import OriginLayout from "./origin-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,14 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}>
-        {/* Fixed Navigation Bar */}
-        <NavigationBar />
-
-        {/* Main Content Area, ensuring it does not overlap the navbar */}
-        <main className="flex-1 ml-64 p-8 overflow-auto bg-[#F1F8FF] min-h-screen">
-          {children}
-            <Toaster /> {/* Add this to render the toast messages */}
-        </main>
+        <OriginLayout>{children}</OriginLayout>
       </body>
     </html>
   );

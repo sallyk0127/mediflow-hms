@@ -27,7 +27,7 @@ const navItems = [
 export default function NavigationBar() {
   const pathname = usePathname();
   const router = useRouter();
-
+  
   // Don't show navbar on auth pages
   if (pathname === '/auth') {
     return null;
@@ -60,7 +60,7 @@ export default function NavigationBar() {
         ))}
       </ul>
       
-      {/* Login / Register Button */}
+      {/* Login */}
       <div className="mt-auto pt-4 border-t border-gray-200">
         <button
           onClick={() => {
@@ -69,7 +69,7 @@ export default function NavigationBar() {
           className="flex items-center p-2 w-full text-left rounded-md transition-all hover:bg-gray-100"
         >
           <UserCircle className="w-5 h-5 mr-3" />
-          <span>Login / Register</span>
+          <span>Login</span>
         </button>
       </div>
     </nav>

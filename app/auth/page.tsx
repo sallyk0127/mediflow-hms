@@ -5,19 +5,19 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
   });
   const router = useRouter();
-
+  
+  //Real logic for checking auth to database
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const endpoint = '/api/auth/login';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -31,7 +31,6 @@ export default function AuthPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Authentication failed');
       }
-      
       router.push('/dashboard');
     } catch {
     }
@@ -44,7 +43,7 @@ export default function AuthPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
+      <div style={{ width: '480px' }} className="w-full p-8 space-y-8 bg-white rounded-lg shadow-lg">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <Image src="/logo.png" alt="MediFlow Logo" width={150} height={50} />
@@ -61,33 +60,6 @@ export default function AuthPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {!isLogin && (
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <div className="mt-1">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="John Doe"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email Address
@@ -154,11 +126,6 @@ export default function AuthPage() {
                 </label>
               </div>
 
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot your password?
-                </a>
-              </div>
             </div>
           )}
 
@@ -167,33 +134,10 @@ export default function AuthPage() {
               type="submit"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              {isLogin ? 'Sign In' : 'Sign Up'}
+              Sign in
             </button>
           </div>
         </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                {isLogin ? 'New to MediFlow?' : 'Already have an account?'}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              {isLogin ? 'Create an account' : 'Sign in to your account'}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
