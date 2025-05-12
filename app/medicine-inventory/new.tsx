@@ -22,10 +22,17 @@ interface Medicine {
   type: string;
   price: string;
   stock: number;
-  expiry: string; // e.g., "01 Jun 2026"
+  expiry: Date | string;
   manufacturer: string;
   code: string;
 }
+
+const formatExpiryDate = (date: Date | string) => {
+  if (typeof date === 'string') {
+    return format(new Date(date), 'dd MMM yyyy');
+  }
+  return format(date, 'dd MMM yyyy');
+};
 
 export default function NewMedicineInventory() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -60,9 +67,15 @@ export default function NewMedicineInventory() {
 
   const filtered = medicines.filter((med) => {
     const medDate = new Date(med.expiry);
-    const isFuture = medDate >= new Date(today.setHours(0, 0, 0, 0));
-    const matchDate = date ? medDate.toDateString() === date.toDateString() : true;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const isFuture = medDate >= todayStart;
+    const matchDate = date ? 
+      medDate.toDateString() === date.toDateString() : 
+      true;
     const matchSearch = med.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
     return isFuture && matchDate && matchSearch;
   });
 
@@ -124,7 +137,7 @@ export default function NewMedicineInventory() {
                   <td className="p-4">{med.type}</td>
                   <td className="p-4">{med.price}</td>
                   <td className="p-4">{med.stock} pcs</td>
-                  <td className="p-4">{med.expiry}</td>
+                  <td className="p-4">{formatExpiryDate(med.expiry)}</td>
                   <td className="p-4">{med.manufacturer}</td>
                   <td className="p-4 flex space-x-2">
                     <Button size="sm" variant="outline" onClick={() => handleView(med)}>
@@ -173,7 +186,7 @@ export default function NewMedicineInventory() {
               <DialogDescription className="text-sm text-gray-600 mt-2">
                 {selected.type} · {selected.manufacturer} <br />
                 Code: {selected.code} <br />
-                Expires: {selected.expiry}
+                Expires: {formatExpiryDate(selected.expiry)}
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
