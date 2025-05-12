@@ -63,8 +63,6 @@ export default function NewMedicineInventory() {
     setIsModalOpen(true);
   };
 
-  const today = new Date();
-
   const filtered = medicines.filter((med) => {
     const medDate = new Date(med.expiry);
     const todayStart = new Date();
