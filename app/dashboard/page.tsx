@@ -6,7 +6,7 @@ import {
   ChevronDown,
   Users,
   Calendar,
-  FilePlus2,
+  Bed,
   UserCheck,
   Filter,
   CheckSquare,
@@ -397,10 +397,10 @@ const Dashboard = () => {
 
           <div className="bg-purple-50 p-2 rounded-lg text-center transition-transform hover:shadow-md duration-200">
             <div className="flex justify-center mb-1">
-              <FilePlus2 className="text-purple-600" size={16} />
+              <Bed className="text-purple-600" size={16} />
             </div>
-            <h3 className="text-lg font-bold">100</h3>
-            <p className="text-xs text-gray-600">Lab Tests</p>
+            <h3 className="text-lg font-bold">{roomData.reduce((total, room) => total + room.totalBeds, 0)}</h3>
+            <p className="text-xs text-gray-600">Total Beds</p>
           </div>
         </div>
       </div>
@@ -555,6 +555,9 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-700 p-2">Beds Availability</h2>
+            <a href="/bed-management" className="text-blue-500 text-xs hover:underline flex items-center pr-2">
+              View All <ExternalLink size={12} className="ml-1" />
+            </a>
           </div>
           <div className="flex-grow flex flex-col justify-center p-2">
             {loading ? (
