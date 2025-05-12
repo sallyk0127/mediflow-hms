@@ -10,7 +10,7 @@ import {
   UserCheck,
   Filter,
   CheckSquare,
-  Square
+  Square,
 } from 'lucide-react';
 
 interface Appointment {
@@ -28,10 +28,16 @@ interface EducationContent {
   authorAvatar: string;
 }
 
-interface PatientFee {
-  name: string;
-  avatar: string;
-  pending: boolean;
+interface PatientData {
+  id: number;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dob: string;
+  email: string | null;
+  phoneNumber: string | null;
+  medicareNumber: string | null;
+  createdAt: string;
 }
 
 interface FilterOption {
@@ -65,6 +71,8 @@ const Dashboard = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [roomData, setRoomData] = useState<RoomData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [patients, setPatients] = useState<PatientData[]>([]);
+  const [loadingPatients, setLoadingPatients] = useState(true);
 
   const timeframeOptions = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -82,7 +90,6 @@ const Dashboard = () => {
 
   // Fetch real room data
   useEffect(() => {
-
     const fetchRoomData = async () => {
       try {
         // Try to fetch real data
@@ -142,6 +149,23 @@ const Dashboard = () => {
     fetchRoomData();
   }, []);
 
+  // Fetch patient data
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await fetch('/api/patients/list?page=1&limit=5');
+        const data = await response.json();
+        setPatients(data.patients);
+      } catch (error) {
+        console.error("Failed to fetch patients:", error);
+      } finally {
+        setLoadingPatients(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
   const [filterOptions, setFilterOptions] = useState<FilterOption[]>([
     { id: 'high-severity', label: 'High Severity (S3-S4)', checked: false },
     { id: 'low-severity', label: 'Low Severity (S1-S2)', checked: false },
@@ -186,12 +210,6 @@ const Dashboard = () => {
     { title: "Do's and Don'ts in Hospital", author: 'Joel P', authorAvatar: '/avatars/joel.jpg' },
   ];
 
-  const patientFees: PatientFee[] = [
-    { name: 'EG Subramani', avatar: '/avatars/eg.jpg', pending: true },
-    { name: 'Elizabeth P', avatar: '/avatars/elizabeth.jpg', pending: true },
-    { name: 'Sumanth T', avatar: '/avatars/sumanth.jpg', pending: true },
-  ];
-
   const getSeverityClass = (severity: number) => {
     switch (severity) {
       case 4: return 'bg-red-500';
@@ -226,6 +244,18 @@ const Dashboard = () => {
     color: room.color,
     textColor: 'text-gray-700'
   }));
+
+  // Function to calculate age from date of birth
+  const calculateAge = (dob: string): number => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   return (
     <div className="p-2 h-screen flex flex-col">
@@ -461,7 +491,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Second row for Education Content and Patient Fee */}
+      {/* Second row for Education Content and Patient List */}
       <div className="grid grid-cols-2 gap-2 mb-2" style={{ height: '25vh' }}>
         {/* Education Content */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
@@ -490,30 +520,43 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Patient Fee */}
+        {/* Patient List */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
-            <h2 className="text-sm font-medium text-gray-700">Patient Fee</h2>
+            <h2 className="text-sm font-medium text-gray-700">Patient List</h2>
+            <a href="/emr" className="text-blue-500 text-xs hover:underline">View All</a>
           </div>
-          <div className="p-2 flex-grow">
-            {patientFees.map((patient, index) => (
-              <div key={index} className="flex justify-between items-center mb-2 p-1 hover:bg-gray-50 rounded-md transition-colors">
-                <div className="flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-gray-200 mr-1 overflow-hidden flex-shrink-0">
-                    <div className="w-full h-full flex items-center justify-center text-xs">
-                      {patient.name.charAt(0)}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-medium truncate max-w-xs">{patient.name}</h3>
-                    <p className="text-xs text-red-500">Fee pending</p>
-                  </div>
-                </div>
-                <button className="bg-blue-500 text-white px-2 py-0.5 rounded-md text-xs hover:bg-blue-600 shadow-sm transition-all">
-                  Request
-                </button>
-              </div>
-            ))}
+          <div className="p-2 flex-grow overflow-auto">
+            {loadingPatients ? (
+              <div className="text-center py-4 text-gray-500 text-sm">Loading patients...</div>
+            ) : patients.length > 0 ? (
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50">
+                  <tr className="border-b">
+                    <th className="p-1 text-left font-medium text-gray-600">Patient</th>
+                    <th className="p-1 text-left font-medium text-gray-600">Age</th>
+                    <th className="p-1 text-left font-medium text-gray-600">Gender</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {patients.map((patient) => (
+                    <tr key={patient.id} className="border-b hover:bg-gray-50">
+                      <td className="p-1 font-medium">
+                        {`${patient.firstName} ${patient.lastName}`}
+                      </td>
+                      <td className="p-1 text-gray-700">
+                        {calculateAge(patient.dob)}
+                      </td>
+                      <td className="p-1 text-gray-700">
+                        {patient.gender}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-4 text-gray-500 text-xs">No patients found</div>
+            )}
           </div>
         </div>
       </div>
