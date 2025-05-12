@@ -1,11 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Trash2 } from "lucide-react";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -14,6 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/hooks/use-toast"; 
 
 interface Medicine {
   name: string;
@@ -25,56 +27,39 @@ interface Medicine {
   code: string;
 }
 
-const medicines: Medicine[] = [
-  {
-    name: "Albuterol (salbutamol)",
-    type: "Inhaler",
-    price: "$28.55",
-    stock: 100,
-    expiry: "01 Jun 2026",
-    manufacturer: "John's Health Care",
-    code: "ALSXEC0123",
-  },
-  {
-    name: "Amoxicillin 250 mg",
-    type: "Tablet",
-    price: "$40.55",
-    stock: 28,
-    expiry: "21 Jul 2026",
-    manufacturer: "Pattikson Pvt Ltd",
-    code: "AMSXEC0043",
-  },
-  {
-    name: "Aspirin 300 mg",
-    type: "Tablet",
-    price: "$28.55",
-    stock: 190,
-    expiry: "01 Jun 2027",
-    manufacturer: "David's Ltd",
-    code: "ASPKC01010",
-  },
-];
-
 export default function NewMedicineInventory() {
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selected, setSelected] = useState<Medicine | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingStock, setEditingStock] = useState<{ code: string; current: number } | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchMedicines() {
+      try {
+        const res = await fetch("/api/medicine");
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        setMedicines(data);
+      } catch (err) {
+        console.error("Failed to fetch medicines:", err);
+      }
+    }
+
+    fetchMedicines();
+  }, []);
 
   const handleView = (medicine: Medicine) => {
     setSelected(medicine);
     setIsModalOpen(true);
   };
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
   const today = new Date();
 
   const filtered = medicines.filter((med) => {
-    const medDate = parse(med.expiry, "dd MMM yyyy", new Date());
+    const medDate = new Date(med.expiry);
     const isFuture = medDate >= new Date(today.setHours(0, 0, 0, 0));
     const matchDate = date ? medDate.toDateString() === date.toDateString() : true;
     const matchSearch = med.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,14 +69,14 @@ export default function NewMedicineInventory() {
   return (
     <div className="container mx-auto">
       <div className="flex justify-between items-center mb-6">
-      <div className="relative w-72">
-      <Input
-        type="search"
-        placeholder="Search"
-        className="pl-8"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+        <div className="relative w-72">
+          <Input
+            type="search"
+            placeholder="Search"
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <Popover>
           <PopoverTrigger asChild>
@@ -119,7 +104,7 @@ export default function NewMedicineInventory() {
               <th className="p-4 text-left text-sm font-medium text-gray-500">In Stock</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Expiry</th>
               <th className="p-4 text-left text-sm font-medium text-gray-500">Manufacturer</th>
-              <th className="p-4 text-left text-sm font-medium text-gray-500">User Action</th>
+              <th className="p-4 text-left text-sm font-medium text-gray-500">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -145,10 +130,31 @@ export default function NewMedicineInventory() {
                     <Button size="sm" variant="outline" onClick={() => handleView(med)}>
                       View
                     </Button>
-                    <Button size="sm" variant="secondary" onClick={() => alert(`Add stock to ${med.name}`)}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setEditingStock({ code: med.code, current: med.stock })}
+                    >
                       ➕
                     </Button>
-                    <Button size="sm" variant="destructive">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={async () => {
+                        if (confirm(`Are you sure you want to delete ${med.name}?`)) {
+                          const res = await fetch(`/api/medicine/${med.code}`, {
+                            method: "DELETE",
+                          });
+                          const result = await res.json();
+                          if (result.success) {
+                            toast({ title: "Medicine deleted" });
+                            setMedicines((prev) => prev.filter((m) => m.code !== med.code));   
+                          } else {
+                            toast({ title: "Deletion failed", variant: "destructive" });
+                          }
+                        }
+                      }}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </td>
@@ -159,7 +165,7 @@ export default function NewMedicineInventory() {
         </table>
       </div>
 
-      {isHydrated && selected && (
+      {selected && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent>
             <DialogHeader>
@@ -170,6 +176,56 @@ export default function NewMedicineInventory() {
                 Expires: {selected.expiry}
               </DialogDescription>
             </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {editingStock && (
+        <Dialog open={!!editingStock} onOpenChange={() => setEditingStock(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Stock</DialogTitle>
+              <DialogDescription>
+                Update stock quantity for <b>{editingStock.code}</b>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                type="number"
+                value={editingStock.current}
+                onChange={(e) =>
+                  setEditingStock({ ...editingStock, current: parseInt(e.target.value) })
+                }
+              />
+              <div className="flex gap-2 justify-end">
+                <Button
+                  onClick={async () => {
+                    const res = await fetch(`/api/medicine/${editingStock.code}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ stock: editingStock.current }),
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                      toast({ title: "Stock updated" });
+                      setMedicines((prev) =>
+                        prev.map((m) =>
+                          m.code === editingStock.code ? { ...m, stock: editingStock.current } : m
+                        )
+                      );
+                      setEditingStock(null);                      
+                    } else {
+                      toast({ title: "Update failed", variant: "destructive" });
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+                <Button variant="ghost" onClick={() => setEditingStock(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}
