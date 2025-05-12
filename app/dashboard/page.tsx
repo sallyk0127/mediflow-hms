@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import DashboardBarChart from './DashboardBarChart';
@@ -11,6 +11,7 @@ import {
   Filter,
   CheckSquare,
   Square,
+  ExternalLink,
 } from 'lucide-react';
 
 interface Appointment {
@@ -22,10 +23,10 @@ interface Appointment {
   doctor: string;
 }
 
-interface EducationContent {
+interface TrainingSession {
+  role: string;
   title: string;
-  author: string;
-  authorAvatar: string;
+  description: string;
 }
 
 interface PatientData {
@@ -73,8 +74,88 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState<PatientData[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
+  const [selectedTraining, setSelectedTraining] = useState<TrainingSession | null>(null);
 
   const timeframeOptions = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
+
+  // Training sessions data from training.tsx
+  const trainingSessions: TrainingSession[] = [
+    {
+      role: "Nurses",
+      title: "Autism Awareness",
+      description: `Autism Awareness Training for Nurses
+
+        Introduction  
+        Autism Spectrum Disorder (ASD) affects many individuals and their families. As nurses, it's essential to understand how to interact with and support autistic patients effectively. This report outlines key areas of focus for autism awareness training.
+
+        Understanding Autism  
+        Autism is a developmental disorder characterized by challenges in communication, social interaction, and behavioral patterns. Recognizing the early signs, such as delayed speech or difficulties in social situations, is crucial for timely intervention.
+
+        Sensory Sensitivities  
+        Many autistic individuals experience sensory sensitivities. This can include heightened responses to sounds, lights, or textures. Nurses should be aware of these sensitivities to create a comfortable healthcare environment. For example, dimming lights or reducing noise during examinations can help ease anxiety for the patient.
+
+        Supporting Families  
+        Families of autistic children often feel anxious and protective. It's vital for nurses to approach these families with empathy and understanding. Open communication is key; reassure them that their concerns are valid and that support is available. Providing resources and connecting them with support groups can also be beneficial.
+
+        Effective Communication Strategies  
+        When interacting with autistic patients, use clear and simple language. Avoid jargon and be patient, allowing extra time for responses. Non-verbal communication, like using visual aids, can also enhance understanding. Always listen actively and validate the patient's feelings.
+
+        Creating an Inclusive Healthcare Environment  
+        Nurses play a significant role in fostering inclusivity. This includes being mindful of sensory triggers and creating a calming atmosphere. Training sessions should focus on practical strategies to improve patient interactions and create a welcoming environment for all.
+
+        Continuous Education  
+        To better understand autism spectrum disorders, nurses should engage in ongoing education. Workshops, seminars, and online courses can provide valuable insights into best practices for patient care.
+
+        Conclusion  
+        By focusing on these key areas, nurses can enhance their understanding of autism and improve their interactions with autistic patients and their families. This training will not only benefit the patients but also create a more supportive healthcare environment.`,
+    },
+    {
+      role: "Nurses, Doctors, and Staff",
+      title: "Self Wellbeing",
+      description: `Self Wellbeing Training
+
+        1. Recognizing Signs of Stress  
+        Be aware of the signs of stress in yourself and your colleagues. This could include changes in mood, irritability, fatigue, or withdrawal from social interactions. Recognizing these signs early can help address issues before they escalate.
+
+        2. Self-Care Strategies  
+        Make sure to take care of yourself. This could mean taking short breaks during your shift, staying hydrated, and eating well. Find activities outside of work that help you relax, like exercising, reading, or spending time with friends and family.
+
+        3. Seeking Help  
+        Don't hesitate to seek help if you're feeling overwhelmed. Our hospital offers employees assistance programs (EAPs) that provide confidential counseling services. It's important to talk to someone about what you're going through.
+
+        4. Peer Support  
+        Connect with your colleagues. Sometimes just talking to someone who understands what you're experiencing can be really helpful. Consider forming a support group with your fellow nurses or staff to share experiences and coping strategies.
+
+        5. Mindfulness and Stress Management  
+        Techniques like mindfulness, meditation, or yoga can really help manage stress. Even taking a few minutes to breathe deeply or practice mindfulness during a break can make a difference.
+
+        By implementing these strategies, you can better support your own mental health and that of your colleagues. Remember, taking care of yourself is essential to providing the best care for your patients.`,
+    },
+    {
+      role: "All Healthcare Professionals",
+      title: "Proper Report Writing",
+      description: `Proper Report Writing Training
+
+        Here are some things to consider when writing professional reports:
+
+        1. Clarity and Conciseness  
+        Make sure your writing is clear and to the point. Avoid jargon or overly complex language. Use simple terms so that anyone reading the report can understand it easily.
+
+        2. Structure  
+        Organize your report logically. Start with an introduction, followed by the body where you detail the observations, assessments, and interventions, and then conclude with any recommendations or follow-up actions.
+
+        3. Accuracy  
+        Ensure all information is accurate and factual. Double-check any statistics or data you include. If you're referencing patient information, make sure it's correct and up to date.
+
+        4. Objective Tone  
+        Use an objective and professional tone throughout your report. Avoid personal opinions or emotional language. Stick to the facts and observations.
+
+        5. Use of Headings and Bullet Points  
+        This can help break up the text and make it easier to read. Headings can guide the reader through different sections, and bullet points can highlight key information.
+
+        By keeping these points in mind, you can write effective and professional reports that will be valuable for patient care and communication within the healthcare team.`,
+    },
+  ];
 
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -203,12 +284,6 @@ const Dashboard = () => {
       }
     });
   });
-
-  const educationContents: EducationContent[] = [
-    { title: '4 Nutritions to Take Daily', author: 'Joel P', authorAvatar: '/avatars/joel.jpg' },
-    { title: '6 Healthy Lifestyle Tips', author: 'John P', authorAvatar: '/avatars/john.jpg' },
-    { title: "Do's and Don'ts in Hospital", author: 'Joel P', authorAvatar: '/avatars/joel.jpg' },
-  ];
 
   const getSeverityClass = (severity: number) => {
     switch (severity) {
@@ -496,35 +571,61 @@ const Dashboard = () => {
         {/* Education Content */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
-            <h2 className="text-sm font-medium text-gray-700">Education Content</h2>
+            <h2 className="text-sm font-medium text-gray-700">Training Content</h2>
+            <a href="/education-content" className="text-blue-500 text-xs hover:underline flex items-center">
+              View All <ExternalLink size={12} className="ml-1" />
+            </a>
           </div>
-          <div className="p-2 flex-grow">
-            {educationContents.map((content, index) => (
-              <div key={index} className="flex justify-between items-center mb-2 p-1 hover:bg-gray-50 rounded-md transition-colors">
+          <div className="p-2 flex-grow overflow-auto">
+            {trainingSessions.map((session, index) => (
+              <div 
+                key={index} 
+                className="flex justify-between items-center mb-2 p-1 hover:bg-gray-50 rounded-md transition-colors cursor-pointer"
+                onClick={() => setSelectedTraining(session)}
+              >
                 <div className="flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-gray-200 mr-1 overflow-hidden flex-shrink-0">
-                    <div className="w-full h-full flex items-center justify-center text-xs">
-                      {content.author.charAt(0)}
-                    </div>
+                  <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 mr-2 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    <span className="text-xs font-medium">{session.title.charAt(0)}</span>
                   </div>
                   <div>
-                    <h3 className="text-xs font-medium truncate max-w-xs">{content.title}</h3>
-                    <p className="text-xs text-gray-500">{content.author}</p>
+                    <h3 className="text-xs font-medium truncate max-w-xs">{session.title}</h3>
+                    <p className="text-xs text-gray-500">For: {session.role}</p>
                   </div>
                 </div>
                 <button className="bg-blue-500 text-white px-2 py-0.5 rounded-md text-xs hover:bg-blue-600 shadow-sm hover:shadow transition-all">
-                  Assign
+                  View
                 </button>
               </div>
             ))}
           </div>
+
+          {/* Training Details Popup */}
+          {selectedTraining && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50">
+              <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-xl max-h-[90vh] overflow-y-auto">
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{selectedTraining.title}</h3>
+                <p className="text-gray-600 mb-4">For: {selectedTraining.role}</p>
+                <div className="text-gray-700 text-sm whitespace-pre-line">
+                  {selectedTraining.description}
+                </div>
+                <button
+                  className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
+                  onClick={() => setSelectedTraining(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Patient List */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
           <div className="p-2 flex justify-between items-center">
             <h2 className="text-sm font-medium text-gray-700">Patient List</h2>
-            <a href="/emr" className="text-blue-500 text-xs hover:underline">View All</a>
+            <a href="/emr" className="text-blue-500 text-xs hover:underline flex items-center">
+              View All <ExternalLink size={12} className="ml-1" />
+            </a>
           </div>
           <div className="p-2 flex-grow overflow-auto">
             {loadingPatients ? (
