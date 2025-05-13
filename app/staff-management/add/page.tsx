@@ -97,31 +97,42 @@ export default function AddRosterPage() {
   }, []);
 
   const handleSave = async () => {
-    if (!selectedStaff || schedules.length === 0) {
-      alert("Please select a staff and schedule at least one day.");
+    if (!selectedStaff || schedules.length === 0 || !selectedWeekStart) {
+      alert("Please select a staff, a week, and at least one schedule entry.");
       return;
     }
-
-    const res = await fetch("/api/staff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: selectedStaff.name,
-        staffId: selectedStaff.staffId,
-        role: selectedStaff.role,
-        department: selectedStaff.department,
-        schedules,
-        weekStart: selectedWeekStart?.toISOString() || null,
-      }),
-    });
-
-    if (res.ok) {
-      alert("Roster saved.");
-      router.push("/staff-management");
-    } else {
-      alert("Error saving staff schedule.");
+  
+    const schedulesWithWeek = schedules.map((s) => ({
+      ...s,
+      weekStart: selectedWeekStart.toISOString(),
+    }));
+  
+    try {
+      const res = await fetch("/api/staff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: selectedStaff.name,
+          staffId: selectedStaff.staffId,
+          role: selectedStaff.role,
+          department: selectedStaff.department,
+          schedules: schedulesWithWeek,
+          weekStart: selectedWeekStart.toISOString(),
+        }),
+      });
+  
+      if (res.ok) {
+        alert("Roster saved.");
+        router.push("/staff-management");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Error saving staff schedule.");
+      }
+    } catch (err) {
+      console.error("Error saving:", err);
+      alert("Unexpected error occurred.");
     }
-  };
+  };  
 
   return (
     <div className="container mx-auto p-6">
