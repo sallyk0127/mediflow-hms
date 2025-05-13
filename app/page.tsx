@@ -1,9 +1,30 @@
+"use client"; // Add this directive at the top for client-side components
+
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const dashboardImages = [
+    "/dashboard.png",
+    "/dashboard1.png",
+    "/dashboard2.png",
+    "/dashboard3.png"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === dashboardImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [dashboardImages.length]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 p-8 sm:p-12">
+    <div className="min-h-screen p-8 sm:p-12">
       <header className="max-w-6xl mx-auto flex justify-between items-center mb-16">
         <div className="flex items-center gap-4">
           <Image
@@ -11,7 +32,8 @@ export default function Home() {
             alt="MEDIFLOW-HMS Logo"
             width={48}
             height={48}
-            className="h-12 w-auto" // Adjust size as needed
+            className="h-12 w-auto"
+            priority
           />
           <h1 className="text-2xl font-bold text-blue-800 dark:text-blue-200">
             MEDIFLOW-HMS
@@ -54,13 +76,18 @@ export default function Home() {
         </div>
 
         <div className="relative aspect-video rounded-xl overflow-hidden shadow-xl">
-          <Image
-            src="/dashboard.png"
-            alt="MEDIFLOW-HMS Dashboard"
-            fill
-            className="object-cover"
-            priority
-          />
+          {dashboardImages.map((image, index) => (
+            <Image
+              key={image}
+              src={image}
+              alt={`MEDIFLOW-HMS Dashboard ${index + 1}`}
+              fill
+              className={`object-cover transition-opacity duration-1000 ${
+                index === currentImageIndex ? 'opacity-100' : 'opacity-0 absolute'
+              }`}
+              priority={index === 0}
+            />
+          ))}
         </div>
       </main>
 
@@ -92,8 +119,8 @@ export default function Home() {
               title: "Educational Content",
               description: "Access training materials and patient wellness guides."
             }
-          ].map((feature, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          ].map((feature) => (
+            <div key={feature.title} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
               <h4 className="font-semibold text-lg text-blue-600 dark:text-blue-400 mb-2">{feature.title}</h4>
               <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
             </div>
@@ -109,7 +136,7 @@ export default function Home() {
               alt="MEDIFLOW-HMS Logo"
               width={32}
               height={32}
-              className="h-8 w-auto" // Adjust size as needed
+              className="h-8 w-auto"
             />
             <span className="font-medium text-gray-700 dark:text-gray-300">MEDIFLOW-HMS</span>
           </div>
