@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Select from "react-select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -36,7 +41,6 @@ function WeeklyScheduleForm({ onChange }: { onChange: (schedules: ScheduleEntry[
 
   return (
     <div className="mt-6 w-full">
-      <h2 className="mb-4 text-lg font-semibold">Weekly Schedule</h2>
       <div className="space-y-3 w-full">
         {schedule.map((entry, index) => (
           <div key={entry.day} className="flex items-center w-full">
@@ -70,6 +74,7 @@ export default function AddRosterPage() {
   const [selectedStaff, setSelectedStaff] = useState<StaffRecord | null>(null);
   const [schedules, setSchedules] = useState<ScheduleEntry[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null); // ✅ new
 
   useEffect(() => {
     setIsClient(true);
@@ -106,6 +111,7 @@ export default function AddRosterPage() {
         role: selectedStaff.role,
         department: selectedStaff.department,
         schedules,
+        weekStart: selectedWeekStart?.toISOString() || null,
       }),
     });
 
@@ -119,7 +125,7 @@ export default function AddRosterPage() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Add New Staff</h1>
+      <h1 className="text-2xl font-semibold mb-4">Add New Roster</h1>
       <div className="bg-white rounded-lg shadow p-6 space-y-4">
 
         {/* Select Staff */}
@@ -159,8 +165,41 @@ export default function AddRosterPage() {
           </div>
         </div>
 
-        {/* Weekly Schedule */}
-        <WeeklyScheduleForm onChange={setSchedules} />
+        {/* Weekly Schedule + Week Picker */}
+        <div>
+          <h2 className="mb-2 text-lg font-semibold">Weekly Schedule</h2>
+
+          {/* Week Picker */}
+          <div className="flex items-center gap-4 mb-4">
+            <label className="font-medium">Select Week:</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn("w-[240px] justify-start text-left font-normal", !selectedWeekStart && "text-muted-foreground")}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedWeekStart ? format(selectedWeekStart, "PPP") : "Choose a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedWeekStart || undefined}
+                  onSelect={(date) => {
+                    if (!date) return;
+                    const offset = (date.getDay() + 6) % 7; // Monday = start of week
+                    const monday = new Date(date);
+                    monday.setDate(date.getDate() - offset);
+                    setSelectedWeekStart(monday);
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <WeeklyScheduleForm onChange={setSchedules} />
+        </div>
 
         {/* Save Button */}
         <div className="flex gap-4 mt-6">

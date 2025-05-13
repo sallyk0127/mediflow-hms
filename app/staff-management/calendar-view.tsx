@@ -11,6 +11,7 @@ interface Schedule {
   day: string;
   startTime: string;
   endTime: string;
+  weekStart: string;
   staff: {
     name: string;
     role: string;
@@ -49,28 +50,41 @@ export default function WeeklyCalendar() {
           day: string;
           startTime: string;
           endTime: string;
+          weekStart: string;
         }[];
       }[] = await res.json();
-
+        
       const allSchedules: Schedule[] = data.flatMap((staff) =>
-        Array.isArray(staff.schedules)
-          ? staff.schedules.map((s) => ({
-              ...s,
-              staff: {
-                name: staff.name,
-                role: staff.role,
-                department: staff.department || undefined,
-                staffId: staff.staffId
-              }
-            }))
-          : []
-      );      
-
-      setSchedules(allSchedules);
+        (staff.schedules || []).map((s: {
+          id: string;
+          day: string;
+          startTime: string;
+          endTime: string;
+          weekStart: string;
+        }) => ({        
+          ...s,
+          staff: {
+            name: staff.name,
+            role: staff.role,
+            department: staff.department,
+            staffId: staff.staffId,
+          },
+        }))
+      );
+  
+      const weekStart = startOfWeek(currentWeek);
+      const weekEnd = addDays(weekStart, 7);
+  
+      const filtered = allSchedules.filter((s) => {
+        const ws = new Date(s.weekStart);
+        return ws >= weekStart && ws < weekEnd;
+      });
+  
+      setSchedules(filtered);
     };
-
+  
     fetchSchedules();
-  }, []);
+  }, [currentWeek]);  
 
   const getWeekDates = () => {
     const startDate = startOfWeek(currentWeek);

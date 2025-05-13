@@ -84,6 +84,7 @@ model WeeklySchedule {
   day       String   // "Monday", "Tuesday", etc.
   startTime String   // e.g., "08:00"
   endTime   String   // e.g., "16:00"
+  weekStart DateTime @default(now())
   staff     Staff    @relation(fields: [staffId], references: [id])
   staffId   String
 }

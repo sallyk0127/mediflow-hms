@@ -11,7 +11,7 @@ export default function StaffRosterPage() {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header and Add Button */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Staff Roster</h1>
+        <h1 className="text-2xl font-semibold">Staff Management</h1>
         <Button
           className="bg-blue-500 hover:bg-blue-600"
           onClick={() => router.push("/staff-management/add")}
