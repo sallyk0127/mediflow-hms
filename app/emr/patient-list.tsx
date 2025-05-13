@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Edit, Eye, Trash2, Search } from "lucide-react"
 import { useToast } from "@/components/hooks/use-toast"
-//import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 
-type Patient = {
+interface Patient {
   id: number
   title: string | null
   firstName: string
@@ -18,6 +18,7 @@ type Patient = {
   phoneNumber: string | null
   medicareNumber: string | null
   createdAt: string
+  medicalHistory?: string | null
 }
 
 function calculateAge(dob: string): number {
@@ -38,8 +39,9 @@ export default function PatientList() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalPatients, setTotalPatients] = useState(0)
   const { toast } = useToast()
+  const [viewingPatient, setViewingPatient] = useState<Patient | null>(null)
   const patientsPerPage = 10
-  //const router = useRouter()
+  const router = useRouter()
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -138,10 +140,20 @@ export default function PatientList() {
                 <td className="p-4 align-middle text-gray-700">{p.medicareNumber || "N/A"}</td>
                 <td className="p-4 align-middle text-left">
                   <div className="flex justify-start items-center gap-2">
-                    <Button size="icon" variant="ghost" className="h-8 w-8 bg-white rounded-md border shadow-sm hover:bg-gray-100">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 bg-white rounded-md border shadow-sm hover:bg-gray-100"
+                      onClick={() => setViewingPatient(p)}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 bg-white rounded-md border shadow-sm hover:bg-gray-100">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 bg-white rounded-md border shadow-sm hover:bg-gray-100"
+                      onClick={() => router.push(`/emr?id=${p.id}`)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
@@ -159,6 +171,22 @@ export default function PatientList() {
           </tbody>
         </table>
       </div>
+
+      {viewingPatient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-md shadow-lg w-[400px]">
+            <h2 className="text-lg font-semibold mb-4">Patient Details</h2>
+            <p><strong>Name:</strong> {`${viewingPatient.title ? viewingPatient.title + " " : ""}${viewingPatient.firstName} ${viewingPatient.lastName}`}</p>
+            <p><strong>ID:</strong> {viewingPatient.id}</p>
+            <p><strong>Email:</strong> {viewingPatient.email || "N/A"}</p>
+            <p><strong>Phone:</strong> {viewingPatient.phoneNumber || "N/A"}</p>
+            <p><strong>Medical History:</strong> {viewingPatient.medicalHistory || "N/A"}</p>
+            <div className="flex justify-end mt-4">
+              <Button onClick={() => setViewingPatient(null)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between mt-6">
         <div className="text-base text-gray-600">

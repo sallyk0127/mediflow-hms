@@ -35,23 +35,24 @@ export default function MedicalInformation({
         ...patientData,
         dob: new Date(patientData.dob).toISOString(),
       });
-
-      const response = await fetch("/api/patients", {
-        method: "POST",
+  
+      const method = patientData.id ? "PUT" : "POST";
+      const endpoint = patientData.id
+        ? `/api/patients/${patientData.id}`
+        : "/api/patients";
+  
+      const response = await fetch(endpoint, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validatedData),
       });
-
+  
       const result = await response.json();
-
-      if (result.success) {
-        toast({ title: "Patient Registered Successfully!" });
+  
+      if (result.success || response.ok) {
+        toast({ title: "Patient information saved successfully!" });
       } else {
-        toast({
-          title: "Error",
-          description: result.error || "Unknown error.",
-          variant: "destructive",
-        });
+        throw new Error(result.error || "Unknown error.");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -62,9 +63,14 @@ export default function MedicalInformation({
         });
       } else {
         console.error("Submission error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save patient data.",
+          variant: "destructive",
+        });
       }
     }
-  };
+  };  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
