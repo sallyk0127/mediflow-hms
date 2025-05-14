@@ -102,26 +102,35 @@ export default function WeeklyCalendar() {
   const getCellContent = (date: Date, hour: number) => {
     const dayName = getDayName(date);
     const slotTime = hour.toString().padStart(2, "0") + ":00";
-
-    return schedules
-      .filter(s => selectedRole === "all" || s.staff.role === selectedRole)
+  
+    const dailyMap = new Map<string, Schedule>();
+  
+    schedules
+      .filter((s) => selectedRole === "all" || s.staff.role === selectedRole)
       .filter((s) => s.day === dayName && s.startTime <= slotTime && s.endTime > slotTime)
-      .map((s) => {
-        const roleClass = roleColors[s.staff.role] || roleColors.default;
-
-        return (
-          <div
-            key={`${s.staff.staffId}-${dayName}-${slotTime}`}
-            className={clsx("p-1 mb-1 rounded text-xs cursor-pointer", roleClass)}
-            onClick={() => router.push(`/staff-management/edit/${s.staff.staffId}`)}
-          >
-            <div>{s.staff.name}</div>
-            <div className="text-[10px]">{s.startTime}–{s.endTime}</div>
-            <div className="text-[10px] italic">{s.staff.role}</div>
-          </div>
-        );
+      .forEach((s) => {
+        const key = `${s.staff.staffId}-${s.day}`;
+        if (!dailyMap.has(key)) {
+          dailyMap.set(key, s);
+        }
       });
-  };
+  
+    return Array.from(dailyMap.values()).map((s) => {
+      const roleClass = roleColors[s.staff.role] || roleColors.default;
+  
+      return (
+        <div
+          key={`${s.staff.staffId}-${s.day}-${s.startTime}-${s.id}`}
+          className={clsx("p-1 mb-1 rounded text-xs cursor-pointer", roleClass)}
+          onClick={() => router.push(`/staff-management/edit/${s.staff.staffId}`)}
+        >
+          <div>{s.staff.name}</div>
+          <div className="text-[10px]">{s.startTime}–{s.endTime}</div>
+          <div className="text-[10px] italic">{s.staff.role}</div>
+        </div>
+      );
+    });
+  };  
 
   const nextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
   const prevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));

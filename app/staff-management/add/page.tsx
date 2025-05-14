@@ -202,6 +202,7 @@ export default function AddRosterPage() {
                     const offset = (date.getDay() + 6) % 7; // Monday = start of week
                     const monday = new Date(date);
                     monday.setDate(date.getDate() - offset);
+                    monday.setHours(0, 0, 0, 0);
                     setSelectedWeekStart(monday);
                   }}
                   initialFocus

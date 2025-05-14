@@ -58,7 +58,7 @@ export default function EditStaffPage() {
       
           setSchedules(futureSchedules);
           if (futureSchedules.length) {
-            setSelectedWeekStart(new Date(futureSchedules[0].weekStart));
+            setSelectedWeekStart(new Date(new Date(futureSchedules[0].weekStart).setHours(0, 0, 0, 0)));
           }
         }
       };      
@@ -67,10 +67,27 @@ export default function EditStaffPage() {
   }, [staffId]);
 
   const handleScheduleChange = (index: number, field: "startTime" | "endTime", value: string) => {
-    const updated = [...schedules];
-    updated[index][field] = value;
-    setSchedules(updated);
-  };
+    const day = days[index];
+    setSchedules((prev) => {
+      const existing = prev.find((s) => s.day === day);
+  
+      if (existing) {
+        return prev.map((s) =>
+          s.day === day ? { ...s, [field]: value } : s
+        );
+      } else {
+        return [
+          ...prev,
+          {
+            day,
+            startTime: field === "startTime" ? value : "",
+            endTime: field === "endTime" ? value : "",
+            weekStart: selectedWeekStart?.toISOString() || new Date().toISOString(),
+          },
+        ];
+      }
+    });
+  };  
 
   const handleSave = async () => {
     if (!staff || !selectedWeekStart || schedules.length === 0) {
@@ -127,7 +144,7 @@ export default function EditStaffPage() {
         </div>
 
         {/* Week Picker */}
-        <div>
+        <div className="flex items-center gap-4 mb-4">
           <label className="font-medium">Edit Week:</label>
           <Popover>
             <PopoverTrigger asChild>
@@ -143,7 +160,12 @@ export default function EditStaffPage() {
               <Calendar
                 mode="single"
                 selected={selectedWeekStart || undefined}
-                onSelect={(date) => date && setSelectedWeekStart(date)}
+                onSelect={(date) => {
+                  if (date) {
+                    date.setHours(0, 0, 0, 0);
+                    setSelectedWeekStart(date);
+                  }
+                }}                
                 initialFocus
               />
             </PopoverContent>
