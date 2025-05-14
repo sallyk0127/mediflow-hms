@@ -82,10 +82,11 @@ const timeSlots = [
 ];
 
 const severityOptions = [
-  { label: "S1 - Critical/Emergency", value: "S1" },
-  { label: "S2 - Urgent", value: "S2" },
-  { label: "S3 - Routine", value: "S3" }
-];
+  { label: "S1", value: "S1" },
+  { label: "S2", value: "S2" },
+  { label: "S3", value: "S3" },
+  { label: "S4", value: "S4" }
+  ];
 
 export default function AddAppointmentPage() {
   const router = useRouter();
