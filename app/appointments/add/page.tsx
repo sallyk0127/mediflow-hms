@@ -12,7 +12,6 @@ import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-// Department-Doctor Mapping with type inference
 const departmentDoctors = {
   "Cardiology": [
     "Dr. Ethan Wright (Interventional Cardiologist)",
@@ -66,7 +65,6 @@ const departmentDoctors = {
   ]
 } as const;
 
-// Department list for dropdown
 const departments = Object.keys(departmentDoctors).map(dept => ({
   label: dept,
   value: dept
@@ -86,7 +84,7 @@ const severityOptions = [
   { label: "S2", value: "S2" },
   { label: "S3", value: "S3" },
   { label: "S4", value: "S4" }
-  ];
+];
 
 export default function AddAppointmentPage() {
   const router = useRouter();
@@ -97,6 +95,7 @@ export default function AddAppointmentPage() {
   const [selectedTime, setSelectedTime] = useState<{ label: string; value: string } | null>(null);
   const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
   const [selectedSeverity, setSelectedSeverity] = useState<{ label: string; value: string } | null>(null);
+  const [reasonForAppointment, setReasonForAppointment] = useState("");
   const [contactPreference, setContactPreference] = useState("email");
   const [isClient, setIsClient] = useState(false);
 
@@ -126,7 +125,8 @@ export default function AddAppointmentPage() {
       department: selectedDepartment,
       date,
       medications: selectedMedication,
-      severity: selectedSeverity
+      severity: selectedSeverity,
+      reasonForAppointment
     });
   };
 
@@ -137,7 +137,6 @@ export default function AddAppointmentPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-4">
-            {/* Patient Search */}
             <div>
               <label className="block font-medium mb-2">Select Patient:</label>
               <Input 
@@ -146,7 +145,6 @@ export default function AddAppointmentPage() {
               />
             </div>
 
-            {/* Contact Preference */}
             <div>
               <label className="block font-medium mb-2">Contact Preference:</label>
               <div className="flex gap-4">
@@ -171,7 +169,6 @@ export default function AddAppointmentPage() {
               </div>
             </div>
 
-            {/* Department and Doctor Selection */}
             <div>
               <label className="block font-medium mb-2">Select Department:</label>
               {isClient && (
@@ -195,11 +192,21 @@ export default function AddAppointmentPage() {
                 />
               )}
             </div>
+
+            {/* Moved Reason for Appointment to left column */}
+            <div>
+              <label className="block font-medium mb-2">Reason for Appointment:</label>
+              <Input
+                type="text"
+                placeholder="Enter the reason for appointment"
+                value={reasonForAppointment}
+                onChange={(e) => setReasonForAppointment(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Right Column */}
           <div className="space-y-4">
-            {/* Severity Level */}
             <div>
               <label className="block font-medium mb-2">Severity Level:</label>
               {isClient && (
@@ -212,7 +219,6 @@ export default function AddAppointmentPage() {
               )}
             </div>
 
-            {/* Date and Time */}
             <div>
               <label className="block font-medium mb-2">Appointment Date:</label>
               <Popover>
@@ -243,7 +249,6 @@ export default function AddAppointmentPage() {
               )}
             </div>
 
-            {/* Medication Selection */}
             <div>
               <label className="block font-medium mb-2">Select Medication:</label>
               {isClient && (
@@ -262,7 +267,6 @@ export default function AddAppointmentPage() {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end gap-4 mt-8">
           <Button 
             variant="outline"
