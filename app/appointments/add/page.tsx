@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,125 +10,167 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
+import { useToast } from "@/components/hooks/use-toast";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
-const departmentDoctors = {
-  "Cardiology": [
-    "Dr. Ethan Wright (Interventional Cardiologist)",
-    "Dr. Sophia Chen (Electrophysiologist)",
-    "Dr. Marcus Reynolds (Cardiac Surgeon)"
-  ],
-  "Neurology": [
-    "Dr. Olivia Park (Movement Disorder Specialist)",
-    "Dr. Nathan Brooks (Epileptologist)",
-    "Dr. Aisha Khan (Neuroimmunologist)"
-  ],
-  "Pediatrics": [
-    "Dr. Liam Foster (General Pediatrician)",
-    "Dr. Isabella Wong (Pediatric Cardiologist)",
-    "Dr. Caleb Rivera (Pediatric Neurologist)"
-  ],
-  "Orthopedics": [
-    "Dr. Hannah Pierce (Sports Medicine)",
-    "Dr. Derek Coleman (Spinal Surgeon)",
-    "Dr. Zoe Ramirez (Joint Replacement Specialist)"
-  ],
-  "Oncology": [
-    "Dr. Evelyn Shaw (Medical Oncologist)",
-    "Dr. Julian Torres (Radiation Oncologist)",
-    "Dr. Naomi Patel (Hematologist)"
-  ],
-  "Gastroenterology": [
-    "Dr. Vincent Cho (Hepatologist)",
-    "Dr. Audrey Simmons (Endoscopist)",
-    "Dr. Dominic Ferraro (IBD Specialist)"
-  ],
-  "Pulmonology": [
-    "Dr. Samantha Hughes (Critical Care)",
-    "Dr. Theodore Grant (Sleep Medicine)",
-    "Dr. Priya Malhotra (Interventional Pulmonologist)"
-  ],
-  "Endocrinology": [
-    "Dr. Daniel Kim (Diabetologist)",
-    "Dr. Rachel Nguyen (Thyroid Specialist)",
-    "Dr. Gabriel Silva (Metabolic Bone Disease)"
-  ],
-  "Rheumatology": [
-    "Dr. Maya Patel (Lupus Specialist)",
-    "Dr. Connor Fitzgerald (Vasculitis Expert)",
-    "Dr. Jasmine Zhao (Pediatric Rheumatologist)"
-  ],
-  "Nephrology": [
-    "Dr. Elijah Thompson (Dialysis Director)",
-    "Dr. Valentina Costa (Transplant Nephrologist)",
-    "Dr. Simon Wu (Hypertension Specialist)"
-  ]
-} as const;
+interface Option {
+  label: string;
+  value: string;
+}
 
-const departments = Object.keys(departmentDoctors).map(dept => ({
-  label: dept,
-  value: dept
-}));
+interface StaffResponse {
+  id: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+}
 
-const timeSlots = [
-  "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
-  "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
-  "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
-  "1:00 PM", "1:15 PM", "1:30 PM", "1:45 PM",
-  "2:00 PM", "2:15 PM", "2:30 PM", "2:45 PM",
-  "3:00 PM", "3:15 PM", "3:30 PM", "3:45 PM"
-];
+interface PatientResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
 
-const severityOptions = [
-  { label: "S1", value: "S1" },
-  { label: "S2", value: "S2" },
-  { label: "S3", value: "S3" },
-  { label: "S4", value: "S4" }
+interface MedicineResponse {
+  id: number;
+  name: string;
+  code: string;
+}
+
+const departments: Option[] = [
+  "Cardiology", "Neurology", "Pediatrics", "Orthopedics", "Oncology",
+  "Gastroenterology", "Pulmonology", "Endocrinology", "Rheumatology", "Nephrology"
+].map(dept => ({ label: dept, value: dept }));
+
+const severityOptions: Option[] = [
+  { label: "S1 - Low", value: "S1" },
+  { label: "S2 - Moderate", value: "S2" },
+  { label: "S3 - High", value: "S3" },
+  { label: "S4 - Critical", value: "S4" },
 ];
 
 export default function AddAppointmentPage() {
   const router = useRouter();
+  const { toast } = useToast();
+
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedDepartment, setSelectedDepartment] = useState<{ label: string; value: string } | null>(null);
-  const [selectedDoctor, setSelectedDoctor] = useState<{ label: string; value: string } | null>(null);
-  const [filteredDoctors, setFilteredDoctors] = useState<{label: string, value: string}[]>([]);
-  const [selectedTime, setSelectedTime] = useState<{ label: string; value: string } | null>(null);
-  const [selectedMedication, setSelectedMedication] = useState<{ label: string; value: string }[]>([]);
-  const [selectedSeverity, setSelectedSeverity] = useState<{ label: string; value: string } | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<Option | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Option | null>(null);
+  const [filteredDoctors, setFilteredDoctors] = useState<Option[]>([]);
+  const [selectedTime, setSelectedTime] = useState<Option | null>(null);
+  const [selectedMedication, setSelectedMedication] = useState<Option[]>([]);
+  const [selectedSeverity, setSelectedSeverity] = useState<Option | null>(null);
   const [reasonForAppointment, setReasonForAppointment] = useState("");
   const [contactPreference, setContactPreference] = useState("email");
+  const [selectedPatient, setSelectedPatient] = useState<Option | null>(null);
+  const [patients, setPatients] = useState<Option[]>([]);
+  const [medicineOptions, setMedicineOptions] = useState<Option[]>([]);
+  const [timeSlots, setTimeSlots] = useState<Option[]>([]);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => { setIsClient(true); }, []);
 
   useEffect(() => {
-    if (selectedDepartment?.value) {
-      const doctors = departmentDoctors[selectedDepartment.value as keyof typeof departmentDoctors] || [];
-      setFilteredDoctors(doctors.map(doctor => ({ 
-        label: doctor, 
-        value: doctor 
-      })));
-      setSelectedDoctor(null);
-    } else {
-      setFilteredDoctors([]);
-    }
+    if (!selectedDoctor?.value || !date) return;
+    const fetchAvailability = async () => {
+      try {
+        const res = await fetch(`/api/staff/${selectedDoctor.value}/availability?date=${date.toISOString().split("T")[0]}`);
+        const result = await res.json();
+        const slots = result.timeSlots.map((time: string) => ({ label: time, value: time }));
+        setTimeSlots(slots);
+      } catch (err) {
+        console.error("Failed to fetch doctor availability", err);
+      }
+    };
+    fetchAvailability();
+  }, [selectedDoctor, date]);
+
+  useEffect(() => {
+    if (!selectedDepartment?.value) return;
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch(`/api/staff?department=${selectedDepartment.value}&role=Doctor`);
+        const data: StaffResponse[] = await res.json();
+        const formatted = data.map((doc) => ({
+          label: doc.name || `${doc.firstName || ""} ${doc.lastName || ""}`.trim(),
+          value: doc.id,
+        }));
+        setFilteredDoctors(formatted);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+    };
+    fetchDoctors();
   }, [selectedDepartment]);
 
-  const handleGenerateBill = () => {
-    if (!selectedDoctor || !selectedTime) {
-      alert("Please select both doctor and time slot");
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const res = await fetch("/api/patients");
+        const result = await res.json();
+        if (result.success) {
+          const formatted = result.data.map((p: PatientResponse) => ({
+            label: `${p.firstName} ${p.lastName} (ID: ${p.id})`,
+            value: p.id.toString(),
+          }));
+          setPatients(formatted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch patients:", error);
+      }
+    };
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const res = await fetch("/api/medicine");
+        const data: MedicineResponse[] = await res.json();
+        const formatted = data.map((med) => ({ label: med.name, value: med.id.toString() }));
+        setMedicineOptions(formatted);
+      } catch (error) {
+        console.error("Failed to fetch medicine list", error);
+      }
+    };
+    fetchMedicines();
+  }, []);
+
+  const handleSave = async () => {
+    if (!selectedPatient || !selectedDoctor || !selectedTime || !date || !selectedSeverity || !reasonForAppointment) {
+      toast({ title: "Missing Fields", description: "Please complete all required fields before saving.", variant: "destructive" });
       return;
     }
-    console.log("Generating bill for:", {
-      doctor: selectedDoctor,
-      time: selectedTime,
-      department: selectedDepartment,
-      date,
-      medications: selectedMedication,
-      severity: selectedSeverity,
-      reasonForAppointment
-    });
+
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: Number(selectedPatient.value),
+          doctorId: selectedDoctor.value,
+          time: selectedTime.value,
+          date: date.toISOString(),
+          severity: selectedSeverity.value,
+          reason: reasonForAppointment,
+          contactPreference,
+          department: selectedDepartment?.value || "",
+          medications: selectedMedication.map((m) => Number(m.value)),
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        toast({ title: "Appointment Created", description: "The appointment was successfully saved." });
+        router.push("/appointments");
+      } else {
+        toast({ title: "Save Failed", description: result.error || "An unknown error occurred.", variant: "destructive" });
+      }
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error", description: "An error occurred while saving the appointment.", variant: "destructive" });
+    }
   };
 
   return (
@@ -139,10 +182,15 @@ export default function AddAppointmentPage() {
           <div className="space-y-4">
             <div>
               <label className="block font-medium mb-2">Select Patient:</label>
-              <Input 
-                type="search" 
-                placeholder="Search patient by name or ID" 
-              />
+              {isClient && (
+                <Select
+                  options={patients}
+                  value={selectedPatient}
+                  onChange={(option) => setSelectedPatient(option as { label: string; value: string } | null)}
+                  placeholder="Search patient by name or ID"
+                  isSearchable
+                />
+              )}
             </div>
 
             <div>
@@ -193,7 +241,6 @@ export default function AddAppointmentPage() {
               )}
             </div>
 
-            {/* Moved Reason for Appointment to left column */}
             <div>
               <label className="block font-medium mb-2">Reason for Appointment:</label>
               <Input
@@ -254,13 +301,12 @@ export default function AddAppointmentPage() {
               {isClient && (
                 <Select
                   isMulti
-                  options={[
-                    { label: "Paracetamol", value: "Paracetamol" },
-                    { label: "Ibuprofen", value: "Ibuprofen" },
-                    { label: "Aspirin", value: "Aspirin" },
-                  ]}
-                  onChange={(selectedOptions) => setSelectedMedication(selectedOptions as { label: string; value: string }[])}
-                  placeholder="Search & select medication"
+                  options={medicineOptions}
+                  value={selectedMedication}
+                  onChange={(selectedOptions) => 
+                    setSelectedMedication(selectedOptions as { label: string; value: string }[])
+                  }
+                    placeholder="Search & select medication"
                 />
               )}
             </div>
@@ -268,17 +314,11 @@ export default function AddAppointmentPage() {
         </div>
 
         <div className="flex justify-end gap-4 mt-8">
-          <Button 
-            variant="outline"
-            onClick={() => router.push("/appointments")}
-          >
-            View Scheduled Appointments
+          <Button className="bg-green-500 hover:bg-green-600" onClick={handleSave}>
+            Save Appointment
           </Button>
-          <Button 
-            className="bg-green-600 hover:bg-green-700"
-            onClick={handleGenerateBill}
-          >
-            Generate Bill
+          <Button className="bg-red-500 hover:bg-red-600" onClick={() => router.back()}>
+            Back
           </Button>
         </div>
       </div>

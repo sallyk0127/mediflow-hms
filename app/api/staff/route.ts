@@ -107,10 +107,19 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const department = searchParams.get("department");
+  const role = searchParams.get("role");
+
   try {
     const staffList = await prisma.staff.findMany({
+      where: {
+        ...(department && { department }),
+        ...(role && { role }),
+      },
       select: {
+        id: true,
         name: true,
         staffId: true,
         role: true,
@@ -118,6 +127,7 @@ export async function GET() {
         schedules: true,
       },
     });
+
     return NextResponse.json(staffList);
   } catch (err) {
     console.error("Failed to fetch staff:", err);

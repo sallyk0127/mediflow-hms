@@ -24,7 +24,7 @@ const hours = Array.from({ length: 24 }, (_, i) => i); // 0:00 to 23:00
 
 const roleColors: Record<string, string> = {
   "Registered Nurse": "bg-green-200 text-green-900",
-  "Senior Consultant": "bg-blue-200 text-blue-900",
+  "Doctor": "bg-blue-200 text-blue-900",
   "Administrator": "bg-yellow-200 text-yellow-900",
   "Registrar": "bg-purple-200 text-purple-900",
   "Enrolled Nurse": "bg-pink-200 text-pink-900",

@@ -59,7 +59,7 @@ function generateAustralianPhone() {
   }
   
   async function main() {
-    const numPatients = 25;
+    const numPatients = 40;
     for (let i = 0; i < numPatients; i++) {
       const data = generateRandomPatient();
       await prisma.patient.create({ data });

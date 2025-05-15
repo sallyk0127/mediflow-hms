@@ -43,6 +43,8 @@ model Patient {
   allergies      String?
   conditions     String?
 
+  appointments Appointment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -75,8 +77,9 @@ model Staff {
   staffId    String           @unique
   role       String
   department String
-  createdAt  DateTime         @default(now())
   schedules  WeeklySchedule[] 
+  appointments Appointment[]
+  createdAt  DateTime         @default(now())
 }
 
 model WeeklySchedule {
@@ -98,6 +101,40 @@ model Medicine {
   expiry       DateTime
   manufacturer String
   code         String   @unique
+  appointments AppointmentMedicine[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model Appointment {
+  id                String       @id @default(cuid())
+  patientId         Int
+  doctorId          String
+  department        String
+  time              String
+  date              DateTime
+  severity          String
+  reason            String
+  contactPreference String
+  createdAt         DateTime     @default(now())
+
+  patient           Patient      @relation(fields: [patientId], references: [id])
+  doctor            Staff        @relation(fields: [doctorId], references: [id])
+  medications       AppointmentMedicine[]
+
+}
+
+model AppointmentMedicine {
+  appointmentId String
+  medicineId    Int
+
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  medicine      Medicine    @relation(fields: [medicineId], references: [id])
+
+  @@id([appointmentId, medicineId])
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
 }
