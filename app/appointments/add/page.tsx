@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useToast } from "@/components/hooks/use-toast";
+import { isSameDay } from "date-fns";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -19,23 +20,15 @@ interface Option {
   value: string;
 }
 
-interface StaffResponse {
-  id: string;
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-}
-
-interface PatientResponse {
+interface Patient {
   id: number;
   firstName: string;
   lastName: string;
 }
 
-interface MedicineResponse {
+interface Medicine {
   id: number;
   name: string;
-  code: string;
 }
 
 const departments: Option[] = [
@@ -68,6 +61,7 @@ export default function AddAppointmentPage() {
   const [medicineOptions, setMedicineOptions] = useState<Option[]>([]);
   const [timeSlots, setTimeSlots] = useState<Option[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [availableDates, setAvailableDates] = useState<Date[]>([]);
 
   useEffect(() => { setIsClient(true); }, []);
 
@@ -88,21 +82,40 @@ export default function AddAppointmentPage() {
 
   useEffect(() => {
     if (!selectedDepartment?.value) return;
-    const fetchDoctors = async () => {
+    const fetchDepartmentAvailability = async () => {
       try {
-        const res = await fetch(`/api/staff?department=${selectedDepartment.value}&role=Doctor`);
-        const data: StaffResponse[] = await res.json();
-        const formatted = data.map((doc) => ({
-          label: doc.name || `${doc.firstName || ""} ${doc.lastName || ""}`.trim(),
-          value: doc.id,
-        }));
-        setFilteredDoctors(formatted);
-      } catch (error) {
-        console.error("Failed to fetch doctors", error);
+        const res = await fetch(`/api/staff/availability?department=${selectedDepartment.value}`);
+        const result = await res.json();
+        const availableDays = result.availability ? Object.keys(result.availability).map((d: string) => new Date(d)) : [];
+        setAvailableDates(availableDays);
+      } catch (err) {
+        console.error("Failed to fetch department availability", err);
       }
     };
-    fetchDoctors();
+    fetchDepartmentAvailability();
   }, [selectedDepartment]);
+
+  useEffect(() => {
+  if (!selectedDepartment?.value) return;
+
+  const fetchDoctors = async () => {
+    try {
+      const res = await fetch(`/api/staff?department=${selectedDepartment.value}&role=Doctor`);
+      const data = await res.json();
+
+      const formatted = data.map((doc: { id: string; name: string }) => ({
+        label: doc.name,
+        value: doc.id,
+      }));
+
+      setFilteredDoctors(formatted);
+    } catch (err) {
+      console.error("Failed to fetch doctors:", err);
+    }
+  };
+
+  fetchDoctors();
+}, [selectedDepartment]);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -110,7 +123,7 @@ export default function AddAppointmentPage() {
         const res = await fetch("/api/patients");
         const result = await res.json();
         if (result.success) {
-          const formatted = result.data.map((p: PatientResponse) => ({
+          const formatted = result.data.map((p: Patient) => ({
             label: `${p.firstName} ${p.lastName} (ID: ${p.id})`,
             value: p.id.toString(),
           }));
@@ -127,8 +140,11 @@ export default function AddAppointmentPage() {
     const fetchMedicines = async () => {
       try {
         const res = await fetch("/api/medicine");
-        const data: MedicineResponse[] = await res.json();
-        const formatted = data.map((med) => ({ label: med.name, value: med.id.toString() }));
+        const data = await res.json();
+        const formatted = data.map((med: Medicine) => ({
+          label: med.name,
+          value: med.id.toString(),
+        }));
         setMedicineOptions(formatted);
       } catch (error) {
         console.error("Failed to fetch medicine list", error);
@@ -136,6 +152,20 @@ export default function AddAppointmentPage() {
     };
     fetchMedicines();
   }, []);
+
+  const handleDateSelect = (selected: Date | undefined) => {
+    if (!selected) return;
+    const isValid = availableDates.some((d) => isSameDay(d, selected));
+    if (!isValid) {
+      toast({
+        title: "Unavailable Date",
+        description: "No available doctors on this day. Please choose another date.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setDate(selected);
+  };
 
   const handleSave = async () => {
     if (!selectedPatient || !selectedDoctor || !selectedTime || !date || !selectedSeverity || !reasonForAppointment) {
@@ -178,148 +208,78 @@ export default function AddAppointmentPage() {
       <h1 className="text-2xl font-semibold mb-6">Add New Appointment</h1>
       <div className="bg-white rounded-lg shadow p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
           <div className="space-y-4">
-            <div>
-              <label className="block font-medium mb-2">Select Patient:</label>
-              {isClient && (
-                <Select
-                  options={patients}
-                  value={selectedPatient}
-                  onChange={(option) => setSelectedPatient(option as { label: string; value: string } | null)}
-                  placeholder="Search patient by name or ID"
-                  isSearchable
-                />
-              )}
+            <label className="block font-medium mb-2">Select Patient</label>
+            {isClient && (
+              <Select options={patients} value={selectedPatient} onChange={(option) => setSelectedPatient(option as Option | null)} placeholder="Search patient by name or ID" isSearchable />
+            )}
+
+            <label className="block font-medium mb-2">Contact Preference</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2">
+                <input type="radio" value="email" checked={contactPreference === "email"} onChange={() => setContactPreference("email")} /> Via Email
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" value="phone" checked={contactPreference === "phone"} onChange={() => setContactPreference("phone")} /> Via Phone
+              </label>
             </div>
 
-            <div>
-              <label className="block font-medium mb-2">Contact Preference:</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    value="email"
-                    checked={contactPreference === "email"}
-                    onChange={() => setContactPreference("email")}
-                  />
-                  Via Email
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    value="phone"
-                    checked={contactPreference === "phone"}
-                    onChange={() => setContactPreference("phone")}
-                  />
-                  Via Phone
-                </label>
-              </div>
-            </div>
+            <label className="block font-medium mb-2">Select Department</label>
+            {isClient && (
+              <Select options={departments} value={selectedDepartment} onChange={(selectedOption) => setSelectedDepartment(selectedOption as Option | null)} placeholder="Search & select department" />
+            )}
 
-            <div>
-              <label className="block font-medium mb-2">Select Department:</label>
-              {isClient && (
-                <Select
-                  options={departments}
-                  onChange={(selectedOption) => setSelectedDepartment(selectedOption as { label: string; value: string } | null)}
-                  placeholder="Search & select department"
-                />
-              )}
-            </div>
+            <label className="block font-medium mb-2">Select Doctor</label>
+            {isClient && (
+              <Select options={filteredDoctors} value={selectedDoctor} onChange={(selectedOption) => setSelectedDoctor(selectedOption as Option | null)} placeholder="Select doctor" isDisabled={!selectedDepartment} />
+            )}
 
-            <div>
-              <label className="block font-medium mb-2">Select Doctor:</label>
-              {isClient && (
-                <Select
-                  options={filteredDoctors}
-                  value={selectedDoctor}
-                  onChange={(selectedOption) => setSelectedDoctor(selectedOption as { label: string; value: string } | null)}
-                  placeholder={selectedDepartment ? "Select doctor" : "First select department"}
-                  isDisabled={!selectedDepartment}
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="block font-medium mb-2">Reason for Appointment:</label>
-              <Input
-                type="text"
-                placeholder="Enter the reason for appointment"
-                value={reasonForAppointment}
-                onChange={(e) => setReasonForAppointment(e.target.value)}
-              />
-            </div>
+            <label className="block font-medium mb-2">Reason for Appointment</label>
+            <Input type="text" placeholder="Enter the reason for appointment" value={reasonForAppointment} onChange={(e) => setReasonForAppointment(e.target.value)} />
           </div>
 
-          {/* Right Column */}
           <div className="space-y-4">
-            <div>
-              <label className="block font-medium mb-2">Severity Level:</label>
-              {isClient && (
-                <Select
-                  options={severityOptions}
-                  value={selectedSeverity}
-                  onChange={(selectedOption) => setSelectedSeverity(selectedOption as { label: string; value: string } | null)}
-                  placeholder="Select severity level"
-                />
-              )}
-            </div>
+            <label className="block font-medium mb-2">Severity Level</label>
+            {isClient && (
+              <Select options={severityOptions} value={selectedSeverity} onChange={(selectedOption) => setSelectedSeverity(selectedOption as Option | null)} placeholder="Select severity level" />
+            )}
 
-            <div>
-              <label className="block font-medium mb-2">Appointment Date:</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : "Select date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  {isClient && <Calendar mode="single" selected={date} onSelect={(day) => setDate(day || undefined)} initialFocus />}
-                </PopoverContent>
-              </Popover>
-            </div>
+            <label className="block font-medium mb-2">Appointment Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                {isClient && (
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateSelect}
+                    disabled={(d) => !availableDates.some((enabled) => isSameDay(enabled, d))}
+                    initialFocus
+                  />
+                )}
+              </PopoverContent>
+            </Popover>
 
-            <div>
-              <label className="block font-medium mb-2">Select Time:</label>
-              {isClient && (
-                <Select
-                  options={timeSlots.map(time => ({ label: time, value: time }))}
-                  value={selectedTime}
-                  onChange={(selectedOption) => setSelectedTime(selectedOption as { label: string; value: string } | null)}
-                  placeholder="Select time slot"
-                />
-              )}
-            </div>
+            <label className="block font-medium mb-2">Select Time</label>
+            {isClient && (
+              <Select options={timeSlots} value={selectedTime} onChange={(selectedOption) => setSelectedTime(selectedOption as Option | null)} placeholder="Select time slot" />
+            )}
 
-            <div>
-              <label className="block font-medium mb-2">Select Medication:</label>
-              {isClient && (
-                <Select
-                  isMulti
-                  options={medicineOptions}
-                  value={selectedMedication}
-                  onChange={(selectedOptions) => 
-                    setSelectedMedication(selectedOptions as { label: string; value: string }[])
-                  }
-                    placeholder="Search & select medication"
-                />
-              )}
-            </div>
+            <label className="block font-medium mb-2">Select Medication</label>
+            {isClient && (
+              <Select isMulti options={medicineOptions} value={selectedMedication} onChange={(selectedOptions) => setSelectedMedication(selectedOptions as Option[] || [])} placeholder="Search & select medication" />
+            )}
           </div>
         </div>
 
         <div className="flex justify-end gap-4 mt-8">
-          <Button className="bg-green-500 hover:bg-green-600" onClick={handleSave}>
-            Save Appointment
-          </Button>
-          <Button className="bg-red-500 hover:bg-red-600" onClick={() => router.back()}>
-            Back
-          </Button>
+          <Button className="bg-green-500 hover:bg-green-600" onClick={handleSave}> Save Appointment </Button>
+          <Button className="bg-red-500 hover:bg-red-600" onClick={() => router.back()}> Back </Button>
         </div>
       </div>
     </div>
