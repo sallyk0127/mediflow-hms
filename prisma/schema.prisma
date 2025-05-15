@@ -33,7 +33,7 @@ model Patient {
   billingAddress    String?
   paymentMethod     String?
   assignedRoom      String?
-  Department        String?
+  department        String? 
   bedNumber         String?
   attendingDoctor   String?
 
@@ -132,9 +132,4 @@ model AppointmentMedicine {
   medicine      Medicine    @relation(fields: [medicineId], references: [id])
 
   @@id([appointmentId, medicineId])
-}
-
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "../ERD.svg"
 }
