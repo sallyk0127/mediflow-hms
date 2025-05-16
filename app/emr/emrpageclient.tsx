@@ -33,7 +33,7 @@ const initialPatientState = {
   billingAddress: '',
   paymentMethod: '',
   assignedRoom: '',
-  Department: '',
+  department: '',
   bedNumber: '',
   attendingDoctor: '',
 

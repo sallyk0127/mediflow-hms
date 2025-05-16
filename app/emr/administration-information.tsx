@@ -35,7 +35,7 @@ export default function AdministrationInformation({
     ["Billing Address", "billingAddress"],
     ["Payment Method", "paymentMethod"],
     ["Assigned Room", "assignedRoom"],
-    ["Department", "Department"],
+    ["Department", "department"],
     ["Bed Number", "bedNumber"],
     ["Attending Doctor", "attendingDoctor"],
   ];

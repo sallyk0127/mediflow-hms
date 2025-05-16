@@ -16,8 +16,8 @@ import Image from 'next/image';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Appointments', href: '/appointments', icon: CalendarDays },
   { name: 'EMR', href: '/emr', icon: FilePlus },
+  { name: 'Appointments', href: '/appointments', icon: CalendarDays },
   { name: 'Staff Management', href: '/staff-management', icon: Users },
   { name: 'Bed Management', href: '/bed-management', icon: BedDouble },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: Pill },
