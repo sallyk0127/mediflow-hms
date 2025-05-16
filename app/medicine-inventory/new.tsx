@@ -225,7 +225,7 @@ export default function NewMedicineInventory() {
                             } else {
                               toast({ title: "Deletion failed", variant: "destructive" });
                             }
-                          } catch (error) {
+                          } catch {
                             toast({ title: "Deletion failed", variant: "destructive" });
                           }
                         }
@@ -319,7 +319,7 @@ export default function NewMedicineInventory() {
                       } else {
                         toast({ title: "Update failed", variant: "destructive" });
                       }
-                    } catch (error) {
+                    } catch {
                       toast({ title: "Update failed", variant: "destructive" });
                     }
                   }}

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function AuthPage() {
@@ -12,7 +11,6 @@ export default function AuthPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +32,7 @@ export default function AuthPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Authentication failed');
       }
-
+  
       // Force a full page reload to ensure cookies are available
       // This is necessary because client-side navigation won't have the cookies yet
       window.location.href = '/';
