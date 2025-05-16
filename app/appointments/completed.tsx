@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -10,50 +10,46 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface Appointment {
+  id: string;
   time: string;
   date: string;
-  severity: {
-    level: string;
-    color: string;
-  };
-  patient: {
-    name: string;
-    avatar: string;
-    initials: string;
-  };
+  severity: string;
+  patientName: string;
   patientId: string;
-  doctor: string;
+  doctorName: string;
 }
 
-const appointments: Appointment[] = [
-  {
-    time: "10:30 AM",
-    date: "10/02/2025",
-    severity: { level: "S3", color: "bg-orange-500" },
-    patient: {
-      name: "Alice Brown",
-      avatar: "/placeholder.svg",
-      initials: "AB",
-    },
-    patientId: "7894561",
-    doctor: "Dr. Smith",
-  },
-  {
-    time: "1:00 PM",
-    date: "11/02/2025",
-    severity: { level: "S2", color: "bg-yellow-400" },
-    patient: {
-      name: "Bob White",
-      avatar: "/placeholder.svg",
-      initials: "BW",
-    },
-    patientId: "1236547",
-    doctor: "Dr. Anderson",
-  },
-];
+interface CompletedAppointmentsPageProps {
+  currentPage: number;
+  setCurrentPage: (page: number) => void; 
+  setTotalPages: (total: number) => void;
+  setTotalAppointments: (total: number) => void;
+}
 
-export default function CompletedAppointmentsPage() {
+export default function CompletedAppointmentsPage({ currentPage, setTotalPages, setTotalAppointments }: CompletedAppointmentsPageProps) {
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const res = await fetch(`/api/appointments?status=completed&page=${currentPage}&limit=5`);
+        const result = await res.json();
+        if (result.success && Array.isArray(result.data)) {
+          setAppointments(result.data);
+          setTotalAppointments(result.total || result.data.length);
+          setTotalPages(Math.ceil((result.total || result.data.length) / 5));
+        } else {
+          setAppointments([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch completed appointments:", error);
+        setAppointments([]);
+      }
+    };
+
+    fetchAppointments();
+  }, [currentPage, setTotalPages, setTotalAppointments]);
 
   return (
     <div className="container mx-auto">
@@ -63,10 +59,7 @@ export default function CompletedAppointmentsPage() {
         </div>
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}
-            >
+            <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}>
               <CalendarIcon className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : "Filter by date"}
             </Button>
@@ -91,50 +84,33 @@ export default function CompletedAppointmentsPage() {
             </tr>
           </thead>
           <tbody>
-            {appointments.map((appointment, index) => (
-              <tr key={index} className="border-b">
-                <td className="p-4">{appointment.time}</td>
-                <td className="p-4">{appointment.date}</td>
+            {appointments.map((a) => (
+              <tr key={a.id} className="border-b">
+                <td className="p-4">{a.time}</td>
+                <td className="p-4">{format(new Date(a.date), "dd/MM/yyyy")}</td>
                 <td className="p-4">
-                  <span className={`px-2 py-1 rounded-md text-white text-sm ${appointment.severity.color}`}>
-                    {appointment.severity.level}
+                  <span
+                    className={`px-2 py-1 rounded-md text-white text-sm ${
+                      a.severity === "S4"
+                        ? "bg-red-500"
+                        : a.severity === "S3"
+                        ? "bg-orange-500"
+                        : a.severity === "S2"
+                        ? "bg-yellow-400"
+                        : "bg-green-400"
+                    }`}
+                  >
+                    {a.severity}
                   </span>
                 </td>
-                <td className="p-4 flex items-center">
-                  <Avatar className="h-8 w-8 mr-2">
-                    <AvatarImage src={appointment.patient.avatar} />
-                    <AvatarFallback>{appointment.patient.initials}</AvatarFallback>
-                  </Avatar>
-                  {appointment.patient.name}
-                </td>
-                <td className="p-4">{appointment.patientId}</td>
-                <td className="p-4">{appointment.doctor}</td>
+                <td className="p-4">{a.patientName}</td>
+                <td className="p-4">{a.patientId}</td>
+                <td className="p-4">{a.doctorName}</td>
                 <td className="p-4 text-blue-500 cursor-pointer">View Details</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-      
-      <div className="flex items-center justify-center space-x-2 py-6">
-        <Button variant="outline" size="sm" disabled>
-            Previous
-        </Button>
-        <Button variant="outline" size="sm" className="bg-blue-500 text-white">
-            1
-        </Button>
-        <Button variant="outline" size="sm">
-            2
-        </Button>
-        <Button variant="outline" size="sm">
-            3
-        </Button>
-        <Button variant="outline" size="sm">
-            4
-        </Button>
-        <Button variant="outline" size="sm">
-            Next
-        </Button>
       </div>
     </div>
   );

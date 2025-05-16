@@ -103,7 +103,9 @@ model Appointment {
   severity          String
   reason            String
   contactPreference String
+  status            String @default("new")
   createdAt         DateTime              @default(now())
+  
   doctor            Staff                 @relation(fields: [doctorId], references: [id])
   patient           Patient               @relation(fields: [patientId], references: [id])
   medications       AppointmentMedicine[]

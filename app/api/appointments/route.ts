@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
             },
           })),
         },
+        status: "new",
       },
       include: {
         medications: true,
@@ -32,5 +33,38 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error creating appointment:", error);
     return NextResponse.json({ success: false, error: "Failed to create appointment" }, { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const status = searchParams.get("status");
+
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: status ? { status: status.toLowerCase() } : undefined,
+      include: {
+        patient: true,
+        doctor: true, 
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    const formatted = appointments.map((a) => ({
+      id: a.id,
+      time: a.time,
+      date: a.date.toISOString(),
+      severity: a.severity,
+      patientName: `${a.patient?.firstName ?? ""} ${a.patient?.lastName ?? ""}`,
+      patientId: a.patientId.toString(),
+      doctorName: a.doctor?.name ?? "Unknown",
+    }));
+
+    return NextResponse.json({ success: true, data: formatted, total: appointments.length });
+  } catch (error) {
+    console.error("Failed to fetch appointments:", error);
+    return NextResponse.json({ success: false, error: "Failed to fetch appointments" }, { status: 500 });
   }
 }
