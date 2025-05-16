@@ -40,9 +40,6 @@ export default function Home() {
           </h1>
         </div>
         <nav className="hidden sm:flex gap-6">
-          <Link href="/auth" className="text-blue-600 dark:text-blue-300 hover:underline">
-            Login
-          </Link>
           <Link href="#features" className="text-gray-600 dark:text-gray-300 hover:underline">
             Features
           </Link>
@@ -60,12 +57,6 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/auth"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors text-center"
-            >
-              Get Started
-            </Link>
             <Link
               href="#features"
               className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 font-medium py-3 px-6 rounded-lg transition-colors text-center"
