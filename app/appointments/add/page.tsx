@@ -270,7 +270,7 @@ export default function AddAppointmentPage() {
               <Select options={timeSlots} value={selectedTime} onChange={(selectedOption) => setSelectedTime(selectedOption as Option | null)} placeholder="Select time slot" />
             )}
 
-            <label className="block font-medium mb-2">Select Medication</label>
+            <label className="block font-medium mb-2">Current Medication</label>
             {isClient && (
               <Select isMulti options={medicineOptions} value={selectedMedication} onChange={(selectedOptions) => setSelectedMedication(selectedOptions as Option[] || [])} placeholder="Search & select medication" />
             )}

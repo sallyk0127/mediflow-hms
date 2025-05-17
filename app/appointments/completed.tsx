@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -17,28 +21,42 @@ interface Appointment {
   patientName: string;
   patientId: string;
   doctorName: string;
+  contactPreference: string;
+  department: string;
+  reason: string;
+  medications: string[];
 }
 
 interface CompletedAppointmentsPageProps {
   currentPage: number;
-  setCurrentPage: (page: number) => void; 
   setTotalPages: (total: number) => void;
   setTotalAppointments: (total: number) => void;
 }
 
-export default function CompletedAppointmentsPage({ currentPage, setTotalPages, setTotalAppointments }: CompletedAppointmentsPageProps) {
+export default function CompletedAppointmentsPage({
+  currentPage,
+  setTotalPages,
+  setTotalAppointments,
+}: CompletedAppointmentsPageProps) {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleViewDetails = (appt: Appointment) => {
+    setSelectedAppointment(appt);
+    setShowModal(true);
+  };
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const res = await fetch(`/api/appointments?status=completed&page=${currentPage}&limit=5`);
+        const res = await fetch(`/api/appointments?status=completed&page=${currentPage}&limit=10`);
         const result = await res.json();
         if (result.success && Array.isArray(result.data)) {
           setAppointments(result.data);
           setTotalAppointments(result.total || result.data.length);
-          setTotalPages(Math.ceil((result.total || result.data.length) / 5));
+          setTotalPages(Math.ceil((result.total || result.data.length) / 10));
         } else {
           setAppointments([]);
         }
@@ -59,13 +77,24 @@ export default function CompletedAppointmentsPage({ currentPage, setTotalPages, 
         </div>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-[240px] justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
+            >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : "Filter by date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={date} onSelect={(day) => setDate(day || undefined)} initialFocus />
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(day) => setDate(day || undefined)}
+              initialFocus
+            />
           </PopoverContent>
         </Popover>
       </div>
@@ -106,12 +135,34 @@ export default function CompletedAppointmentsPage({ currentPage, setTotalPages, 
                 <td className="p-4">{a.patientName}</td>
                 <td className="p-4">{a.patientId}</td>
                 <td className="p-4">{a.doctorName}</td>
-                <td className="p-4 text-blue-500 cursor-pointer">View Details</td>
+                <td className="p-4">
+                  <span
+                    onClick={() => handleViewDetails(a)}
+                    className="text-blue-500 hover:underline cursor-pointer"
+                  >
+                    View Details
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {showModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Appointment Details</h2>
+            <p><strong>Contact Preference:</strong> {selectedAppointment.contactPreference}</p>
+            <p><strong>Department:</strong> {selectedAppointment.department}</p>
+            <p><strong>Reason:</strong> {selectedAppointment.reason}</p>
+            <p><strong>Medications:</strong> {selectedAppointment.medications?.join(", ") || "N/A"}</p>
+            <div className="mt-4 text-right">
+              <Button onClick={() => setShowModal(false)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

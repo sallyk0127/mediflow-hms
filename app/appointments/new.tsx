@@ -128,9 +128,12 @@ const fetchAppointments = useCallback(async () => {
                 <td className="p-4">{a.patientId}</td>
                 <td className="p-4">{a.doctorName}</td>
                 <td className="p-4">
-                  <Button size="sm" onClick={() => markAsCompleted(a.id)}>
+                  <span
+                    onClick={() => markAsCompleted(a.id)}
+                    className="text-blue-500 cursor-pointer hover:underline"
+                  >
                     Mark Completed
-                  </Button>
+                  </span>
                 </td>
               </tr>
             ))}

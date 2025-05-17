@@ -1,3 +1,5 @@
+// seed to create beds in various departments
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 

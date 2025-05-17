@@ -74,7 +74,6 @@ export default function AppointmentsPage() {
             {selectedTab === "completed" && (
               <CompletedAppointmentsPage
                 currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
                 setTotalPages={setTotalPages}
                 setTotalAppointments={setTotalAppointments}
               />
