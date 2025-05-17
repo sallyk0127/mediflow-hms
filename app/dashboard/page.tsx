@@ -3,24 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import DashboardBarChart from './DashboardBarChart';
 import {
-  ChevronDown,
   Users,
   Calendar,
   Bed,
   UserCheck,
-  Filter,
-  CheckSquare,
-  Square,
   ExternalLink,
 } from 'lucide-react';
+import { format } from 'date-fns';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/hooks/use-toast";
 
 interface Appointment {
+  id: string;
   time: string;
   date: string;
-  severity: number;
+  severity: string;
   patientName: string;
-  patientAvatar: string;
-  doctor: string;
+  patientId: string;
+  doctorName: string;
 }
 
 interface TrainingSession {
@@ -39,12 +39,6 @@ interface PatientData {
   phoneNumber: string | null;
   medicareNumber: string | null;
   createdAt: string;
-}
-
-interface FilterOption {
-  id: string;
-  label: string;
-  checked: boolean;
 }
 
 interface RoomDetail {
@@ -66,13 +60,15 @@ interface RoomData {
 }
 
 const Dashboard = () => {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('new');
-  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [roomData, setRoomData] = useState<RoomData[]>([]);
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState<PatientData[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [selectedTraining, setSelectedTraining] = useState<TrainingSession | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
 
   // Training sessions data from training.tsx
   const trainingSessions: TrainingSession[] = [
@@ -250,81 +246,51 @@ const Dashboard = () => {
     fetchPatients();
   }, []);
 
-  const [filterOptions, setFilterOptions] = useState<FilterOption[]>([
-    { id: 'high-severity', label: 'High Severity (S3-S4)', checked: false },
-    { id: 'low-severity', label: 'Low Severity (S1-S2)', checked: false },
-    { id: 'dr-john', label: 'Dr. John', checked: false },
-    { id: 'dr-joel', label: 'Dr. Joel', checked: false },
-  ]);
-
-  const appointments: Appointment[] = [
-    { time: '9:30 AM', date: '15/02/2025', severity: 4, patientName: 'Elizabeth P', patientAvatar: '/avatars/elizabeth.jpg', doctor: 'Dr. John' },
-    { time: '9:30 AM', date: '15/02/2025', severity: 4, patientName: 'John D', patientAvatar: '/avatars/john-david.jpg', doctor: 'Dr. Joel' },
-    { time: '10:30 AM', date: '15/02/2025', severity: 3, patientName: 'Krishtav R', patientAvatar: '/avatars/krishtav.jpg', doctor: 'Dr. Joel' },
-  ];
-
-  // Ensure filterOptions is initialized before using it
-  const filteredAppointments = appointments.filter(appointment => {
-    // If filterOptions is undefined or empty, or if no filters are active, show all appointments
-    if (!filterOptions || filterOptions.length === 0 || filterOptions.every(option => !option.checked)) {
-      return true;
-    }
-
-    // Apply selected filters
-    return filterOptions.some(option => {
-      if (!option.checked) return false;
-      
-      switch (option.id) {
-        case 'high-severity':
-          return appointment.severity >= 3;
-        case 'low-severity':
-          return appointment.severity <= 2;
-        case 'dr-john':
-          return appointment.doctor === 'Dr. John';
-        case 'dr-joel':
-          return appointment.doctor === 'Dr. Joel';
-        default:
-          return false;
+  // Fetch appointment data
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setLoadingAppointments(true);
+      try {
+        const res = await fetch(`/api/appointments?status=${activeTab}&page=1&limit=5`);
+        const result = await res.json();
+        if (result.success && Array.isArray(result.data)) {
+          setAppointments(result.data);
+        } else {
+          setAppointments([]);
+        }
+      } catch (error) {
+        console.error(`Failed to fetch ${activeTab} appointments:`, error);
+        setAppointments([]);
+      } finally {
+        setLoadingAppointments(false);
       }
-    });
-  });
+    };
 
-  const getSeverityClass = (severity: number) => {
-    switch (severity) {
-      case 4: return 'bg-red-500';
-      case 3: return 'bg-orange-500';
-      case 2: return 'bg-yellow-400';
-      case 1: return 'bg-green-500';
-      default: return 'bg-gray-400';
+    fetchAppointments();
+  }, [activeTab]);
+
+  const markAsCompleted = async (id: string) => {
+    try {
+      const res = await fetch(`/api/appointments/${id}`, { method: "PATCH" });
+      const result = await res.json();
+      if (result.success) {
+        toast({ title: "Marked Completed", description: "Appointment has been marked as completed." });
+        // Refresh appointment data
+        const updatedRes = await fetch(`/api/appointments?status=${activeTab}&page=1&limit=5`);
+        const updatedResult = await updatedRes.json();
+        if (updatedResult.success && Array.isArray(updatedResult.data)) {
+          setAppointments(updatedResult.data);
+        }
+      } else {
+        toast({ title: "Error", description: result.error || "Failed to update status", variant: "destructive" });
+      }
+    } catch (error) {
+      console.error("Error marking appointment as completed:", error);
+      toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
     }
   };
 
-  const toggleFilterOption = (id: string) => {
-    setFilterOptions(prevOptions =>
-      prevOptions.map(option =>
-        option.id === id ? { ...option, checked: !option.checked } : option
-      )
-    );
-  };
-
-  const clearAllFilters = () => {
-    setFilterOptions(prevOptions =>
-      prevOptions.map(option => ({ ...option, checked: false }))
-    );
-  };
-  
-  // Count active filters with a safety check
-  const activeFiltersCount = filterOptions ? filterOptions.filter(option => option.checked).length : 0;
-
-  // Create chart data for available beds with a safety check
-  const availableBedData = roomData ? roomData.map(room => ({
-    label: room.name,
-    value: room.availableBeds, 
-    color: room.color,
-    textColor: 'text-gray-700'
-  })) : [];
-
-  // Function to calculate age from date of birth
+  // Calculate age from date of birth
   const calculateAge = (dob: string): number => {
     if (!dob) return 0;
     
@@ -342,6 +308,24 @@ const Dashboard = () => {
       return 0;
     }
   };
+
+  const getSeverityClass = (severity: string) => {
+    switch (severity) {
+      case "S4": return "bg-red-500";
+      case "S3": return "bg-orange-500";
+      case "S2": return "bg-yellow-400";
+      case "S1": return "bg-green-500";
+      default: return "bg-gray-400";
+    }
+  };
+
+  // Create chart data for available beds with a safety check
+  const availableBedData = roomData ? roomData.map(room => ({
+    label: room.name,
+    value: room.availableBeds, 
+    color: room.color,
+    textColor: 'text-gray-700'
+  })) : [];
 
   return (
     <div className="p-2 h-screen flex flex-col">
@@ -394,9 +378,15 @@ const Dashboard = () => {
 
       {/* Main Content Area */}
       <div className="grid grid-cols-2 gap-2 mb-2" style={{ height: '35vh' }}>
-        {/* Appointments Section  */}
+        {/* Appointments Section with updated format */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col">
-          <h2 className="text-sm font-medium text-gray-700 p-2">Appointment</h2>
+          <div className="flex justify-between items-center p-2">
+            <h2 className="text-sm font-medium text-gray-700">Appointment</h2>
+            <a href="/appointments" className="text-blue-500 text-xs hover:underline flex items-center">
+              View All <ExternalLink size={12} className="ml-1" />
+            </a>
+          </div>
+          
           <div className="border-b border-gray-200 flex items-center h-8 p-2">
             <button 
               className={`px-3 py-1 text-xs font-medium transition-colors duration-200 hover:bg-gray-50 ${activeTab === 'new' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
@@ -410,129 +400,61 @@ const Dashboard = () => {
             >
               Completed Appointments
             </button>
-            
-            <div className="ml-auto mr-2 relative">
-              <button 
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs
-                ${activeFiltersCount > 0 ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} 
-                transition-colors duration-200`}
-                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              >
-                <Filter size={10} />
-                <span className="text-xs">
-                  {activeFiltersCount > 0 ? `(${activeFiltersCount})` : 'Filter'}
-                </span>
-              </button>
-              
-              {showFilterDropdown && (
-                <div className="absolute right-0 mt-1 w-48 bg-white shadow-lg rounded-md z-10 border border-gray-200">
-                  <div className="flex justify-between items-center p-2 border-b border-gray-200">
-                    <h3 className="font-medium text-xs">Filter Appointments</h3>
-                    <button 
-                      className="text-blue-600 text-xs hover:text-blue-800 transition-colors"
-                      onClick={clearAllFilters}
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="p-2">
-                    <h4 className="font-medium text-xs text-gray-500 mb-1">Severity</h4>
-                    {filterOptions && filterOptions.slice(0, 2).map((option) => (
-                      <div 
-                        key={option.id} 
-                        className="flex items-center mb-1 cursor-pointer hover:bg-gray-50 p-1 rounded" 
-                        onClick={() => toggleFilterOption(option.id)}
-                      >
-                        {option.checked ? 
-                          <CheckSquare size={12} className="text-blue-600 mr-1" /> : 
-                          <Square size={12} className="text-gray-400 mr-1" />
-                        }
-                        <span className="text-xs">{option.label}</span>
-                      </div>
-                    ))}
-                    
-                    <h4 className="font-medium text-xs text-gray-500 mt-2 mb-1">Doctor</h4>
-                    {filterOptions && filterOptions.slice(2).map((option) => (
-                      <div 
-                        key={option.id} 
-                        className="flex items-center mb-1 cursor-pointer hover:bg-gray-50 p-1 rounded" 
-                        onClick={() => toggleFilterOption(option.id)}
-                      >
-                        {option.checked ? 
-                          <CheckSquare size={12} className="text-blue-600 mr-1" /> : 
-                          <Square size={12} className="text-gray-400 mr-1" />
-                        }
-                        <span className="text-xs">{option.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-2 border-t border-gray-200">
-                    <button 
-                      className="w-full bg-blue-500 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-600 transition-colors"
-                      onClick={() => setShowFilterDropdown(false)}
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
           
-          <div className="p-2 flex-grow">
-            <div className="grid grid-cols-5 gap-1 mb-1 text-xs font-medium text-gray-500">
-              <div className="flex items-center">
-                Time <ChevronDown size={10} className="ml-1" />
+          <div className="p-2 flex-grow overflow-auto">
+            {loadingAppointments ? (
+              <div className="text-center py-4 text-gray-500">
+                <p className="text-xs">Loading appointments...</p>
               </div>
-              <div className="flex items-center">
-                Date <ChevronDown size={10} className="ml-1" />
-              </div>
-              <div className="flex items-center">
-                Sev. <ChevronDown size={10} className="ml-1" />
-              </div>
-              <div className="flex items-center">
-                Patient <ChevronDown size={10} className="ml-1" />
-              </div>
-              <div className="flex items-center">
-                Dr. <ChevronDown size={10} className="ml-1" />
-              </div>
-            </div>
-
-            {filteredAppointments && filteredAppointments.length > 0 ? (
-              <div className="space-y-1">
-                {filteredAppointments.map((appointment, index) => (
-                  <div 
-                    key={index} 
-                    className="grid grid-cols-5 gap-1 items-center text-xs p-1 hover:bg-gray-50 rounded-md transition-colors cursor-pointer"
-                  >
-                    <div>{appointment.time}</div>
-                    <div>{appointment.date}</div>
-                    <div>
-                      <span className={`inline-block px-1 py-0.5 rounded-md text-white text-xs ${getSeverityClass(appointment.severity)}`}>
-                        S{appointment.severity}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 rounded-full bg-gray-200 mr-1 overflow-hidden flex-shrink-0">
-                        <div className="w-full h-full flex items-center justify-center text-xs">
-                          {appointment.patientName.charAt(0)}
+            ) : appointments.length > 0 ? (
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-gray-500">
+                    <th className="p-1">Time</th>
+                    <th className="p-1">Date</th>
+                    <th className="p-1">Sev.</th>
+                    <th className="p-1">Patient</th>
+                    <th className="p-1">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((appointment) => (
+                    <tr key={appointment.id} className="border-b hover:bg-gray-50">
+                      <td className="p-1">{appointment.time}</td>
+                      <td className="p-1">{format(new Date(appointment.date), "dd/MM/yyyy")}</td>
+                      <td className="p-1">
+                        <span className={`inline-block px-1 py-0.5 rounded-md text-white text-xs ${getSeverityClass(appointment.severity)}`}>
+                          {appointment.severity}
+                        </span>
+                      </td>
+                      <td className="p-1">
+                        <div className="flex items-center">
+                          <div className="w-4 h-4 rounded-full bg-gray-200 mr-1 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            <span className="text-xs">{appointment.patientName.charAt(0)}</span>
+                          </div>
+                          <span className="truncate">{appointment.patientName}</span>
                         </div>
-                      </div>
-                      <span className="truncate">{appointment.patientName}</span>
-                    </div>
-                    <div>{appointment.doctor}</div>
-                  </div>
-                ))}
-              </div>
+                      </td>
+                      <td className="p-1">
+                        {activeTab === 'new' ? (
+                          <Button 
+                            className="h-5 text-xs px-1 bg-green-500 hover:bg-green-600"
+                            onClick={() => markAsCompleted(appointment.id)}
+                          >
+                            Complete
+                          </Button>
+                        ) : (
+                          <span className="text-blue-500 cursor-pointer text-xs">View</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : (
               <div className="text-center py-4 text-gray-500">
-                <p className="text-xs">No matching appointments.</p>
-                <button 
-                  className="mt-1 text-blue-500 hover:text-blue-700 text-xs"
-                  onClick={clearAllFilters}
-                >
-                  Clear filters
-                </button>
+                <p className="text-xs">No {activeTab} appointments found.</p>
               </div>
             )}
           </div>
