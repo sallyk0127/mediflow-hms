@@ -29,7 +29,7 @@ export default function RoomChart({ roomData }: Props) {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Total Beds</h2>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={185}>
         <BarChart data={roomData}>
           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
           <YAxis />
@@ -45,7 +45,7 @@ export default function RoomChart({ roomData }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         <div className="bg-white p-4 rounded-lg">
           <h2 className="text-lg font-semibold mb-4">Available Beds</h2>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={185}>
             <BarChart data={roomData}>
               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
               <YAxis />
@@ -57,7 +57,7 @@ export default function RoomChart({ roomData }: Props) {
 
         <div className="bg-white p-4 rounded-lg">
           <h2 className="text-lg font-semibold mb-4">Occupied Beds</h2>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={185}>
             <BarChart data={roomData}>
               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
               <YAxis />

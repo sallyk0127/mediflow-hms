@@ -142,7 +142,7 @@ export default function RoomAvailabilityChart() {
         setSelectedPatient(matched);
         setPatientQuery(`${matched.firstName} ${matched.lastName}`);
       } else {
-        setPatientQuery(bed.patientName); // fallback
+        setPatientQuery(bed.patientName); 
       }
     } else {
       setSelectedPatient(null);
@@ -200,7 +200,7 @@ export default function RoomAvailabilityChart() {
         }),
       });
   
-      await fetchBeds(); // Refresh table
+      await fetchBeds(); 
       setShowEditModal(false);
       toast({ title: "Bed Updated", description: "The bed information was successfully updated!" });
     } catch (error) {
@@ -237,9 +237,14 @@ export default function RoomAvailabilityChart() {
   if (loading) return <div className="p-6">Loading beds...</div>;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Beds Availability</h1>
-
+    <div className="container mx-auto p-6 space-y-6 ">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Beds Availability</h1>
+          <div className="flex space-x-4">
+            <button onClick={() => setActiveTab("chart")} className={`px-4 py-2 ${activeTab === "chart" ? "text-blue-600 font-bold" : ""}`}>Chart</button>
+            <button onClick={() => setActiveTab("table")} className={`px-4 py-2 ${activeTab === "table" ? "text-blue-600 font-bold" : ""}`}>Table</button>
+          </div>
+    </div>
       {showEditModal && editingBed && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -326,14 +331,6 @@ export default function RoomAvailabilityChart() {
           </div>
         </div>
       )}
-
-      {/* Tabs and Filters */}
-      <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-md">
-        <div className="flex space-x-4 ml-auto">
-          <button onClick={() => setActiveTab("chart")} className={`px-4 py-2 ${activeTab === "chart" ? "text-blue-600 font-bold" : ""}`}>Chart</button>
-          <button onClick={() => setActiveTab("table")} className={`px-4 py-2 ${activeTab === "table" ? "text-blue-600 font-bold" : ""}`}>Table</button>
-        </div>
-      </div>
 
       {/* Filters */}
       {activeTab === "table" && (
