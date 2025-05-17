@@ -127,5 +127,5 @@ enum BedStatus {
 
 generator erd {
   provider = "prisma-erd-generator"
-  output   = "./generated/erd.png"
+  output   = env("ERD_OUTPUT")
 }
