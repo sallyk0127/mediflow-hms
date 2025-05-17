@@ -67,16 +67,12 @@ interface RoomData {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('new');
-  const [timeframe, setTimeframe] = useState('Weekly');
-  const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [roomData, setRoomData] = useState<RoomData[]>([]);
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState<PatientData[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [selectedTraining, setSelectedTraining] = useState<TrainingSession | null>(null);
-
-  const timeframeOptions = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
 
   // Training sessions data from training.tsx
   const trainingSessions: TrainingSession[] = [
@@ -176,7 +172,8 @@ const Dashboard = () => {
         // Try to fetch real data
         const res = await fetch("/api/beds");
         const data = await res.json();
-        const beds = Array.isArray(data) ? data : data.beds;
+        // Add a safety check for the data structure
+        const beds = data && Array.isArray(data) ? data : data && data.beds && Array.isArray(data.beds) ? data.beds : [];
 
         const divisionsMap: Record<string, RoomData> = {};
         
@@ -193,7 +190,8 @@ const Dashboard = () => {
         };
 
         for (const bed of beds) {
-          const divisionName = bed.division;
+          // Make sure the bed has a valid division name
+          const divisionName = bed.division || "Unknown";
           if (!divisionsMap[divisionName]) {
             divisionsMap[divisionName] = {
               id: divisionName,
@@ -207,9 +205,9 @@ const Dashboard = () => {
           }
 
           divisionsMap[divisionName].details.push({
-            id: bed.bedId,
-            patientName: bed.patientName?.replace(/ \[\d+\]$/, "") || "-",
-            location: bed.location,
+            id: bed.bedId || `bed-${Math.random().toString(36).substr(2, 9)}`,
+            patientName: bed.patientName ? bed.patientName.replace(/ \[\d+\]$/, "") : "-",
+            location: bed.location || "-",
             status: bed.status === "AVAILABLE" ? "Available" : "Occupied",
             usedUntil: bed.usedUntil || undefined,
           });
@@ -222,6 +220,8 @@ const Dashboard = () => {
         setRoomData(Object.values(divisionsMap));
       } catch (error) {
         console.error("Failed to fetch beds:", error);
+        // Set empty array as fallback
+        setRoomData([]);
       } finally {
         setLoading(false);
       }
@@ -236,9 +236,12 @@ const Dashboard = () => {
       try {
         const response = await fetch('/api/patients/list?page=1&limit=5');
         const data = await response.json();
-        setPatients(data.patients);
+        // Add safety check for the response structure
+        setPatients(data && data.patients && Array.isArray(data.patients) ? data.patients : []);
       } catch (error) {
         console.error("Failed to fetch patients:", error);
+        // Set empty array as fallback
+        setPatients([]);
       } finally {
         setLoadingPatients(false);
       }
@@ -260,9 +263,10 @@ const Dashboard = () => {
     { time: '10:30 AM', date: '15/02/2025', severity: 3, patientName: 'Krishtav R', patientAvatar: '/avatars/krishtav.jpg', doctor: 'Dr. Joel' },
   ];
 
+  // Ensure filterOptions is initialized before using it
   const filteredAppointments = appointments.filter(appointment => {
-    // If no filters are active, show all appointments
-    if (filterOptions.every(option => !option.checked)) {
+    // If filterOptions is undefined or empty, or if no filters are active, show all appointments
+    if (!filterOptions || filterOptions.length === 0 || filterOptions.every(option => !option.checked)) {
       return true;
     }
 
@@ -309,27 +313,34 @@ const Dashboard = () => {
     );
   };
   
-  // Count active filters
-  const activeFiltersCount = filterOptions.filter(option => option.checked).length;
+  // Count active filters with a safety check
+  const activeFiltersCount = filterOptions ? filterOptions.filter(option => option.checked).length : 0;
 
-  // Create chart data for available beds 
-  const availableBedData = roomData.map(room => ({
+  // Create chart data for available beds with a safety check
+  const availableBedData = roomData ? roomData.map(room => ({
     label: room.name,
     value: room.availableBeds, 
     color: room.color,
     textColor: 'text-gray-700'
-  }));
+  })) : [];
 
   // Function to calculate age from date of birth
   const calculateAge = (dob: string): number => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+    if (!dob) return 0;
+    
+    try {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      console.error("Error calculating age:", error);
+      return 0;
     }
-    return age;
   };
 
   return (
@@ -343,30 +354,6 @@ const Dashboard = () => {
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-sm font-medium text-gray-700">Activity Overview</h2>
           <div className="relative">
-            <button 
-              className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 text-xs"
-              onClick={() => setShowTimeframeDropdown(!showTimeframeDropdown)}
-            >
-              <span className="text-xs text-gray-600">{timeframe}</span>
-              <ChevronDown size={12} className={`transform transition-transform ${showTimeframeDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {showTimeframeDropdown && (
-              <div className="absolute right-0 mt-1 w-32 bg-white shadow-lg rounded-md z-10 py-1 border border-gray-200">
-                {timeframeOptions.map((option) => (
-                  <button
-                    key={option}
-                    className={`block w-full text-left px-3 py-1 text-xs hover:bg-blue-50 transition-colors duration-150 ${timeframe === option ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
-                    onClick={() => {
-                      setTimeframe(option);
-                      setShowTimeframeDropdown(false);
-                    }}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
@@ -399,7 +386,7 @@ const Dashboard = () => {
             <div className="flex justify-center mb-1">
               <Bed className="text-purple-600" size={16} />
             </div>
-            <h3 className="text-lg font-bold">{roomData.reduce((total, room) => total + room.totalBeds, 0)}</h3>
+            <h3 className="text-lg font-bold">{roomData ? roomData.reduce((total, room) => total + room.totalBeds, 0) : 0}</h3>
             <p className="text-xs text-gray-600">Total Beds</p>
           </div>
         </div>
@@ -450,7 +437,7 @@ const Dashboard = () => {
                   </div>
                   <div className="p-2">
                     <h4 className="font-medium text-xs text-gray-500 mb-1">Severity</h4>
-                    {filterOptions.slice(0, 2).map((option) => (
+                    {filterOptions && filterOptions.slice(0, 2).map((option) => (
                       <div 
                         key={option.id} 
                         className="flex items-center mb-1 cursor-pointer hover:bg-gray-50 p-1 rounded" 
@@ -465,7 +452,7 @@ const Dashboard = () => {
                     ))}
                     
                     <h4 className="font-medium text-xs text-gray-500 mt-2 mb-1">Doctor</h4>
-                    {filterOptions.slice(2).map((option) => (
+                    {filterOptions && filterOptions.slice(2).map((option) => (
                       <div 
                         key={option.id} 
                         className="flex items-center mb-1 cursor-pointer hover:bg-gray-50 p-1 rounded" 
@@ -511,7 +498,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {filteredAppointments.length > 0 ? (
+            {filteredAppointments && filteredAppointments.length > 0 ? (
               <div className="space-y-1">
                 {filteredAppointments.map((appointment, index) => (
                   <div 
@@ -562,8 +549,10 @@ const Dashboard = () => {
           <div className="flex-grow flex flex-col justify-center p-2">
             {loading ? (
               <div className="text-center py-4 text-gray-500 text-sm">Loading...</div>
-            ) : (
+            ) : availableBedData && availableBedData.length > 0 ? (
               <DashboardBarChart data={availableBedData} />
+            ) : (
+              <div className="text-center py-4 text-gray-500 text-sm">No bed data available</div>
             )}
           </div>
         </div>
@@ -580,7 +569,7 @@ const Dashboard = () => {
             </a>
           </div>
           <div className="p-2 flex-grow overflow-auto">
-            {trainingSessions.map((session, index) => (
+            {trainingSessions && trainingSessions.map((session, index) => (
               <div 
                 key={index} 
                 className="flex justify-between items-center mb-2 p-1 hover:bg-gray-50 rounded-md transition-colors cursor-pointer"
