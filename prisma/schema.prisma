@@ -125,7 +125,10 @@ enum BedStatus {
   OCCUPIED
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = env("ERD_OUTPUT")
-}
+// Use an environment variable to conditionally enable the ERD generator
+// Add this block only locally, not in production
+
+// generator erd {
+//   provider = "prisma-erd-generator"
+//   output   = env("ERD_OUTPUT")
+// }
