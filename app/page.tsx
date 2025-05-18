@@ -228,7 +228,7 @@ export default function Home() {
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 text-right">
                 <p>160 Sussex St, Sydney NSW 2000</p>
-                <p>Support: <a href="tel:+6112345678" className="text-blue-600 dark:text-blue-400 hover:underline">+61 12345678</a></p>
+                <p>Support: <a href="tel:(02) 8265 3222" className="text-blue-600 dark:text-blue-400 hover:underline">(02) 8265 3222</a></p>
               </div>
             </div>
           </div>
