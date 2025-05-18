@@ -18,8 +18,8 @@ import Image from 'next/image';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse', 'admin'] },
-  { name: 'Appointments', href: '/appointments', icon: CalendarDays, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'EMR', href: '/emr', icon: FilePlus, roles: ['doctor', 'nurse', 'admin'] },
+  { name: 'Appointments', href: '/appointments', icon: CalendarDays, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'Staff Management', href: '/staff-management', icon: Users, roles: ['doctor', 'nurse', 'admin'] },
   { name: 'Bed Management', href: '/bed-management', icon: BedDouble, roles: ['admin', 'nurse'] },
   { name: 'Medicine Inventory', href: '/medicine-inventory', icon: Pill, roles: ['doctor', 'nurse', 'admin'] },
