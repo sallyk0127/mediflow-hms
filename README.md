@@ -1,6 +1,6 @@
 # MediFlow HMS
 
-MediFlow HMS is a comprehensive Hospital Management System built to streamline hospital operations, improve patient care, and enhance administrative efficiency. The platform offers modules for appointment scheduling, bed management, electronic medical records, medicine inventory, staff management, and educational content.
+MediFlow HMS is a comprehensive Hospital Management System built to streamline hospital operations, improve patient care, and enhance administrative efficiency. This centralised platform offers modules for appointment scheduling, bed management, electronic medical records, medicine inventory, staff management, and educational content.
 
 ## Features
 
