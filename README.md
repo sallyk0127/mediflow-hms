@@ -109,8 +109,8 @@ MIT
 ## Creators
 
 Victoria University Sydney Campus IT Capstone Project 2 students
-- Reynaldo Chen
 - Minjung (Sally) Kim
+- Reynaldo Chen
 - Frandika Tandela
 
 ---
